@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import com.example.myapplication.ui.DetailGastroBarScreen
 import com.example.myapplication.ui.HomeScreen
 import com.example.myapplication.ui.LoginScreen
 import com.example.myapplication.ui.ProfileScreen
@@ -26,9 +27,9 @@ class MainActivity : ComponentActivity() {
 //                    HomeScreen(
 //                        modifier = Modifier.padding(it)
 //                    )
-                    // RegisterScreen(
-                    // modifier = Modifier.padding(it)
-                    // )
+//                     RegisterScreen(
+//                     modifier = Modifier.padding(it)
+//                     )
                     // LoginScreen(
                     // modifier = Modifier.padding(it)
                     // )
@@ -38,7 +39,10 @@ class MainActivity : ComponentActivity() {
 //                   ReviewScreen(
 //                       modifier = Modifier.padding(it)
 //                   )
-                    ProfileScreen(
+//                    ProfileScreen(
+//                        modifier = Modifier.padding(it)
+//                    )
+                    DetailGastroBarScreen(
                         modifier = Modifier.padding(it)
                     )
                 }

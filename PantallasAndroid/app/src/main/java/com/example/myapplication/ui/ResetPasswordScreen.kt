@@ -32,7 +32,7 @@ fun ResetPasswordBody(modifier: Modifier = Modifier) {
             contentScale = ContentScale.Crop
         )
 
-        // Contenido centrado
+
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,

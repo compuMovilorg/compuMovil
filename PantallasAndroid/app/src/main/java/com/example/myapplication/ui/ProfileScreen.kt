@@ -40,7 +40,7 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Detalles del perfil y botón de edición
+
         ProfileDetails(
             userName = userName,
             userEmail = userEmail,
