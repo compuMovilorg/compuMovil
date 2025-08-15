@@ -1,13 +1,7 @@
 package com.example.myapplication.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,42 +16,53 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
+import com.example.myapplication.utils.AppButton
+import com.example.myapplication.utils.LogoApp
 
 @Composable
-fun ResetPasswordScreen() {
+fun ResetPasswordBody(modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
+        // Imagen de fondo
         Image(
             painter = painterResource(R.drawable.fondo),
             contentDescription = "fondo",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
+
+        // Contenido centrado
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
                 .padding(24.dp)
         ) {
             // Logo
             LogoApp(modifier = Modifier.padding(100.dp))
 
             // Campo de correo
-          AppButton(stringResource(R.string.email))
+            AppButton(
+                texto = stringResource(R.string.email),
+                modifier = Modifier.padding(10.dp),
+                onClick = { /* Crear cuenta */ }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón de Reset
-            AppButton(stringResource(R.string.reset_password))
+            // Botón de restablecer
+            AppButton(
+                texto = stringResource(R.string.reset_password),
+                modifier = Modifier.padding(10.dp),
+                onClick = { /* Crear cuenta */ }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Texto de instrucción
             Text(
-                text = "Verifica tu correo electronico para restablecer tu contraseña",
+                text = "Verifica tu correo electrónico para restablecer tu contraseña",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = Color.White,
                     fontWeight = FontWeight.Bold
@@ -66,6 +71,11 @@ fun ResetPasswordScreen() {
             )
         }
     }
+}
+
+@Composable
+fun ResetPasswordScreen(modifier: Modifier = Modifier) {
+    ResetPasswordBody(modifier = modifier)
 }
 
 @Preview(showBackground = true)
