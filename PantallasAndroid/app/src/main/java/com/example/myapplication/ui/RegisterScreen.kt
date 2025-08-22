@@ -15,12 +15,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
-import com.example.myapplication.components.PasswordField
+import com.example.myapplication.utils.PasswordField
 import com.example.myapplication.utils.AppButton
-import com.example.myapplication.utils.EmailField
 import com.example.myapplication.utils.LogoApp
-import com.example.myapplication.utils.NameField
-import com.example.myapplication.utils.UserField
+import com.example.myapplication.utils.CustomTextField
 import com.example.myapplication.utils.DateBirthField
 
 @Composable
@@ -55,15 +53,17 @@ fun FormularioRegistro(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier.fillMaxWidth()
     ) {
-        NameField(
+        CustomTextField(
             value = name,
             onValueChange = onNameChange,
+            label = "Nombre",
             modifier = Modifier.fillMaxWidth()
         )
 
-        UserField(
+        CustomTextField(
             value = usuario,
             onValueChange = onUsuarioChange,
+            label = "Usuario",
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -73,9 +73,10 @@ fun FormularioRegistro(
             modifier = Modifier.fillMaxWidth()
         )
 
-        EmailField(
+        CustomTextField(
             value = email,
             onValueChange = onEmailChange,
+            label = "Correo electrónico",
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -89,6 +90,7 @@ fun FormularioRegistro(
 
 @Composable
 fun BodyRegisterScreen(
+    RegisterButtomPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var name by remember { mutableStateOf("") }
@@ -127,18 +129,20 @@ fun BodyRegisterScreen(
                 onPasswordChange = { password = it }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             AppButton(
                 texto = stringResource(R.string.crear_cuenta),
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { /* Acción crear cuenta */ }
+                onClick = RegisterButtomPressed
             )
         }
     }
 }
+
 @Composable
 fun RegisterScreen(
+    RegisterButtomPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -151,7 +155,6 @@ fun RegisterScreen(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-
 
         Column(
             modifier = Modifier
@@ -168,21 +171,25 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             BodyRegisterScreen(
+                RegisterButtomPressed = RegisterButtomPressed,
                 modifier = Modifier.fillMaxWidth()
             )
         }
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun BodyRegisterScreenPreview() {
-    BodyRegisterScreen()
+    BodyRegisterScreen(
+        RegisterButtomPressed = {}
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun RegisterScreenPreview() {
-    RegisterScreen()
+    RegisterScreen(
+        RegisterButtomPressed = {}
+    )
 }

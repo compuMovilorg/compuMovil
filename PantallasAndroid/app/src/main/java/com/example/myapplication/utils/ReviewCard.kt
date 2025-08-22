@@ -30,6 +30,7 @@ fun ReviewCard(
     reviewText: String,
     likes: Int,
     comments: Int,
+    placeImage: Painter,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -44,6 +45,16 @@ fun ReviewCard(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ReviewCardHeader(userImage, userName, placeName)
+
+            Image(
+                painter = placeImage,
+                contentDescription = "Imagen del lugar",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp) // tamaño ajustable
+                    .clip(MaterialTheme.shapes.medium)
+            )
+
             ReviewCardBody(reviewText)
             ReviewCardFooter(likes, comments)
         }
@@ -106,32 +117,7 @@ private fun ReviewCardFooter(likes: Int, comments: Int) {
         }
     }
 }
-@Preview(showBackground = true)
-@Composable
-fun PreviewReviewCardHeader() {
-    ReviewCardHeader(
-        userImage = painterResource(id = R.drawable.usr1), // Reemplaza con una imagen de prueba
-        userName = "Carlos Perez",
-        placeName = "Café del Parque"
-    )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewReviewCardBody() {
-    ReviewCardBody(
-        reviewText = "Un lugar muy acogedor con excelente café y atención al cliente."
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewReviewCardFooter() {
-    ReviewCardFooter(
-        likes = 120,
-        comments = 45
-    )
-}
 @Preview(showBackground = true)
 @Composable
 fun PreviewReviewCard() {
@@ -141,7 +127,7 @@ fun PreviewReviewCard() {
         placeName = "Café del Parque",
         reviewText = "Un lugar muy acogedor con excelente café y atención al cliente.",
         likes = 120,
-        comments = 45
+        comments = 45,
+        placeImage = painterResource(id = R.drawable.gastrobarimg1)
     )
 }
-

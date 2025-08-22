@@ -48,7 +48,6 @@ fun DetailGastroBarScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botones apilados verticalmente
         Column(
             modifier = Modifier
                 .fillMaxWidth()

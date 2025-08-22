@@ -14,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
-import com.example.myapplication.utils.EmailField
-import com.example.myapplication.components.PasswordField
+import com.example.myapplication.utils.PasswordField
+import com.example.myapplication.utils.CustomTextField
 import com.example.myapplication.utils.AppButton
 
 @Composable
@@ -51,10 +51,11 @@ fun LoginBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo Email
-        EmailField(
+        // Campo  Email
+        CustomTextField(
             value = email,
             onValueChange = { email = it },
+            label = "Correo o Usuario",
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -69,7 +70,7 @@ fun LoginBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Boton
+
         AppButton(
             texto = stringResource(R.string.iniciar_sesion),
             modifier = Modifier.padding(bottom = 10.dp),
@@ -79,11 +80,13 @@ fun LoginBody(
 }
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Fondo
+
         Image(
             painter = painterResource(id = R.drawable.fondolog),
             contentDescription = "Fondo log",
@@ -91,7 +94,7 @@ fun LoginScreen() {
             contentScale = ContentScale.Crop
         )
 
-        // Contenido
+
         LoginBody(
             onLoginClick = { email, password ->
                 // Acción iniciar sesión
@@ -100,13 +103,11 @@ fun LoginScreen() {
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginBody() {
     LoginBody { _, _ -> }
 }
-
 
 @Preview(showBackground = true)
 @Composable
