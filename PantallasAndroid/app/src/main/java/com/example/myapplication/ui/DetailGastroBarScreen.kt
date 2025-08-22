@@ -25,24 +25,15 @@ import com.example.myapplication.utils.AppButton
 
 @Composable
 fun DetailGastroBarScreen(
-    modifier: Modifier
+    gastroBar: GastroBar,
+    modifier: Modifier = Modifier
 ) {
-    val gastroBar = GastroBar(
-        name = "Santa Juana Gastrobar",
-        rating = 4.5f,
-        reviewCount = 30,
-        address = "Calle 71 #11-51",
-        hours = "Lunes a Sábado de 8:00 am. a 11:00 pm\nDomingos y festivos, de 7:30 a.m. a 11:00 p.m",
-        cuisine = "Fusión Colombiana",
-        description = "Santa Juana es un gastrobar en Quinta Camacho que fusiona arte y gastronomía. Ofrece una experiencia única con cocina latina, coctelería artesanal y un ambiente lleno de diseño e inspiración ancestral."
-    )
-
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        HeaderImage(imageRes = R.drawable.gastrobarimg1)
+        HeaderImage(imageRes = gastroBar.imagePlace)
 
         PlaceInfoSection(gastroBar = gastroBar)
 
@@ -133,8 +124,21 @@ fun InfoRow(icon: ImageVector, text: String) {
 @Preview(showBackground = true)
 @Composable
 fun DetailGastroBarScreenPreview() {
+    val sampleGastroBar = GastroBar(
+        id = 1,
+        imagePlace = R.drawable.gastrobarimg1,
+        name = "Santa Juana Gastrobar",
+        rating = 4.5f,
+        reviewCount = 30,
+        address = "Calle 71 #11-51",
+        hours = "Lunes a Sábado de 8:00 am. a 11:00 pm\nDomingos y festivos, de 7:30 a.m. a 11:00 p.m",
+        cuisine = "Fusión Colombiana",
+        description = "Santa Juana es un gastrobar en Quinta Camacho que fusiona arte y gastronomía. Ofrece una experiencia única con cocina latina, coctelería artesanal y un ambiente lleno de diseño e inspiración ancestral."
+    )
+
     MaterialTheme {
         DetailGastroBarScreen(
+            gastroBar = sampleGastroBar,
             modifier = Modifier.fillMaxSize()
         )
     }

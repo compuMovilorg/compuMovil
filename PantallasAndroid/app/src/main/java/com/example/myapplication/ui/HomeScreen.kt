@@ -10,12 +10,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.ReviewInfo
 import com.example.myapplication.utils.ReviewCard
-import com.example.myapplication.utils.SearchBarField
 import com.example.myapplication.data.local.LocalReviewsProvider.Reviews
 
 
 @Composable
 fun HomeScreen(
+    onReviewClick: (Int) -> Unit,
     modifier: Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -35,13 +35,9 @@ fun HomeScreen(
         ) {
             items(filteredReviews) { review ->
                 ReviewCard(
-                    userImage = painterResource(id = review.userImage),
-                    userName = review.name,
-                    placeName = review.placeName,
-                    reviewText = review.reviewText,
-                    likes = review.likes,
-                    comments = review.comments,
-                    placeImage = painterResource(id = review.placeImage)
+                    onReviewClick = { onReviewClick(review.id) },
+                    review = review,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -52,6 +48,7 @@ fun HomeScreen(
 @Composable
 fun ReviewScreenPreview() {
     HomeScreen(
+        onReviewClick = {},
         modifier = Modifier.fillMaxSize()
     )
 }

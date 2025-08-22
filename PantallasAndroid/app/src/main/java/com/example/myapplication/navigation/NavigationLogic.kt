@@ -9,7 +9,10 @@ object NavigationLogic {
 
     private val showBottomBarScreens = listOf(
         Screen.Home.route,
-        //Screen.Search.route,
+        //Screen.Detail.route,
+        Screen.Search.route,
+        Screen.Create.route,
+        Screen.Notification.route,
         Screen.Profile.route,
 
     )

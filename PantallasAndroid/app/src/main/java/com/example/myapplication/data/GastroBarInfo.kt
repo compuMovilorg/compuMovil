@@ -1,6 +1,10 @@
 package com.example.myapplication.data
 
+import androidx.annotation.DrawableRes
+
 data class GastroBar(
+    @DrawableRes val imagePlace: Int,
+    val id: Int,
     val name: String,
     val rating: Float,
     val reviewCount: Int,
