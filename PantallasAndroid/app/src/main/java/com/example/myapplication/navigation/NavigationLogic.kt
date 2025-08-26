@@ -1,23 +1,28 @@
 package com.example.myapplication.navigation
 
 object NavigationLogic {
-    private val noBottomBarScreens = listOf(
-        Screen.Start.route,
-        Screen.Login.route,
-        Screen.Register.route,
+    private val showTopBarScreens = listOf(
+        Screen.Home.route,
+       /// Screen.Search.route,
+        Screen.Profile.route,
+        Screen.Notification.route,
+        Screen.Settings.route,
     )
 
     private val showBottomBarScreens = listOf(
         Screen.Home.route,
-        //Screen.Detail.route,
+        Screen.Detail.route,
         Screen.Search.route,
         Screen.Create.route,
-        Screen.Notification.route,
         Screen.Profile.route,
+        Screen.Notification.route,
+        Screen.Settings.route,
 
     )
 
     fun shouldShowBottomBar(route: String?) =showBottomBarScreens.contains(route)
+    fun shouldShowTopBar(route: String?) = showTopBarScreens.contains(route)
+
 
 
 }

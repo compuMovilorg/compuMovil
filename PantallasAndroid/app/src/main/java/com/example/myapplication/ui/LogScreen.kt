@@ -42,7 +42,7 @@ fun LoginBody(
                 .size(200.dp)
         )
 
-        // Titulo
+        // Título
         Text(
             text = "Bienvenido a Nocta",
             style = MaterialTheme.typography.headlineLarge,
@@ -51,7 +51,7 @@ fun LoginBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo  Email
+        // Campo Email
         CustomTextField(
             value = email,
             onValueChange = { email = it },
@@ -70,7 +70,7 @@ fun LoginBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-
+        // Botón login
         AppButton(
             texto = stringResource(R.string.iniciar_sesion),
             modifier = Modifier.padding(bottom = 10.dp),
@@ -81,12 +81,12 @@ fun LoginBody(
 
 @Composable
 fun LoginScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLoginClick: (String, String) -> Unit
 ) {
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-
         Image(
             painter = painterResource(id = R.drawable.fondolog),
             contentDescription = "Fondo log",
@@ -94,11 +94,9 @@ fun LoginScreen(
             contentScale = ContentScale.Crop
         )
 
-
         LoginBody(
-            onLoginClick = { email, password ->
-                // Acción iniciar sesión
-            }
+            modifier = Modifier.fillMaxSize(),
+            onLoginClick = onLoginClick
         )
     }
 }
@@ -112,5 +110,5 @@ fun PreviewLoginBody() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {
-    LoginScreen()
+    LoginScreen { _, _ -> }
 }

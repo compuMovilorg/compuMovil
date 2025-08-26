@@ -1,156 +1,73 @@
 package com.example.myapplication.ui
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.utils.LogoApp
+import com.example.myapplication.utils.LogOutButton
+import com.example.myapplication.utils.SettingsOption
 
 @Composable
 fun SettingsScreen(
-    modifier: Modifier = Modifier
+    onLogoutClick: () -> Unit = {}
 ) {
-    var newFollowers by remember { mutableStateOf(true) }
-    var comments by remember { mutableStateOf(false) }
-    var likes by remember { mutableStateOf(true) }
-    var recommendations by remember { mutableStateOf(false) }
-
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .padding(16.dp)
     ) {
-        // Simple TopAppBar equivalent without Scaffold
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp), // Manual padding to clear the status bar
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Settings",
-                style = MaterialTheme.typography.headlineSmall
-            )
-        }
+        // 🔹 Header
+        Text(
+            text = "Configuración",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(vertical = 16.dp)
+        )
 
-        // Header section (now a simple white box with the logo)
-        SimpleHeader()
+        // 🔹 Opción: Información Personal
+        SettingsOption(
+            icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
+            title = "Información Personal",
+            onClick = { /* Navegar */ }
+        )
 
-        // Main content column
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-        ) {
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "Notifications",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.height(8.dp))
+        Divider()
 
-            Divider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-            )
+        // 🔹 Opción: Privacidad
+        SettingsOption(
+            icon = { Icon(Icons.Default.Lock, contentDescription = null) },
+            title = "Privacidad",
+            onClick = { /* Navegar */ }
+        )
 
-            NotificationItem(
-                title = "New Followers",
-                subtitle = "When you receive a new follower",
-                checked = newFollowers,
-                onCheckedChange = { newFollowers = it }
-            )
+        Divider()
 
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
+        // 🔹 Opción: Bloqueados
+        SettingsOption(
+            icon = { Icon(Icons.Default.Block, contentDescription = null) },
+            title = "Bloqueados",
+            onClick = { /* Navegar */ }
+        )
 
-            NotificationItem(
-                title = "Comments on Reviews",
-                subtitle = "When someone comments on your reviews",
-                checked = comments,
-                onCheckedChange = { comments = it }
-            )
+        Spacer(modifier = Modifier.padding(8.dp))
 
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
-
-            NotificationItem(
-                title = "Likes",
-                subtitle = "When someone likes your reviews or comments",
-                checked = likes,
-                onCheckedChange = { likes = it }
-            )
-
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
-
-            NotificationItem(
-                title = "Recommendations for You",
-                subtitle = "Get recommended gastrobares to explore",
-                checked = recommendations,
-                onCheckedChange = { recommendations = it }
-            )
-
-            Spacer(Modifier.height(16.dp))
-        }
-    }
-}
-
-@Composable
-private fun SimpleHeader() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(240.dp)
-            .background(Color.White),
-        contentAlignment = Alignment.Center
-    ) {
-        LogoApp(modifier = Modifier.size(140.dp))
-    }
-}
-
-@Composable
-private fun NotificationItem(
-    title: String,
-    subtitle: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(2.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange
+        // 🔹 Botón de Logout
+        LogOutButton(
+            onLogoutClick = onLogoutClick,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun SettingsScreenPreview() {
+fun PreviewSettingsScreen() {
     MaterialTheme {
         SettingsScreen()
     }

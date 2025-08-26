@@ -1,28 +1,18 @@
 package com.example.myapplication.navigation
 
+import android.util.Log
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.AddCircle
-import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Text
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.myapplication.data.GastroBar
 import com.example.myapplication.data.local.LocalGastroBarProvider
 import com.example.myapplication.data.local.LocalReviewsProvider
 import com.example.myapplication.ui.*
@@ -34,99 +24,115 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Search : Screen("search")
     object Profile : Screen("profile")
-    object Create : Screen("create")
+    object Settings : Screen("settings")
     object Notification : Screen("notification")
+    object Create : Screen("create")
 
-  //  object Detail : Screen("detail/{gastroBarId}")
+
+    object Detail : Screen("detail/{gastroBarId}")
+
 
 }
-@Composable
 
+@Composable
 fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController
-
 ) {
     NavHost(
         navController = navController,
-        startDestination = "start",
+        startDestination = Screen.Start.route,
         modifier = modifier
-
     ) {
-        composable("start") {
+        composable(Screen.Start.route) {
             StartScreen(
-                LoginButtonPressd = { navController.navigate("login") },
-                RegisterButtonPressd = { navController.navigate("register") },
+                LoginButtonPressd = { navController.navigate(Screen.Login.route) },
+                RegisterButtonPressd = { navController.navigate(Screen.Register.route) },
                 modifier = modifier
             )
         }
 
-        composable("login") {
+        composable(Screen.Login.route) {
             LoginScreen(
-                modifier = modifier
-            )
-        }
-        composable("register") {
-            RegisterScreen(
                 modifier = modifier,
-                RegisterButtomPressed = {
-                    navController.navigate("home") {
-                        popUpTo(0) {
-                            inclusive = true
-                        }
+                onLoginClick = { _, _ ->
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
         }
-        composable("home") {
+
+        composable(Screen.Register.route) {
+            RegisterScreen(
+                modifier = modifier,
+                RegisterButtomPressed = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Home.route) {
             HomeScreen(
                 modifier = modifier,
                 onReviewClick = { reviewId ->
                     val review = LocalReviewsProvider.Reviews.find { it.id == reviewId }
+                    val idGastroBar = review?.gastroBarId ?: 0
+                    Log.d("HomeScreen", "Review ID: $reviewId")
                     review?.let {
-                        navController.navigate("detail/${it.gastroBarId}")
+                        navController.navigate("detail/${idGastroBar}")
                     }
                 }
             )
         }
-        composable("search") {
+
+        composable(Screen.Search.route) {
             SearchScreen(
                 gastroBars = LocalGastroBarProvider.gastroBars,
                 modifier = modifier
+            )
+        }
 
+        composable(Screen.Create.route) {
+            // CreateScreen(modifier = modifier)
+        }
+
+
+
+        composable(Screen.Profile.route) {
+            ProfileScreen(modifier = modifier,
+                onConfiguracionClick = { navController.navigate(Screen.Settings.route) })
+        }
+        composable(Screen.Notification.route) {
+            // NotificationScreen(modifier = modifier)
+        }
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onLogoutClick = {
+                    navController.navigate(Screen.Start.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
-        composable("create") {
-//            create(
-//                modifier = modifier
-//            )
-        }
-        composable("notification") {
-//            detail(
-//                modifier = modifier
-//            )
-        }
-        composable("profile") {
-            ProfileScreen(
-                modifier = modifier
-            )
-        }
+
         composable(
             route = "detail/{gastroBarId}",
             arguments = listOf(navArgument("gastroBarId") { type = NavType.IntType })
-        ){
+        ) {
             val gastroBarId = it.arguments?.getInt("gastroBarId") ?: 0
             val gastroBar = LocalGastroBarProvider.gastroBars.find { it.id == gastroBarId }
-            if(gastroBar != null) {
+            if (gastroBar != null) {
                 DetailGastroBarScreen(
                     gastroBar = gastroBar,
                     modifier = modifier
                 )
-            }else {
-               Text(text = "GastroBar no encontrado")
+            } else {
+                Text(text = "GastroBar no encontrado")
             }
         }
-
     }
 }
 
@@ -136,11 +142,10 @@ data class BottomNavItem(
     val route: String
 )
 
-
 val bottomNavItems = listOf(
     BottomNavItem(Icons.Filled.Home, Icons.Outlined.Home, Screen.Home.route),
     BottomNavItem(Icons.Filled.Search, Icons.Outlined.Search, Screen.Search.route),
     BottomNavItem(Icons.Filled.AddCircle, Icons.Outlined.AddCircle, Screen.Create.route),
-    BottomNavItem(Icons.Filled.Favorite, Icons.Outlined.Favorite, Screen.Notification.route),
+    BottomNavItem(Icons.Filled.Notifications, Icons.Outlined.Notifications, Screen.Notification.route),
     BottomNavItem(Icons.Filled.Person, Icons.Outlined.Person, Screen.Profile.route)
 )

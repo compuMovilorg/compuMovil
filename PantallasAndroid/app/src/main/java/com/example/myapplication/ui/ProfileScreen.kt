@@ -18,9 +18,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
+import com.example.myapplication.utils.SettingsOption
 
 @Composable
 fun ProfileScreen(
+    onConfiguracionClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Ejemplo de datos para la pantalla
@@ -35,10 +37,10 @@ fun ProfileScreen(
         // Encabezado de la pantalla
         ProfileHeader(
             userImage = profilePic,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.padding(top = 20.dp)
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.padding(bottom = 8.dp))
 
 
         ProfileDetails(
@@ -47,16 +49,11 @@ fun ProfileScreen(
             onEditProfileClick = { /* */ }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Menú de opciones
-        ProfileMenu()
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        // Botón de cerrar sesión
-        LogoutButton(
-            onLogoutClick = { /* */ }
+        ProfileMenu(
+            onConfiguracionClick = onConfiguracionClick
         )
     }
 }
@@ -74,11 +71,6 @@ fun ProfileHeader(
 
         // Contenido superpuesto: logo y foto de perfil
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(
-                painter = painterResource(id = R.drawable.logo), // Placeholder
-                contentDescription = "NOCTA Logo",
-                modifier = Modifier.size(100.dp)
-            )
             Spacer(modifier = Modifier.height(32.dp))
             Image(
                 painter = painterResource(id = userImage),
@@ -102,7 +94,7 @@ fun ProfileDetails(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .offset(y = (-40).dp), // Subimos este composable para que se superponga
+            .offset(y = (-40).dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Nombre de usuario
@@ -130,89 +122,40 @@ fun ProfileDetails(
 }
 
 @Composable
-fun ProfileMenu(modifier: Modifier = Modifier) {
+fun ProfileMenu(
+    modifier: Modifier = Modifier,
+    onConfiguracionClick: () -> Unit) {
     Column(modifier = modifier.padding(horizontal = 24.dp)) {
-        ProfileMenuItem(
-            icon = Icons.Default.History,
-            text = "History",
-            onClick = { /* ... */ }
+        SettingsOption(
+            icon = { Icon(Icons.Default.History, contentDescription = "Historial") },
+            title = "Historial",
+            onClick = { /* Acción historial */ }
         )
-        ProfileMenuItem(
-            icon = Icons.Default.Bookmark,
-            text = "Saved",
-            onClick = { /* ... */ }
+        SettingsOption(
+            icon = { Icon(Icons.Default.Bookmark, contentDescription = "Guardado") },
+            title = "Guardado",
+            onClick = { /* Acción guardado */ }
         )
-        ProfileMenuItem(
-            icon = Icons.Default.Notifications,
-            text = "Notifications",
-            onClick = { /* ... */ }
+        SettingsOption(
+            icon = { Icon(Icons.Default.Notifications, contentDescription = "Notificaciones") },
+            title = "Notificaciones",
+            onClick = { /* Acción notificaciones */ }
         )
-        ProfileMenuItem(
-            icon = Icons.Default.Settings,
-            text = "Settings",
-            onClick = { /* ... */ }
+        SettingsOption(
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Configuración") },
+            title = "Configuración",
+            onClick = onConfiguracionClick
         )
     }
 }
-
-@Composable
-fun ProfileMenuItem(
-    icon: ImageVector,
-    text: String,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onClick) {
-            Icon(imageVector = icon, contentDescription = text)
-        }
-        TextButton(onClick = onClick, modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(imageVector = Icons.Default.ArrowForwardIos, contentDescription = "Arrow", modifier = Modifier.size(16.dp))
-            }
-        }
-    }
-    Divider(color = Color.LightGray)
-}
-
-@Composable
-fun LogoutButton(
-    onLogoutClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    TextButton(
-        onClick = onLogoutClick,
-        modifier = modifier.padding(16.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "Log out",
-                color = Color.Red,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.Default.Logout,
-                contentDescription = "Logout",
-                tint = Color.Red
-            )
-        }
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
     MaterialTheme {
-        ProfileScreen()
+        ProfileScreen(
+            onConfiguracionClick = { /* Acción de configuración */ },
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }

@@ -28,7 +28,8 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 24.dp)
+            .padding(top= 100.dp)
     ) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp)

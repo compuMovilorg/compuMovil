@@ -29,6 +29,13 @@ val displayFontFamily = FontFamily(
     )
 )
 
+val noctaLogoFont = FontFamily(
+    Font(
+        googleFont = GoogleFont("Poppins"),
+        fontProvider = provider
+    )
+)
+
 // Default Material 3 typography values
 val baseline = Typography()
 

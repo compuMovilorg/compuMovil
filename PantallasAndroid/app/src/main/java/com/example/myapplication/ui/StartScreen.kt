@@ -55,7 +55,7 @@ fun BodyStartScreen(
 
 @Composable
 @Preview(showBackground = true)
-fun BodyHomeScreenPreview() {
+fun BodyStartScreenPreview() {
     BodyStartScreen(
         LoginButtonPressd = {},
         RegisterButtonPressd = {}
@@ -99,7 +99,7 @@ fun StartScreen(
 
 @Composable
 @Preview(showBackground = true)
-fun HomeScreenPreview() {
+fun StartScreenPreview() {
     StartScreen(
         LoginButtonPressd = {},
         RegisterButtonPressd = {}

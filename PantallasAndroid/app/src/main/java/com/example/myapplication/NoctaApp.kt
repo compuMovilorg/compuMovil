@@ -10,6 +10,7 @@ import com.example.myapplication.navigation.AppNavigation
 import com.example.myapplication.navigation.NavigationLogic
 import com.example.myapplication.navigation.Screen
 import com.example.myapplication.utils.NoctaBottomNavigationBar
+import com.example.myapplication.utils.NoctaTopBar
 
 @Composable
 fun NoctaApp(
@@ -23,30 +24,24 @@ fun NoctaApp(
     val showBar = currentRoute != Screen.Start.route && currentRoute != Screen.Login.route && currentRoute != Screen.Register.route
 
     Scaffold(
+        modifier = modifier,
+        topBar = {
+            if (NavigationLogic.shouldShowTopBar(currentRoute)) {
+                NoctaTopBar()
+            }
+        },
         bottomBar = {
             if (NavigationLogic.shouldShowBottomBar(currentRoute)) {
-                NoctaBottomNavigationBar(
-                    navController = navController
-                )
+                NoctaBottomNavigationBar(navController = navController)
             }
         }
     ) {
         AppNavigation(
             modifier = Modifier.padding(
-               bottom = it.calculateBottomPadding(),
+                bottom = it.calculateBottomPadding(),
                // top = it.calculateTopPadding()
             ),
             navController = navController
         )
     }
 }
-
-//        RegisterScreen(modifier = Modifier.padding(innerPadding))
-//         HomeScreen(modifier = Modifier.padding(innerPadding))
-        //  LoginScreen(modifier = Modifier.padding(innerPadding))
-        // ResetPasswordScreen(modifier = Modifier.padding(innerPadding))
-        // ReviewScreen(modifier = Modifier.padding(innerPadding))
-        // ProfileScreen(modifier = Modifier.padding(innerPadding))
-        // DetailGastroBarScreen(modifier = Modifier.padding(innerPadding))
-//    }
-//}

@@ -25,7 +25,7 @@ object LocalReviewsProvider {
             reviewText = "La decoración es increíble y las tapas son de otro nivel. Ideal para salir con amigos.",
             likes = 198,
             comments = 54,
-            gastroBarId = 2 // 🔗 corresponde a Bistro & Bar Luna Roja
+            gastroBarId = 6 // 🔗 corresponde a Bistro & Bar Luna Roja
         ),
         ReviewInfo(
             id = 3,

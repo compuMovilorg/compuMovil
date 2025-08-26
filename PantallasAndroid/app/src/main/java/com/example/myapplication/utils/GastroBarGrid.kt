@@ -1,13 +1,14 @@
 package com.example.myapplication.utils
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -24,8 +25,8 @@ fun GastroBarGrid(
         columns = GridCells.Fixed(2),
         modifier = modifier,
         contentPadding = PaddingValues(0.dp),
-        verticalArrangement = Arrangement.spacedBy(0.dp),
-        horizontalArrangement = Arrangement.spacedBy(0.dp)
+        verticalArrangement = Arrangement.spacedBy(1.dp),
+        horizontalArrangement = Arrangement.spacedBy(1.dp)
     ) {
         items(gastroBars) { gastroBar ->
             Image(
@@ -34,9 +35,7 @@ fun GastroBarGrid(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .aspectRatio(1f)
-                    .fillMaxSize()
             )
         }
     }
 }
-
