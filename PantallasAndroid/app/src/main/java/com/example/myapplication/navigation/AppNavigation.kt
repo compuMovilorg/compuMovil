@@ -22,14 +22,13 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Register : Screen("register")
     object Home : Screen("home")
+    object Detail : Screen("detail/{gastroBarId}")
     object Search : Screen("search")
+    object Create : Screen("create")
+    object Events : Screen("events")
     object Profile : Screen("profile")
     object Settings : Screen("settings")
     object Notification : Screen("notification")
-    object Create : Screen("create")
-
-
-    object Detail : Screen("detail/{gastroBarId}")
 
 
 }
@@ -103,10 +102,14 @@ fun AppNavigation(
 
         composable(Screen.Profile.route) {
             ProfileScreen(modifier = modifier,
-                onConfiguracionClick = { navController.navigate(Screen.Settings.route) })
+                onConfiguracionClick = { navController.navigate(Screen.Settings.route) },
+                onNotificationClick = { navController.navigate(Screen.Notification.route) })
         }
         composable(Screen.Notification.route) {
-            // NotificationScreen(modifier = modifier)
+            NotificationScreen(modifier = modifier)
+        }
+        composable(Screen.Events.route) {
+           // EventsScreen(modifier = modifier)
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
@@ -146,6 +149,6 @@ val bottomNavItems = listOf(
     BottomNavItem(Icons.Filled.Home, Icons.Outlined.Home, Screen.Home.route),
     BottomNavItem(Icons.Filled.Search, Icons.Outlined.Search, Screen.Search.route),
     BottomNavItem(Icons.Filled.AddCircle, Icons.Outlined.AddCircle, Screen.Create.route),
-    BottomNavItem(Icons.Filled.Notifications, Icons.Outlined.Notifications, Screen.Notification.route),
+    BottomNavItem(Icons.Filled.Notifications, Icons.Outlined.Notifications, Screen.Events.route),
     BottomNavItem(Icons.Filled.Person, Icons.Outlined.Person, Screen.Profile.route)
 )

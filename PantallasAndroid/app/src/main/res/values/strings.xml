@@ -7,4 +7,8 @@
     <string name="usuario">Usuario</string>
     <string name="reset_password">Reset Password</string>
     <string name="contrasenia">Contraseña</string>
+    <string name="configuracion">Configuración</string>
+    <string name="informacionpersonal">Información Personal</string>
+    <string name="privacidad">Privacidad</string>
+    <string name="bloqueados">Bloqueados</string>
 </resources>

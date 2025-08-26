@@ -22,8 +22,9 @@ import com.example.myapplication.utils.SettingsOption
 
 @Composable
 fun ProfileScreen(
+    modifier: Modifier = Modifier,
     onConfiguracionClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onNotificationClick: () -> Unit
 ) {
     // Ejemplo de datos para la pantalla
     val userName = "Ashley"
@@ -53,7 +54,9 @@ fun ProfileScreen(
 
         // Menú de opciones
         ProfileMenu(
-            onConfiguracionClick = onConfiguracionClick
+            onConfiguracionClick = onConfiguracionClick,
+            onNotificationClick = onNotificationClick
+
         )
     }
 }
@@ -124,7 +127,9 @@ fun ProfileDetails(
 @Composable
 fun ProfileMenu(
     modifier: Modifier = Modifier,
-    onConfiguracionClick: () -> Unit) {
+    onConfiguracionClick: () -> Unit,
+    onNotificationClick: () -> Unit
+) {
     Column(modifier = modifier.padding(horizontal = 24.dp)) {
         SettingsOption(
             icon = { Icon(Icons.Default.History, contentDescription = "Historial") },
@@ -139,7 +144,7 @@ fun ProfileMenu(
         SettingsOption(
             icon = { Icon(Icons.Default.Notifications, contentDescription = "Notificaciones") },
             title = "Notificaciones",
-            onClick = { /* Acción notificaciones */ }
+            onClick = onNotificationClick
         )
         SettingsOption(
             icon = { Icon(Icons.Default.Settings, contentDescription = "Configuración") },
@@ -155,6 +160,7 @@ fun ProfileScreenPreview() {
     MaterialTheme {
         ProfileScreen(
             onConfiguracionClick = { /* Acción de configuración */ },
+            onNotificationClick = { /* Acción de notificaciones */ },
             modifier = Modifier.fillMaxSize()
         )
     }

@@ -9,8 +9,10 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.R
 import com.example.myapplication.utils.LogOutButton
 import com.example.myapplication.utils.SettingsOption
 
@@ -21,11 +23,12 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
+            .padding(top = 100.dp)
     ) {
         // 🔹 Header
         Text(
-            text = "Configuración",
+            text = stringResource(R.string.configuracion),
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(vertical = 16.dp)
         )
@@ -33,7 +36,7 @@ fun SettingsScreen(
         // 🔹 Opción: Información Personal
         SettingsOption(
             icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
-            title = "Información Personal",
+            title = stringResource(R.string.informacionpersonal),
             onClick = { /* Navegar */ }
         )
 
@@ -42,7 +45,7 @@ fun SettingsScreen(
         // 🔹 Opción: Privacidad
         SettingsOption(
             icon = { Icon(Icons.Default.Lock, contentDescription = null) },
-            title = "Privacidad",
+            title = stringResource(R.string.privacidad),
             onClick = { /* Navegar */ }
         )
 
@@ -51,7 +54,7 @@ fun SettingsScreen(
         // 🔹 Opción: Bloqueados
         SettingsOption(
             icon = { Icon(Icons.Default.Block, contentDescription = null) },
-            title = "Bloqueados",
+            title = stringResource(R.string.bloqueados),
             onClick = { /* Navegar */ }
         )
 

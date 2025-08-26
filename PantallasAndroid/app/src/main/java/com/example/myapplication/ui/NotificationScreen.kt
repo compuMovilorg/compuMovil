@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.utils.LogoApp
 
 @Composable
 fun NotificationScreen(
@@ -24,92 +23,57 @@ fun NotificationScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .padding(horizontal = 24.dp)
+            .padding(top = 100.dp)
     ) {
-        // Simple TopAppBar equivalent without Scaffold
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp), // Manual padding to clear the status bar
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Settings",
-                style = MaterialTheme.typography.headlineSmall
-            )
-        }
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = "Notificaciones",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(8.dp))
 
-        // Header section (now a simple white box with the logo)
-        SimpleHeader()
+        Divider(
+            modifier = Modifier.padding(vertical = 8.dp),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+        )
 
-        // Main content column
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-        ) {
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "Notifications",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.height(8.dp))
+        NotificationItem(
+            title = "New Followers",
+            subtitle = "When you receive a new follower",
+            checked = newFollowers,
+            onCheckedChange = { newFollowers = it }
+        )
 
-            Divider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-            )
+        Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
 
-            NotificationItem(
-                title = "New Followers",
-                subtitle = "When you receive a new follower",
-                checked = newFollowers,
-                onCheckedChange = { newFollowers = it }
-            )
+        NotificationItem(
+            title = "Comments on Reviews",
+            subtitle = "When someone comments on your reviews",
+            checked = comments,
+            onCheckedChange = { comments = it }
+        )
 
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
+        Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
 
-            NotificationItem(
-                title = "Comments on Reviews",
-                subtitle = "When someone comments on your reviews",
-                checked = comments,
-                onCheckedChange = { comments = it }
-            )
+        NotificationItem(
+            title = "Likes",
+            subtitle = "When someone likes your reviews or comments",
+            checked = likes,
+            onCheckedChange = { likes = it }
+        )
 
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
+        Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
 
-            NotificationItem(
-                title = "Likes",
-                subtitle = "When someone likes your reviews or comments",
-                checked = likes,
-                onCheckedChange = { likes = it }
-            )
+        NotificationItem(
+            title = "Recommendations for You",
+            subtitle = "Get recommended gastrobares to explore",
+            checked = recommendations,
+            onCheckedChange = { recommendations = it }
+        )
 
-            Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
-
-            NotificationItem(
-                title = "Recommendations for You",
-                subtitle = "Get recommended gastrobares to explore",
-                checked = recommendations,
-                onCheckedChange = { recommendations = it }
-            )
-
-            Spacer(Modifier.height(16.dp))
-        }
-    }
-}
-
-@Composable
-private fun SimpleHeader() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(240.dp)
-            .background(Color.White),
-        contentAlignment = Alignment.Center
-    ) {
-        LogoApp(modifier = Modifier.size(140.dp))
+        Spacer(Modifier.height(16.dp))
     }
 }
 
