@@ -8,69 +8,68 @@ object LocalReviewsProvider {
         ReviewInfo(
             id = 1,
             userImage = R.drawable.usr1,
-            placeImage = R.drawable.gastrobarimg1,
+            placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 1 }.imagePlace,
             name = "Ana Torres",
-            placeName = "Gastrobar La Esquina",
+            placeName = LocalGastroBarProvider.gastroBars.first { it.id == 1 }.name,
             reviewText = "Excelente ambiente nocturno, cócteles creativos y buena música en vivo.",
             likes = 150,
             comments = 38,
-            gastroBarId = 1 // 🔗 corresponde a Gastrobar La Esquina
+            gastroBarId = 1
         ),
         ReviewInfo(
             id = 2,
             userImage = R.drawable.usr1,
-            placeImage = R.drawable.gastrobarimg1,
+            placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 2 }.imagePlace,
             name = "Carlos Perez",
-            placeName = "Bistro & Bar Luna Roja",
+            placeName = LocalGastroBarProvider.gastroBars.first { it.id == 2 }.name,
             reviewText = "La decoración es increíble y las tapas son de otro nivel. Ideal para salir con amigos.",
             likes = 198,
             comments = 54,
-            gastroBarId = 6 // 🔗 corresponde a Bistro & Bar Luna Roja
+            gastroBarId = 2
         ),
         ReviewInfo(
             id = 3,
             userImage = R.drawable.usr1,
-            placeImage = R.drawable.gastrobarimg1,
+            placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 3 }.imagePlace,
             name = "Laura Gómez",
-            placeName = "El Rincón del Sabor",
+            placeName = LocalGastroBarProvider.gastroBars.first { it.id == 3 }.name,
             reviewText = "Amplia variedad de cervezas artesanales y un menú que combina sabores únicos.",
             likes = 175,
             comments = 42,
-            gastroBarId = 3 // 🔗 corresponde a El Rincón del Sabor
+            gastroBarId = 3
         ),
         ReviewInfo(
             id = 4,
             userImage = R.drawable.usr1,
-            placeImage = R.drawable.gastrobarimg1,
+            placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 4 }.imagePlace,
             name = "Luis Hernández",
-            placeName = "Discoteca Eclipse",
+            placeName = LocalGastroBarProvider.gastroBars.first { it.id == 4 }.name,
             reviewText = "La pista de baile es enorme y el DJ mantiene la energía toda la noche.",
             likes = 320,
             comments = 89,
-            gastroBarId = 4 // 🔗 corresponde a Discoteca Eclipse
+            gastroBarId = 4
         ),
         ReviewInfo(
             id = 5,
             userImage = R.drawable.usr1,
-            placeImage = R.drawable.gastrobarimg1,
+            placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 5 }.imagePlace,
             name = "Sofía Vargas",
-            placeName = "Bar Nocturno Black Moon",
+            placeName = LocalGastroBarProvider.gastroBars.first { it.id == 5 }.name,
             reviewText = "Ambiente elegante, cocteles premium y atención de primera.",
             likes = 210,
             comments = 60,
-            gastroBarId = 5 // 🔗 corresponde a Bar Nocturno Black Moon
+            gastroBarId = 5
         ),
         ReviewInfo(
             id = 6,
             userImage = R.drawable.usr1,
-            placeImage = R.drawable.gastrobarimg1,
+            placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 6 }.imagePlace,
             name = "Javier Moreno",
-            placeName = "Club Neon",
+            placeName = LocalGastroBarProvider.gastroBars.first { it.id == 6 }.name,
             reviewText = "Luces espectaculares, sonido envolvente y un público que nunca para de bailar.",
             likes = 285,
             comments = 77,
-            gastroBarId = 6 // 🔗 corresponde a Club Neon
+            gastroBarId = 6
         )
     )
 }
-

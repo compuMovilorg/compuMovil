@@ -52,6 +52,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation("androidx.compose.ui:ui-text-google-fonts:1.8.1")
     implementation(libs.androidx.ui.test)
+    implementation(libs.androidx.foundation)
+    implementation(libs.ui)
     val nav_version = "2.7.2"
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation("androidx.compose.material:material-icons-extended:1.7.0")

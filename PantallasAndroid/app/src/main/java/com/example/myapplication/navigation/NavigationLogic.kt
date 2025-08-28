@@ -4,6 +4,7 @@ object NavigationLogic {
     private val showTopBarScreens = listOf(
         Screen.Home.route,
        /// Screen.Search.route,
+        Screen.Create.route,
         Screen.Profile.route,
         Screen.Settings.route,
         Screen.Notification.route,

@@ -10,17 +10,19 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.compose.material3.Text
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import androidx.compose.material3.Text
 import com.example.myapplication.data.local.LocalGastroBarProvider
 import com.example.myapplication.data.local.LocalReviewsProvider
+import com.example.myapplication.data.local.LocalEventsProvider
 import com.example.myapplication.ui.*
 
 sealed class Screen(val route: String) {
     object Start : Screen("start")
     object Login : Screen("login")
     object Register : Screen("register")
+    object ResetPassword : Screen("resetPassword")
     object Home : Screen("home")
     object Detail : Screen("detail/{gastroBarId}")
     object Search : Screen("search")
@@ -29,8 +31,6 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile")
     object Settings : Screen("settings")
     object Notification : Screen("notification")
-
-
 }
 
 @Composable
@@ -58,6 +58,9 @@ fun AppNavigation(
                     navController.navigate(Screen.Home.route) {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                onForgotPasswordClick = {
+                    navController.navigate(Screen.ResetPassword.route)
                 }
             )
         }
@@ -73,6 +76,15 @@ fun AppNavigation(
             )
         }
 
+        composable(Screen.ResetPassword.route) {
+            ResetPasswordScreen(
+                modifier = modifier,
+                onLogInClick = {
+                    navController.navigate(Screen.Login.route)
+                }
+            )
+        }
+
         composable(Screen.Home.route) {
             HomeScreen(
                 modifier = modifier,
@@ -81,7 +93,7 @@ fun AppNavigation(
                     val idGastroBar = review?.gastroBarId ?: 0
                     Log.d("HomeScreen", "Review ID: $reviewId")
                     review?.let {
-                        navController.navigate("detail/${idGastroBar}")
+                        navController.navigate("detail/$idGastroBar")
                     }
                 }
             )
@@ -90,27 +102,46 @@ fun AppNavigation(
         composable(Screen.Search.route) {
             SearchScreen(
                 gastroBars = LocalGastroBarProvider.gastroBars,
-                modifier = modifier
+                modifier = modifier,
+                onGastroBarClick = { gastroBarId ->
+                    navController.navigate("detail/$gastroBarId")
+                }
             )
         }
 
         composable(Screen.Create.route) {
-            // CreateScreen(modifier = modifier)
+            CreateScreen(
+                onSaveClick = { _, _, _ ->
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                modifier = modifier
+            )
         }
 
-
+        composable(Screen.Events.route) {
+            EventScreen(
+                modifier = modifier,
+                events = LocalEventsProvider.events,
+                onEventClick = {
+                    navController.navigate("detail/${it.title}")
+                }
+            )
+        }
 
         composable(Screen.Profile.route) {
-            ProfileScreen(modifier = modifier,
+            ProfileScreen(
+                modifier = modifier,
                 onConfiguracionClick = { navController.navigate(Screen.Settings.route) },
-                onNotificationClick = { navController.navigate(Screen.Notification.route) })
+                onNotificationClick = { navController.navigate(Screen.Notification.route) }
+            )
         }
+
         composable(Screen.Notification.route) {
             NotificationScreen(modifier = modifier)
         }
-        composable(Screen.Events.route) {
-           // EventsScreen(modifier = modifier)
-        }
+
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onLogoutClick = {

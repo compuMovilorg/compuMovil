@@ -13,7 +13,8 @@ import com.example.myapplication.utils.GastroBarGrid
 @Composable
 fun BodySearchScreen(
     modifier: Modifier = Modifier,
-    gastroBars: List<GastroBar>
+    gastroBars: List<GastroBar>,
+    onGastroBarClick: (Int) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
@@ -32,7 +33,6 @@ fun BodySearchScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-
         val filteredBars = if (searchQuery.isBlank()) {
             gastroBars
         } else {
@@ -41,7 +41,8 @@ fun BodySearchScreen(
 
         GastroBarGrid(
             gastroBars = filteredBars,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            onGridItemClick = { bar -> onGastroBarClick(bar.id) }
         )
     }
 }
@@ -49,16 +50,21 @@ fun BodySearchScreen(
 @Composable
 fun SearchScreen(
     modifier: Modifier = Modifier,
-    gastroBars: List<GastroBar>
+    gastroBars: List<GastroBar>,
+    onGastroBarClick: (Int) -> Unit
 ) {
-    BodySearchScreen(gastroBars = gastroBars)
+    BodySearchScreen(
+        gastroBars = gastroBars,
+        onGastroBarClick = onGastroBarClick
+    )
 }
 
 @Composable
 @Preview(showBackground = true)
 fun BodySearchScreenPreview() {
     SearchScreen(
-        gastroBars = LocalGastroBarProvider.gastroBars
+        gastroBars = LocalGastroBarProvider.gastroBars,
+        onGastroBarClick = {}
     )
 }
 
@@ -66,6 +72,7 @@ fun BodySearchScreenPreview() {
 @Preview(showBackground = true)
 fun SearchScreenPreview() {
     SearchScreen(
-        gastroBars = LocalGastroBarProvider.gastroBars
+        gastroBars = LocalGastroBarProvider.gastroBars,
+        onGastroBarClick = {}
     )
 }

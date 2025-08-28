@@ -1,12 +1,18 @@
 package com.example.myapplication.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,46 +27,29 @@ fun CreateScreenBody(
 ) {
     var placeName by remember { mutableStateOf(TextFieldValue("")) }
     var reviewText by remember { mutableStateOf(TextFieldValue("")) }
-    var rating: Float by remember { mutableStateOf(0f) }
-    var selectedImageRes by remember { mutableStateOf<Int?>(null) }
+    var rating by remember { mutableStateOf(0f) }
+    var selectedImages by remember { mutableStateOf(listOf<Int>()) }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(top = 110.dp)
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Top
     ) {
-        Text(
-            text = "Crear Reseña",
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         // Nombre del lugar
         OutlinedTextField(
             value = placeName,
             onValueChange = { placeName = it },
             label = { Text("Nombre del lugar") },
+            placeholder = { Text("Buscar o seleccionar un gastrobar") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Reseña
-        OutlinedTextField(
-            value = reviewText,
-            onValueChange = { reviewText = it },
-            label = { Text("Escribe tu reseña") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Rating interactivo
-        Text(text = "Calificación:")
+        // Rating
+        Text(text = "Calificar", style = MaterialTheme.typography.bodyMedium)
         StarRating(
             rating = rating,
             onRatingChanged = { newRating -> rating = newRating.toFloat() }
@@ -68,54 +57,85 @@ fun CreateScreenBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Imagen opcional
-        Text(text = "Añadir foto (opcional):")
+        // Fotos
+        Text(text = "Fotos")
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Button(
-                onClick = {
-                    selectedImageRes = R.drawable.gastrobarimg1
-                },
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Añadir imagen")
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                        .clickable {
+                            // Aquí iría lógica de abrir galería
+                            selectedImages =
+                                selectedImages + R.drawable.gastrobarimg1
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("+")
+                }
             }
-
-            selectedImageRes?.let { resId ->
+            items(selectedImages.size) { index ->
                 Image(
-                    painter = painterResource(id = resId),
+                    painter = painterResource(id = selectedImages[index]),
                     contentDescription = "Imagen seleccionada",
                     modifier = Modifier
                         .size(64.dp)
-                        .padding(4.dp)
+                        .background(Color.LightGray, RoundedCornerShape(8.dp))
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Reseña
+        OutlinedTextField(
+            value = reviewText,
+            onValueChange = { reviewText = it },
+            label = { Text("Excribe tu reseña") },
+            placeholder = { Text("Escribe sobre el lugar...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        Text(text = "Etiquetas")
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("Cocteles", "Ambiente", "Servicio", "Precio").forEach { tag ->
+                AssistChip(
+                    onClick = { /* TODO seleccionar tag */ },
+                    label = { Text(tag) }
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Guardar reseña
+        // Botón publicar
         Button(
             onClick = {
-                onSaveClick(placeName.text, reviewText.text,rating)
+                onSaveClick(placeName.text, reviewText.text, rating)
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Guardar Reseña")
+            Text("Publicar reseña")
         }
     }
 }
 
 @Composable
 fun CreateScreen(
-    onSaveClick: (String, String, Int) -> Unit,
+    onSaveClick: (String, String, Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     CreateScreenBody(
-        onSaveClick = onSaveClick as (String, String, Float) -> Unit,
+        onSaveClick = onSaveClick,
         modifier = modifier
     )
 }
@@ -123,7 +143,7 @@ fun CreateScreen(
 @Preview(showBackground = true)
 @Composable
 fun PreviewCreateScreen() {
-    CreateScreenBody(
+    CreateScreen(
         onSaveClick = { _, _, _ -> }
     )
 }
