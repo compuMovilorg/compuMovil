@@ -1,24 +1,45 @@
 package com.example.myapplication.utils
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarHalf
+import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import kotlin.math.floor
 
 @Composable
-fun StarRating(rating: Float, modifier: Modifier = Modifier) {
+fun StarRating(
+    rating: Float,
+    modifier: Modifier = Modifier,
+    maxStars: Int = 5,
+    onRatingChanged: ((Int) -> Unit)? = null
+) {
     Row(modifier = modifier) {
-        val fullStars = rating.toInt()
-        val hasHalfStar = rating - fullStars >= 0.5f
-        repeat(fullStars) {
-            Icon(imageVector = Icons.Default.Star, contentDescription = "Full Star", tint = Color.Yellow)
-        }
-        if (hasHalfStar) {
-            Icon(imageVector = Icons.Default.StarHalf, contentDescription = "Half Star", tint = Color.Yellow)
+        val fullStars = floor(rating).toInt()
+        val hasHalfStar = (rating - fullStars) >= 0.5f
+
+        for (i in 1..maxStars) {
+            val icon = when {
+                i <= fullStars -> Icons.Default.Star
+                i == fullStars + 1 && hasHalfStar -> Icons.Default.StarHalf
+                else -> Icons.Default.StarOutline
+            }
+
+            Icon(
+                imageVector = icon,
+                contentDescription = "Star $i",
+                tint = Color.Yellow,
+                modifier = if (onRatingChanged != null) {
+                    Modifier.clickable { onRatingChanged(i) }
+                } else {
+                    Modifier
+                }
+            )
         }
     }
 }
