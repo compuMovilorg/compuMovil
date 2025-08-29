@@ -1,4 +1,8 @@
 package com.example.myapplication.ui.search
 
-class SearchState {
-}
+import com.example.myapplication.data.GastroBar
+
+data class SearchState(
+    val searchQuery: String = "",
+    val gastroBars: List<GastroBar> = emptyList()
+)

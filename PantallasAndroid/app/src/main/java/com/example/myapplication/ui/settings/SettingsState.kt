@@ -1,4 +1,5 @@
 package com.example.myapplication.ui.settings
 
-class SettingsState {
-}
+data class SettingsState(
+    val isLoggedOut: Boolean = false
+)

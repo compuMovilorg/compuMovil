@@ -56,26 +56,23 @@ fun StartScreen(
     onNavigateLogin: () -> Unit,
     onNavigateRegister: () -> Unit
 ) {
-    val loginPressed by viewModel.loginPressed.collectAsState()
-    val registerPressed by viewModel.registerPressed.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(loginPressed) {
-        if (loginPressed) {
+    LaunchedEffect(uiState.loginPressed) {
+        if (uiState.loginPressed) {
             onNavigateLogin()
             viewModel.resetState()
         }
     }
 
-    LaunchedEffect(registerPressed) {
-        if (registerPressed) {
+    LaunchedEffect(uiState.registerPressed) {
+        if (uiState.registerPressed) {
             onNavigateRegister()
             viewModel.resetState()
         }
     }
 
-    Box(
-        modifier = modifier
-    ) {
+    Box(modifier = modifier) {
         Image(
             painter = painterResource(R.drawable.fondo),
             contentDescription = "fondo",
@@ -101,6 +98,7 @@ fun StartScreen(
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

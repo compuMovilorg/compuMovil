@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,15 +16,14 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
 import com.example.myapplication.utils.LogOutButton
 import com.example.myapplication.utils.SettingsOption
-import com.example.myapplication.ui.settings.SettingsViewModel
-
 @Composable
+
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel,
     onLogoutClick: () -> Unit = {}
 ) {
-    val uiState = viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsState()
 
     Column(
         modifier = modifier
@@ -70,10 +70,8 @@ fun SettingsScreen(
             modifier = Modifier.fillMaxWidth()
         )
     }
-
-    if (uiState.value.isLoggedOut) {
-    }
 }
+
 
 //@Preview(showBackground = true)
 //@Composable

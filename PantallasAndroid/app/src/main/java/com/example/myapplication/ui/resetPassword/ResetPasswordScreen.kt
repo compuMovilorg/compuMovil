@@ -28,7 +28,7 @@ fun ResetPasswordBody(
     viewModel: ResetPasswordViewModel = viewModel(),
     onLogInClick: () -> Unit
 ) {
-    val email by viewModel.email.collectAsState()
+   val state by viewModel.uiState.collectAsState()
 
     Box(modifier = modifier.fillMaxSize()) {
         // Imagen de fondo
@@ -49,7 +49,6 @@ fun ResetPasswordBody(
             // Logo
             LogoApp(modifier = Modifier.padding(bottom = 60.dp))
 
-            // Texto principal
             Text(
                 text = "¿Olvido su contraseña?",
                 style = MaterialTheme.typography.headlineSmall.copy(
@@ -70,7 +69,7 @@ fun ResetPasswordBody(
             Spacer(modifier = Modifier.height(24.dp))
 
             CustomTextField(
-                value = email,
+                value = state.email,
                 onValueChange = { viewModel.updateEmail(it) },
                 label = "Correo",
                 modifier = Modifier.fillMaxWidth(),
@@ -107,6 +106,7 @@ fun ResetPasswordBody(
         }
     }
 }
+
 
 @Composable
 fun ResetPasswordScreen(

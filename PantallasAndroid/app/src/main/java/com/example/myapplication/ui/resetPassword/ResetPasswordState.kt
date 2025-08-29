@@ -1,4 +1,5 @@
 package com.example.myapplication.ui.resetPassword
 
-class ResetPasswordState {
-}
+data class ResetPasswordState(
+    val email: String = ""
+)

@@ -2,19 +2,22 @@ package com.example.myapplication.ui.resetPassword
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
 class ResetPasswordViewModel : ViewModel() {
 
-    private val _email = MutableStateFlow("")
-    val email = _email.asStateFlow()
+    private val _uiState = MutableStateFlow(ResetPasswordState())
+    val email: StateFlow<String> get() = MutableStateFlow(_uiState.value.email)
+    val uiState: StateFlow<ResetPasswordState> = _uiState
 
-    fun updateEmail(input: String) {
-        _email.value = input
+    // Actualiza el email
+    fun updateEmail(newEmail: String) {
+        _uiState.update { it.copy(email = newEmail) }
     }
 
     fun sendResetPassword() {
-        // TODO: implementar logica de envio
-        println("Enviando correo de restablecimiento a ${_email.value}")
+        val currentEmail = _uiState.value.email
+        println("Enviando link de restablecimiento a $currentEmail")
     }
 }
