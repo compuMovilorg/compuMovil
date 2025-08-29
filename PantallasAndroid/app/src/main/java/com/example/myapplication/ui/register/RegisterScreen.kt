@@ -95,12 +95,7 @@ fun BodyRegisterScreen(
     RegisterButtomPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val name by registerViewModel.name.collectAsState()
-    val usuario by registerViewModel.usuario.collectAsState()
-    val fechaNacimiento by registerViewModel.fechaNacimiento.collectAsState()
-    val email by registerViewModel.email.collectAsState()
-    val password by registerViewModel.password.collectAsState()
-
+    val state by registerViewModel.uiState.collectAsState()
     Box(
         modifier = modifier
             .fillMaxHeight()
@@ -119,15 +114,15 @@ fun BodyRegisterScreen(
             )
 
             FormularioRegistro(
-                name = name,
+                name = state.name,
                 onNameChange = { registerViewModel.updateName(it) },
-                usuario = usuario,
+                usuario = state.usuario,
                 onUsuarioChange = { registerViewModel.updateUsuario(it) },
-                fechaNacimiento = fechaNacimiento,
+                fechaNacimiento = state.fechaNacimiento,
                 onFechaNacimientoChange = { registerViewModel.updateFechaNacimiento(it) },
-                email = email,
+                email = state.email,
                 onEmailChange = { registerViewModel.updateEmail(it) },
-                password = password,
+                password = state.password,
                 onPasswordChange = { registerViewModel.updatePassword(it) }
             )
 

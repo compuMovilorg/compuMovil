@@ -13,22 +13,42 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.R
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.utils.StarRating
 
 @Composable
+fun CreateScreen(
+    onSaveClick: (String, String, Float) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: CreateViewModel = viewModel()
+) {
+    val state by viewModel.uiState.collectAsState()
+
+    CreateScreenBody(
+        state = state,
+        onPlaceNameChange = viewModel::onPlaceNameChanged,
+        onReviewTextChange = viewModel::onReviewTextChanged,
+        onRatingChange = viewModel::onRatingChanged,
+        onAddImage = { viewModel.onAddImage() },
+        onToggleTag = viewModel::onToggleTag,
+        onSaveClick = onSaveClick,
+        modifier = modifier
+    )
+}
+
+@Composable
 fun CreateScreenBody(
+    state: CreateState,
+    onPlaceNameChange: (String) -> Unit,
+    onReviewTextChange: (String) -> Unit,
+    onRatingChange: (Float) -> Unit,
+    onAddImage: () -> Unit,
+    onToggleTag: (String) -> Unit,
     onSaveClick: (String, String, Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var placeName by remember { mutableStateOf(TextFieldValue("")) }
-    var reviewText by remember { mutableStateOf(TextFieldValue("")) }
-    var rating by remember { mutableStateOf(0f) }
-    var selectedImages by remember { mutableStateOf(listOf<Int>()) }
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -36,10 +56,10 @@ fun CreateScreenBody(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Top
     ) {
-        // Nombre del lugar
+
         OutlinedTextField(
-            value = placeName,
-            onValueChange = { placeName = it },
+            value = state.placeName,
+            onValueChange = onPlaceNameChange,
             label = { Text("Nombre del lugar") },
             placeholder = { Text("Buscar o seleccionar un gastrobar") },
             modifier = Modifier.fillMaxWidth()
@@ -47,11 +67,11 @@ fun CreateScreenBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Rating
+
         Text(text = "Calificar", style = MaterialTheme.typography.bodyMedium)
         StarRating(
-            rating = rating,
-            onRatingChanged = { newRating -> rating = newRating.toFloat() }
+            rating = state.rating,
+            onRatingChanged = { onRatingChange(it.toFloat()) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -65,19 +85,15 @@ fun CreateScreenBody(
                     modifier = Modifier
                         .size(64.dp)
                         .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                        .clickable {
-                            // Aquí iría lógica de abrir galería
-                            selectedImages =
-                                selectedImages + R.drawable.gastrobarimg1
-                        },
+                        .clickable { onAddImage() },
                     contentAlignment = Alignment.Center
                 ) {
                     Text("+")
                 }
             }
-            items(selectedImages.size) { index ->
+            items(state.selectedImages.size) { index ->
                 Image(
-                    painter = painterResource(id = selectedImages[index]),
+                    painter = painterResource(id = state.selectedImages[index]),
                     contentDescription = "Imagen seleccionada",
                     modifier = Modifier
                         .size(64.dp)
@@ -90,9 +106,9 @@ fun CreateScreenBody(
 
         // Reseña
         OutlinedTextField(
-            value = reviewText,
-            onValueChange = { reviewText = it },
-            label = { Text("Excribe tu reseña") },
+            value = state.reviewText,
+            onValueChange = onReviewTextChange,
+            label = { Text("Escribe tu reseña") },
             placeholder = { Text("Escribe sobre el lugar...") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -101,14 +117,18 @@ fun CreateScreenBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-
+        // Etiquetas
         Text(text = "Etiquetas")
         Spacer(modifier = Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("Cocteles", "Ambiente", "Servicio", "Precio").forEach { tag ->
                 AssistChip(
-                    onClick = { /* TODO seleccionar tag */ },
-                    label = { Text(tag) }
+                    onClick = { onToggleTag(tag) },
+                    label = { Text(tag) },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = if (tag in state.selectedTags) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        else Color.Transparent
+                    )
                 )
             }
         }
@@ -118,7 +138,7 @@ fun CreateScreenBody(
         // Botón publicar
         Button(
             onClick = {
-                onSaveClick(placeName.text, reviewText.text, rating)
+                onSaveClick(state.placeName, state.reviewText, state.rating)
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
@@ -126,17 +146,6 @@ fun CreateScreenBody(
             Text("Publicar reseña")
         }
     }
-}
-
-@Composable
-fun CreateScreen(
-    onSaveClick: (String, String, Float) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    CreateScreenBody(
-        onSaveClick = onSaveClick,
-        modifier = modifier
-    )
 }
 
 @Preview(showBackground = true)

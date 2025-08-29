@@ -1,39 +1,34 @@
+// RegisterViewModel.kt
 package com.example.myapplication.ui.register
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class RegisterViewModel : ViewModel() {
 
-    private val _name = MutableStateFlow("")
-    val name: StateFlow<String> = _name
+    private val _uiState = MutableStateFlow(RegisterState())
+    val uiState: StateFlow<RegisterState> = _uiState
+
     fun updateName(input: String) {
-        _name.value = input
+        _uiState.update { it.copy(name = input) }
     }
 
-    private val _usuario = MutableStateFlow("")
-    val usuario: StateFlow<String> = _usuario
     fun updateUsuario(input: String) {
-        _usuario.value = input
+        _uiState.update { it.copy(usuario = input) }
     }
 
-    private val _fechaNacimiento = MutableStateFlow("")
-    val fechaNacimiento: StateFlow<String> = _fechaNacimiento
     fun updateFechaNacimiento(input: String) {
-        _fechaNacimiento.value = input
+        _uiState.update { it.copy(fechaNacimiento = input) }
     }
 
-    private val _email = MutableStateFlow("")
-    val email: StateFlow<String> = _email
     fun updateEmail(input: String) {
-        _email.value = input
+        _uiState.update { it.copy(email = input) }
     }
 
-    private val _password = MutableStateFlow("")
-    val password: StateFlow<String> = _password
     fun updatePassword(input: String) {
-        _password.value = input
+        _uiState.update { it.copy(password = input) }
     }
+
 }
