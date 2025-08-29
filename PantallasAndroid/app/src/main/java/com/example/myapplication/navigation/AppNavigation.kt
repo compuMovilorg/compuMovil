@@ -11,15 +11,29 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
+import com.example.myapplication.ui.register.RegisterViewModel
 import androidx.navigation.navArgument
 import androidx.compose.material3.Text
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.data.local.LocalGastroBarProvider
 import com.example.myapplication.data.local.LocalReviewsProvider
 import com.example.myapplication.data.local.LocalEventsProvider
-import com.example.myapplication.ui.*
+import com.example.myapplication.ui.create.CreateScreen
+import com.example.myapplication.ui.detailBar.DetailGastroBarScreen
+import com.example.myapplication.ui.events.EventScreen
+import com.example.myapplication.ui.home.HomeScreen
+import com.example.myapplication.ui.log.LoginScreen
+import com.example.myapplication.ui.notification.NotificationScreen
+import com.example.myapplication.ui.profile.ProfileScreen
+import com.example.myapplication.ui.register.RegisterScreen
+import com.example.myapplication.ui.resetPassword.ResetPasswordScreen
+import com.example.myapplication.ui.search.SearchScreen
+import com.example.myapplication.ui.settings.SettingsScreen
+import com.example.myapplication.ui.settings.SettingsViewModel
+import com.example.myapplication.ui.start.StartScreen
 
 sealed class Screen(val route: String) {
-    object Start : Screen("start")
+    object StartRoute : Screen("start")
     object Login : Screen("login")
     object Register : Screen("register")
     object ResetPassword : Screen("resetPassword")
@@ -29,7 +43,7 @@ sealed class Screen(val route: String) {
     object Create : Screen("create")
     object Events : Screen("events")
     object Profile : Screen("profile")
-    object Settings : Screen("settings")
+    object SettingsRoute : Screen("settings")
     object Notification : Screen("notification")
 }
 
@@ -40,13 +54,13 @@ fun AppNavigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Start.route,
+        startDestination = Screen.StartRoute.route,
         modifier = modifier
     ) {
-        composable(Screen.Start.route) {
+        composable(Screen.StartRoute.route) {
             StartScreen(
-                LoginButtonPressd = { navController.navigate(Screen.Login.route) },
-                RegisterButtonPressd = { navController.navigate(Screen.Register.route) },
+                onNavigateLogin = { navController.navigate(Screen.Login.route) },
+                onNavigateRegister = { navController.navigate(Screen.Register.route) },
                 modifier = modifier
             )
         }
@@ -66,6 +80,7 @@ fun AppNavigation(
         }
 
         composable(Screen.Register.route) {
+            val registerViewModel: RegisterViewModel = viewModel()
             RegisterScreen(
                 modifier = modifier,
                 RegisterButtomPressed = {
@@ -124,8 +139,7 @@ fun AppNavigation(
             EventScreen(
                 modifier = modifier,
                 events = LocalEventsProvider.events,
-                onEventClick = {
-                    navController.navigate("detail/${it.title}")
+                onEventClick = { event ->
                 }
             )
         }
@@ -133,7 +147,7 @@ fun AppNavigation(
         composable(Screen.Profile.route) {
             ProfileScreen(
                 modifier = modifier,
-                onConfiguracionClick = { navController.navigate(Screen.Settings.route) },
+                onConfiguracionClick = { navController.navigate(Screen.SettingsRoute.route) },
                 onNotificationClick = { navController.navigate(Screen.Notification.route) }
             )
         }
@@ -142,10 +156,12 @@ fun AppNavigation(
             NotificationScreen(modifier = modifier)
         }
 
-        composable(Screen.Settings.route) {
+        composable(Screen.SettingsRoute.route) {
+            val settingsViewModel: SettingsViewModel = viewModel()
             SettingsScreen(
+                viewModel = settingsViewModel,
                 onLogoutClick = {
-                    navController.navigate(Screen.Start.route) {
+                    navController.navigate(Screen.StartRoute.route) {
                         popUpTo(0) { inclusive = true }
                     }
                 }

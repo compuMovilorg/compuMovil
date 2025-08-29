@@ -1,4 +1,4 @@
-package com.example.myapplication.ui
+package com.example.myapplication.ui.events
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

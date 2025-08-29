@@ -1,24 +1,25 @@
-package com.example.myapplication.ui
+package com.example.myapplication.ui.notification
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun NotificationScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: NotificationViewModel = viewModel()
 ) {
-    var newFollowers by remember { mutableStateOf(true) }
-    var comments by remember { mutableStateOf(false) }
-    var likes by remember { mutableStateOf(true) }
-    var recommendations by remember { mutableStateOf(false) }
+    val newFollowers by viewModel.newFollowers.collectAsState()
+    val comments by viewModel.comments.collectAsState()
+    val likes by viewModel.likes.collectAsState()
+    val recommendations by viewModel.recommendations.collectAsState()
 
     Column(
         modifier = modifier
@@ -43,7 +44,7 @@ fun NotificationScreen(
             title = "New Followers",
             subtitle = "When you receive a new follower",
             checked = newFollowers,
-            onCheckedChange = { newFollowers = it }
+            onCheckedChange = { viewModel.setNewFollowers(it) }
         )
 
         Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
@@ -52,7 +53,7 @@ fun NotificationScreen(
             title = "Comments on Reviews",
             subtitle = "When someone comments on your reviews",
             checked = comments,
-            onCheckedChange = { comments = it }
+            onCheckedChange = { viewModel.setComments(it) }
         )
 
         Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
@@ -61,7 +62,7 @@ fun NotificationScreen(
             title = "Likes",
             subtitle = "When someone likes your reviews or comments",
             checked = likes,
-            onCheckedChange = { likes = it }
+            onCheckedChange = { viewModel.setLikes(it) }
         )
 
         Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
@@ -70,7 +71,7 @@ fun NotificationScreen(
             title = "Recommendations for You",
             subtitle = "Get recommended gastrobares to explore",
             checked = recommendations,
-            onCheckedChange = { recommendations = it }
+            onCheckedChange = { viewModel.setRecommendations(it) }
         )
 
         Spacer(Modifier.height(16.dp))
@@ -112,10 +113,10 @@ private fun NotificationItem(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun SettingsScreenPreview() {
-    MaterialTheme {
-        NotificationScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//private fun NotificationScreenPreview() {
+//    MaterialTheme {
+//        NotificationScreen(viewModel = NotificationViewModel())
+//    }
+//}

@@ -1,4 +1,4 @@
-package com.example.myapplication.ui
+package com.example.myapplication.ui.log
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
 import com.example.myapplication.utils.PasswordField
 import com.example.myapplication.utils.CustomTextField
@@ -25,11 +26,12 @@ import com.example.myapplication.utils.AppButton
 @Composable
 fun LoginBody(
     modifier: Modifier = Modifier,
+    viewModel: LoginViewModel,
     onLoginClick: (String, String) -> Unit,
     onForgotPasswordClick: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val email by viewModel.email.collectAsState()
+    val password by viewModel.password.collectAsState()
 
     Column(
         modifier = modifier
@@ -59,7 +61,7 @@ fun LoginBody(
         // Campo Email
         CustomTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { viewModel.updateEmail(it) },
             label = "Correo o Usuario",
             modifier = Modifier.fillMaxWidth()
         )
@@ -69,7 +71,7 @@ fun LoginBody(
         // Campo Contraseña
         PasswordField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { viewModel.updatePassword(it) },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -103,6 +105,7 @@ fun LoginBody(
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = viewModel(),
     onLoginClick: (String, String) -> Unit,
     onForgotPasswordClick: () -> Unit
 ) {
@@ -117,6 +120,7 @@ fun LoginScreen(
         // Contenido de login sobre el fondo
         LoginBody(
             modifier = modifier.fillMaxSize(),
+            viewModel = viewModel,
             onLoginClick = onLoginClick,
             onForgotPasswordClick = onForgotPasswordClick
         )

@@ -1,4 +1,4 @@
-package com.example.myapplication.ui
+package com.example.myapplication.ui.resetPassword
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -12,21 +12,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
 import com.example.myapplication.utils.AppButton
 import com.example.myapplication.utils.CustomTextField
 import com.example.myapplication.utils.LogoApp
-import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
 fun ResetPasswordBody(
     modifier: Modifier = Modifier,
+    viewModel: ResetPasswordViewModel = viewModel(),
     onLogInClick: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
+    val email by viewModel.email.collectAsState()
 
     Box(modifier = modifier.fillMaxSize()) {
         // Imagen de fondo
@@ -49,7 +51,7 @@ fun ResetPasswordBody(
 
             // Texto principal
             Text(
-                text = "¿Olvidó su contraseña?",
+                text = "¿Olvido su contraseña?",
                 style = MaterialTheme.typography.headlineSmall.copy(
                     color = Color.White,
                     fontWeight = FontWeight.Bold
@@ -69,7 +71,7 @@ fun ResetPasswordBody(
 
             CustomTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { viewModel.updateEmail(it) },
                 label = "Correo",
                 modifier = Modifier.fillMaxWidth(),
                 keyboardType = KeyboardType.Email
@@ -80,7 +82,7 @@ fun ResetPasswordBody(
             AppButton(
                 texto = "Restablecer contraseña",
                 modifier = Modifier.fillMaxWidth(),
-                onClick = {}
+                onClick = { viewModel.sendResetPassword() }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -94,7 +96,7 @@ fun ResetPasswordBody(
                     style = MaterialTheme.typography.bodyMedium.copy(color = Color.White)
                 )
                 Text(
-                    text = "Iniciar sesión",
+                    text = "Iniciar sesion",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
@@ -107,7 +109,10 @@ fun ResetPasswordBody(
 }
 
 @Composable
-fun ResetPasswordScreen(modifier: Modifier = Modifier, onLogInClick: () -> Unit = {}) {
+fun ResetPasswordScreen(
+    modifier: Modifier = Modifier,
+    onLogInClick: () -> Unit = {}
+) {
     ResetPasswordBody(modifier = modifier, onLogInClick = onLogInClick)
 }
 

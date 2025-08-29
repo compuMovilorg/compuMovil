@@ -21,7 +21,7 @@ fun NoctaApp(
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry.value?.destination?.route
 
-    val showBar = currentRoute != Screen.Start.route && currentRoute != Screen.Login.route && currentRoute != Screen.Register.route
+    val showBar = currentRoute != Screen.StartRoute.route && currentRoute != Screen.Login.route && currentRoute != Screen.Register.route
 
     Scaffold(
         modifier = modifier,

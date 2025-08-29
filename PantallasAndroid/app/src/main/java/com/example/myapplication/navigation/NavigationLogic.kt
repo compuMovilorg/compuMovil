@@ -6,7 +6,7 @@ object NavigationLogic {
        /// Screen.Search.route,
         Screen.Create.route,
         Screen.Profile.route,
-        Screen.Settings.route,
+        Screen.SettingsRoute.route,
         Screen.Notification.route,
         Screen.Events.route
     )
@@ -19,7 +19,7 @@ object NavigationLogic {
         Screen.Events.route,
         Screen.Profile.route,
         Screen.Notification.route,
-        Screen.Settings.route,
+        Screen.SettingsRoute.route,
 
     )
 

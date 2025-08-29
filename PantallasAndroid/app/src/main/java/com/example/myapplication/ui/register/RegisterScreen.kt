@@ -1,4 +1,4 @@
-package com.example.myapplication.ui
+package com.example.myapplication.ui.register
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
 import com.example.myapplication.utils.PasswordField
 import com.example.myapplication.utils.AppButton
@@ -90,14 +91,15 @@ fun FormularioRegistro(
 
 @Composable
 fun BodyRegisterScreen(
+    registerViewModel: RegisterViewModel,
     RegisterButtomPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var name by remember { mutableStateOf("") }
-    var usuario by remember { mutableStateOf("") }
-    var fechaNacimiento by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val name by registerViewModel.name.collectAsState()
+    val usuario by registerViewModel.usuario.collectAsState()
+    val fechaNacimiento by registerViewModel.fechaNacimiento.collectAsState()
+    val email by registerViewModel.email.collectAsState()
+    val password by registerViewModel.password.collectAsState()
 
     Box(
         modifier = modifier
@@ -118,15 +120,15 @@ fun BodyRegisterScreen(
 
             FormularioRegistro(
                 name = name,
-                onNameChange = { name = it },
+                onNameChange = { registerViewModel.updateName(it) },
                 usuario = usuario,
-                onUsuarioChange = { usuario = it },
+                onUsuarioChange = { registerViewModel.updateUsuario(it) },
                 fechaNacimiento = fechaNacimiento,
-                onFechaNacimientoChange = { fechaNacimiento = it },
+                onFechaNacimientoChange = { registerViewModel.updateFechaNacimiento(it) },
                 email = email,
-                onEmailChange = { email = it },
+                onEmailChange = { registerViewModel.updateEmail(it) },
                 password = password,
-                onPasswordChange = { password = it }
+                onPasswordChange = { registerViewModel.updatePassword(it) }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -143,7 +145,8 @@ fun BodyRegisterScreen(
 @Composable
 fun RegisterScreen(
     RegisterButtomPressed: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    registerViewModel: RegisterViewModel = viewModel()
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -172,7 +175,8 @@ fun RegisterScreen(
 
             BodyRegisterScreen(
                 RegisterButtomPressed = RegisterButtomPressed,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                registerViewModel = registerViewModel
             )
         }
     }
@@ -181,7 +185,9 @@ fun RegisterScreen(
 @Preview(showBackground = true)
 @Composable
 fun BodyRegisterScreenPreview() {
+    val vm: RegisterViewModel = viewModel()
     BodyRegisterScreen(
+        registerViewModel = vm,
         RegisterButtomPressed = {}
     )
 }
@@ -190,6 +196,7 @@ fun BodyRegisterScreenPreview() {
 @Composable
 fun RegisterScreenPreview() {
     RegisterScreen(
+        registerViewModel = viewModel(),
         RegisterButtomPressed = {}
     )
 }
