@@ -26,12 +26,11 @@ import com.example.myapplication.utils.AppButton
 @Composable
 fun LoginBody(
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel,
+    viewModel: LoginViewModel = viewModel(),
     onLoginClick: (String, String) -> Unit,
     onForgotPasswordClick: () -> Unit
 ) {
-    val email by viewModel.email.collectAsState()
-    val password by viewModel.password.collectAsState()
+    val state by viewModel.uiState.collectAsState()
 
     Column(
         modifier = modifier
@@ -60,7 +59,7 @@ fun LoginBody(
 
         // Campo Email
         CustomTextField(
-            value = email,
+            value = state.email,
             onValueChange = { viewModel.updateEmail(it) },
             label = "Correo o Usuario",
             modifier = Modifier.fillMaxWidth()
@@ -70,7 +69,7 @@ fun LoginBody(
 
         // Campo Contraseña
         PasswordField(
-            value = password,
+            value = state.password,
             onValueChange = { viewModel.updatePassword(it) },
             modifier = Modifier.fillMaxWidth()
         )
@@ -81,7 +80,7 @@ fun LoginBody(
         AppButton(
             texto = stringResource(R.string.iniciar_sesion),
             modifier = Modifier.fillMaxWidth(),
-            onClick = { onLoginClick(email, password) }
+            onClick = { onLoginClick(state.email, state.password) }
         )
 
         // Link "Olvidaste tu contraseña"
@@ -92,15 +91,13 @@ fun LoginBody(
             textDecoration = TextDecoration.Underline,
             modifier = Modifier
                 .padding(top = 16.dp)
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) {
+                .clickable {
                     onForgotPasswordClick()
                 }
         )
     }
 }
+
 
 @Composable
 fun LoginScreen(
@@ -117,7 +114,6 @@ fun LoginScreen(
             contentScale = ContentScale.Crop
         )
 
-        // Contenido de login sobre el fondo
         LoginBody(
             modifier = modifier.fillMaxSize(),
             viewModel = viewModel,

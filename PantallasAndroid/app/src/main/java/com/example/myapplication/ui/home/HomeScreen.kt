@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.utils.ReviewCard
 import com.example.myapplication.data.local.LocalReviewsProvider.Reviews
 
@@ -14,14 +15,10 @@ import com.example.myapplication.data.local.LocalReviewsProvider.Reviews
 @Composable
 fun HomeScreen(
     onReviewClick: (Int) -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    viewModel: HomeViewModel = viewModel()
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-
-    val filteredReviews = Reviews.filter { review ->
-        review.placeName.contains(searchQuery, ignoreCase = true) ||
-                review.reviewText.contains(searchQuery, ignoreCase = true)
-    }
+    val state by viewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -32,7 +29,7 @@ fun HomeScreen(
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(filteredReviews) { review ->
+            items(viewModel.filteredReviews) { review ->
                 ReviewCard(
                     onReviewClick = { onReviewClick(review.id) },
                     review = review,

@@ -1,36 +1,34 @@
+// NotificationViewModel.kt
 package com.example.myapplication.ui.notification
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
 class NotificationViewModel : ViewModel() {
 
-    private val _newFollowers = MutableStateFlow(true)
-    val newFollowers: StateFlow<Boolean> = _newFollowers
+    private val _uiState = MutableStateFlow(NotificationState())
+    val uiState: StateFlow<NotificationState> = _uiState
 
-    private val _comments = MutableStateFlow(false)
-    val comments: StateFlow<Boolean> = _comments
-
-    private val _likes = MutableStateFlow(true)
-    val likes: StateFlow<Boolean> = _likes
-
-    private val _recommendations = MutableStateFlow(false)
-    val recommendations: StateFlow<Boolean> = _recommendations
+    val newFollowers: StateFlow<Boolean> get() = MutableStateFlow(_uiState.value.newFollowers)
+    val comments: StateFlow<Boolean> get() = MutableStateFlow(_uiState.value.comments)
+    val likes: StateFlow<Boolean> get() = MutableStateFlow(_uiState.value.likes)
+    val recommendations: StateFlow<Boolean> get() = MutableStateFlow(_uiState.value.recommendations)
 
     fun setNewFollowers(value: Boolean) {
-        _newFollowers.value = value
+        _uiState.update { it.copy(newFollowers = value) }
     }
 
     fun setComments(value: Boolean) {
-        _comments.value = value
+        _uiState.update { it.copy(comments = value) }
     }
 
     fun setLikes(value: Boolean) {
-        _likes.value = value
+        _uiState.update { it.copy(likes = value) }
     }
 
     fun setRecommendations(value: Boolean) {
-        _recommendations.value = value
+        _uiState.update { it.copy(recommendations = value) }
     }
 }

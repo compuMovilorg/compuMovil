@@ -1,4 +1,8 @@
 package com.example.myapplication.ui.home
 
-class HomeState {
-}
+import com.example.myapplication.data.ReviewInfo
+
+data class HomeState(
+    val searchQuery: String = "",
+    val reviews: List<ReviewInfo> = emptyList()
+)

@@ -14,12 +14,9 @@ import androidx.compose.runtime.collectAsState
 @Composable
 fun NotificationScreen(
     modifier: Modifier = Modifier,
-    viewModel: NotificationViewModel = viewModel()
+    viewModel: NotificationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-    val newFollowers by viewModel.newFollowers.collectAsState()
-    val comments by viewModel.comments.collectAsState()
-    val likes by viewModel.likes.collectAsState()
-    val recommendations by viewModel.recommendations.collectAsState()
+    val state by viewModel.uiState.collectAsState()
 
     Column(
         modifier = modifier
@@ -43,7 +40,7 @@ fun NotificationScreen(
         NotificationItem(
             title = "New Followers",
             subtitle = "When you receive a new follower",
-            checked = newFollowers,
+            checked = state.newFollowers,
             onCheckedChange = { viewModel.setNewFollowers(it) }
         )
 
@@ -52,7 +49,7 @@ fun NotificationScreen(
         NotificationItem(
             title = "Comments on Reviews",
             subtitle = "When someone comments on your reviews",
-            checked = comments,
+            checked = state.comments,
             onCheckedChange = { viewModel.setComments(it) }
         )
 
@@ -61,7 +58,7 @@ fun NotificationScreen(
         NotificationItem(
             title = "Likes",
             subtitle = "When someone likes your reviews or comments",
-            checked = likes,
+            checked = state.likes,
             onCheckedChange = { viewModel.setLikes(it) }
         )
 
@@ -70,13 +67,14 @@ fun NotificationScreen(
         NotificationItem(
             title = "Recommendations for You",
             subtitle = "Get recommended gastrobares to explore",
-            checked = recommendations,
+            checked = state.recommendations,
             onCheckedChange = { viewModel.setRecommendations(it) }
         )
 
         Spacer(Modifier.height(16.dp))
     }
 }
+
 
 @Composable
 private fun NotificationItem(

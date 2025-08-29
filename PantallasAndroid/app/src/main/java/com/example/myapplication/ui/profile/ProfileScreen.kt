@@ -7,6 +7,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -15,19 +17,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
 import com.example.myapplication.utils.SettingsOption
 
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel = viewModel(),
     onConfiguracionClick: () -> Unit,
     onNotificationClick: () -> Unit
 ) {
-    // Ejemplo de datos para la pantalla
-    val userName = "Ashley"
-    val userEmail = "ashley.smith@example.com"
-    val profilePic = R.drawable.usr1
+    val state by viewModel.uiState.collectAsState()
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -35,17 +36,16 @@ fun ProfileScreen(
     ) {
         // Encabezado de la pantalla
         ProfileHeader(
-            userImage = profilePic,
+            userImage = state.profilePic,
             modifier = Modifier.padding(top = 20.dp)
         )
 
         Spacer(modifier = Modifier.padding(bottom = 8.dp))
 
-
         ProfileDetails(
-            userName = userName,
-            userEmail = userEmail,
-            onEditProfileClick = { /* */ }
+            userName = state.userName,
+            userEmail = state.userEmail,
+            onEditProfileClick = { /* Acción para editar perfil */ }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -54,10 +54,10 @@ fun ProfileScreen(
         ProfileMenu(
             onConfiguracionClick = onConfiguracionClick,
             onNotificationClick = onNotificationClick
-
         )
     }
 }
+
 
 @Composable
 fun ProfileHeader(

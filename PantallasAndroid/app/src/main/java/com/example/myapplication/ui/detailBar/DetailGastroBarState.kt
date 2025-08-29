@@ -1,4 +1,7 @@
 package com.example.myapplication.ui.detailBar
 
-class DetailGastroBarState {
-}
+import com.example.myapplication.data.GastroBar
+
+data class DetailGastroBarUiState(
+    val gastroBar: GastroBar
+)

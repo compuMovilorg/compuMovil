@@ -20,12 +20,12 @@ import com.example.myapplication.data.local.LocalReviewsProvider
 import com.example.myapplication.data.local.LocalEventsProvider
 import com.example.myapplication.ui.create.CreateScreen
 import com.example.myapplication.ui.detailBar.DetailGastroBarScreen
-import com.example.myapplication.ui.events.EventScreen
 import com.example.myapplication.ui.home.HomeScreen
 import com.example.myapplication.ui.log.LoginScreen
 import com.example.myapplication.ui.notification.NotificationScreen
 import com.example.myapplication.ui.profile.ProfileScreen
 import com.example.myapplication.ui.register.RegisterScreen
+import com.example.myapplication.ui.events.EventScreen
 import com.example.myapplication.ui.resetPassword.ResetPasswordScreen
 import com.example.myapplication.ui.search.SearchScreen
 import com.example.myapplication.ui.settings.SettingsScreen

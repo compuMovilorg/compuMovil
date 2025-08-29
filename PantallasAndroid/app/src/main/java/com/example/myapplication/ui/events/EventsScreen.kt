@@ -8,7 +8,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,17 +22,14 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.EventInfo
 import com.example.myapplication.utils.SearchBarField
 import com.example.myapplication.utils.TagChip
-import com.example.myapplication.R
-
 
 @Composable
 fun BodyEventScreen(
-    modifier: Modifier = Modifier,
-    events: List<EventInfo>,
-    onEventClick: (EventInfo) -> Unit = {}
+    viewModel: EventViewModel,
+    onEventClick: (EventInfo) -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedTag by remember { mutableStateOf("Hoy") }
+    val state by viewModel.uiState.collectAsState()
 
     Column(
         modifier = modifier
@@ -37,7 +37,6 @@ fun BodyEventScreen(
             .padding(top = 110.dp)
             .padding(horizontal = 16.dp)
     ) {
-
         Text(
             text = "Eventos en vivo",
             style = MaterialTheme.typography.headlineMedium,
@@ -52,39 +51,32 @@ fun BodyEventScreen(
         ) {
             TagChip(
                 text = "Hoy",
-                isSelected = selectedTag == "Hoy",
-                onClick = { selectedTag = "Hoy" }
+                isSelected = state.selectedTag == "Hoy",
+                onClick = { viewModel.updateSelectedTag("Hoy") }
             )
             TagChip(
                 text = "Proximo",
-                isSelected = selectedTag == "Proximo",
-                onClick = { selectedTag = "Proximo" }
+                isSelected = state.selectedTag == "Proximo",
+                onClick = { viewModel.updateSelectedTag("Proximo") }
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // SearchBar
         SearchBarField(
             modifier = Modifier.fillMaxWidth(),
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
+            value = state.searchQuery,
+            onValueChange = { viewModel.updateSearchQuery(it) },
             placeholder = "Buscar Evento..."
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        val filteredEvents = if (searchQuery.isBlank()) {
-            events
-        } else {
-            events.filter { it.title.contains(searchQuery, ignoreCase = true) }
-        }
-
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(filteredEvents) { event ->
+            items(viewModel.filteredEvents) { event ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -99,7 +91,6 @@ fun BodyEventScreen(
                             .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Imagen del flyer
                         Image(
                             painter = painterResource(id = event.eventImage),
                             contentDescription = "Flyer del evento",
@@ -107,10 +98,7 @@ fun BodyEventScreen(
                                 .size(80.dp)
                                 .clip(RoundedCornerShape(8.dp))
                         )
-
                         Spacer(modifier = Modifier.width(12.dp))
-
-                        // Información del evento
                         Column {
                             Text(
                                 text = "${event.date} • ${event.time}",
@@ -136,21 +124,24 @@ fun EventScreen(
     events: List<EventInfo>,
     onEventClick: (EventInfo) -> Unit = {}
 ) {
+
+    val viewModel = remember { EventViewModel(events) }
+
     BodyEventScreen(
         modifier = modifier,
-        events = events,
+        viewModel = viewModel,
         onEventClick = onEventClick
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun EventScreenPreview() {
-    EventScreen(
-        events = listOf(
-            EventInfo("19 Oct", "8:30 PM", "Bring me the horizon", R.drawable.gastrobarimg3),
-            EventInfo("20 Oct", "9:00 PM", "Ed Sheeran Live", R.drawable.gastrobarimg10)
-        ),
-        onEventClick = {}
-    )
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun EventScreenPreview() {
+//    EventScreen(
+//        events = listOf(
+//            EventInfo("Hoy", "8:30 PM", "Bring me the horizon", R.drawable.gastrobarimg3),
+//            EventInfo("Proximo", "9:00 PM", "Ed Sheeran Live", R.drawable.gastrobarimg10)
+//        ),
+//        onEventClick = {}
+//    )
+//}

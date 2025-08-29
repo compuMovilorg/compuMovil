@@ -1,4 +1,9 @@
 package com.example.myapplication.ui.events
 
-class EventsState {
-}
+import com.example.myapplication.data.EventInfo
+
+data class EventState(
+    val searchQuery: String = "",
+    val selectedTag: String = "Hoy",
+    val events: List<EventInfo> = emptyList()
+)

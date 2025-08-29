@@ -7,16 +7,17 @@ import kotlinx.coroutines.flow.update
 
 class LoginViewModel : ViewModel() {
 
-    private val _email = MutableStateFlow("")
-    val email: StateFlow<String> = _email
+    private val _uiState = MutableStateFlow(LoginState())
+    val uiState: StateFlow<LoginState> = _uiState
 
-    private val _password = MutableStateFlow("")
-    val password: StateFlow<String> = _password
+    val email: StateFlow<String> get() = MutableStateFlow(_uiState.value.email)
+    val password: StateFlow<String> get() = MutableStateFlow(_uiState.value.password)
 
     fun updateEmail(newEmail: String) {
-        _email.value = newEmail
+        _uiState.update { it.copy(email = newEmail) }
     }
+
     fun updatePassword(newPassword: String) {
-        _password.value = newPassword
+        _uiState.update { it.copy(password = newPassword) }
     }
 }
