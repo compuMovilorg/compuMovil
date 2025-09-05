@@ -20,6 +20,8 @@ import com.example.myapplication.data.local.LocalReviewsProvider
 import com.example.myapplication.data.local.LocalEventsProvider
 import com.example.myapplication.ui.create.CreateScreen
 import com.example.myapplication.ui.detailBar.DetailGastroBarScreen
+import com.example.myapplication.ui.detailBar.DetailGastroBarViewModel
+import com.example.myapplication.ui.detailBar.DetailGastroBarViewModelFactory
 import com.example.myapplication.ui.home.HomeScreen
 import com.example.myapplication.ui.log.LoginScreen
 import com.example.myapplication.ui.notification.NotificationScreen
@@ -171,12 +173,15 @@ fun AppNavigation(
         composable(
             route = "detail/{gastroBarId}",
             arguments = listOf(navArgument("gastroBarId") { type = NavType.IntType })
-        ) {
-            val gastroBarId = it.arguments?.getInt("gastroBarId") ?: 0
+        ) { backStackEntry ->
+            val gastroBarId = backStackEntry.arguments?.getInt("gastroBarId") ?: 0
             val gastroBar = LocalGastroBarProvider.gastroBars.find { it.id == gastroBarId }
             if (gastroBar != null) {
+                val detailViewModel: DetailGastroBarViewModel = viewModel(
+                    factory = DetailGastroBarViewModelFactory(gastroBar)
+                )
                 DetailGastroBarScreen(
-                    gastroBar = gastroBar,
+                    viewModel = detailViewModel,
                     modifier = modifier
                 )
             } else {
@@ -185,6 +190,8 @@ fun AppNavigation(
         }
     }
 }
+
+
 
 data class BottomNavItem(
     val filledIcon: ImageVector,

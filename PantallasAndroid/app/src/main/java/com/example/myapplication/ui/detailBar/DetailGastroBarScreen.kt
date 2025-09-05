@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,20 +24,24 @@ import com.example.myapplication.R
 import com.example.myapplication.data.GastroBar
 import com.example.myapplication.utils.StarRating
 import com.example.myapplication.utils.AppButton
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 
 @Composable
 fun DetailGastroBarScreen(
-    gastroBar: GastroBar,
+    viewModel: DetailGastroBarViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        HeaderImage(imageRes = gastroBar.imagePlace)
+        HeaderImage(imageRes = uiState.gastroBar.imagePlace)
 
-        PlaceInfoSection(gastroBar = gastroBar)
+        PlaceInfoSection(gastroBar = uiState.gastroBar)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -137,8 +143,9 @@ fun DetailGastroBarScreenPreview() {
     )
 
     MaterialTheme {
+        val viewModel = DetailGastroBarViewModel(sampleGastroBar)
         DetailGastroBarScreen(
-            gastroBar = sampleGastroBar,
+            viewModel = viewModel,
             modifier = Modifier.fillMaxSize()
         )
     }
