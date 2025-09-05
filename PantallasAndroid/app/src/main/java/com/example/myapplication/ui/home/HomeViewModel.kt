@@ -30,4 +30,9 @@ class HomeViewModel : ViewModel() {
                         review.reviewText.contains(_uiState.value.searchQuery, ignoreCase = true)
             }
         }
+
+    fun getReviewById(id: Int): ReviewInfo? {
+        return uiState.value.reviews.find { it.id == id }
+    }
 }
+

@@ -18,7 +18,7 @@ import com.example.myapplication.ui.detailBar.DetailGastroBarViewModel
 import com.example.myapplication.ui.detailBar.DetailGastroBarViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.data.local.LocalGastroBarProvider
-import com.example.myapplication.data.local.LocalReviewsProvider
+import com.example.myapplication.ui.home.HomeViewModel
 import com.example.myapplication.data.local.LocalEventsProvider
 import com.example.myapplication.ui.create.CreateScreen
 import com.example.myapplication.ui.detailBar.DetailGastroBarScreen
@@ -108,14 +108,16 @@ fun AppNavigation(
         }
 
         composable(Screen.Home.route) {
+            val homeViewModel: HomeViewModel = viewModel()
             HomeScreen(
                 modifier = modifier,
+                viewModel = homeViewModel,
                 onReviewClick = { reviewId ->
-                    val review = LocalReviewsProvider.Reviews.find { it.id == reviewId }
-                    val idGastroBar = review?.gastroBarId ?: 0
+
+                    val review = homeViewModel.getReviewById(reviewId)
                     Log.d("HomeScreen", "Review ID: $reviewId")
                     review?.let {
-                        navController.navigate("detail/$idGastroBar")
+                        navController.navigate("detail/${it.gastroBarId}")
                     }
                 }
             )
