@@ -90,11 +90,7 @@ fun AppNavigation(
             val registerViewModel: RegisterViewModel = viewModel()
             RegisterScreen(
                 modifier = modifier,
-                RegisterButtomPressed = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
+                registerViewModel = registerViewModel
             )
         }
 

@@ -92,7 +92,7 @@ fun FormularioRegistro(
 @Composable
 fun BodyRegisterScreen(
     registerViewModel: RegisterViewModel,
-    RegisterButtomPressed: () -> Unit,
+
     modifier: Modifier = Modifier
 ) {
     val state by registerViewModel.uiState.collectAsState()
@@ -131,15 +131,22 @@ fun BodyRegisterScreen(
             AppButton(
                 texto = stringResource(R.string.crear_cuenta),
                 modifier = Modifier.fillMaxWidth(),
-                onClick = RegisterButtomPressed
+                onClick = { registerViewModel.register() }
             )
+            state.result?.let { result ->
+                Spacer(modifier = Modifier.height(8.dp))
+                when (result) {
+                    is RegisterResult.Success -> Text("Registro exitoso", color = Color.Green)
+                    is RegisterResult.Error -> Text(result.message, color = Color.Red)
+                }
+            }
         }
     }
 }
 
 @Composable
 fun RegisterScreen(
-    RegisterButtomPressed: () -> Unit,
+
     modifier: Modifier = Modifier,
     registerViewModel: RegisterViewModel = viewModel()
 ) {
@@ -169,7 +176,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             BodyRegisterScreen(
-                RegisterButtomPressed = RegisterButtomPressed,
+
                 modifier = Modifier.fillMaxWidth(),
                 registerViewModel = registerViewModel
             )
@@ -182,8 +189,7 @@ fun RegisterScreen(
 fun BodyRegisterScreenPreview() {
     val vm: RegisterViewModel = viewModel()
     BodyRegisterScreen(
-        registerViewModel = vm,
-        RegisterButtomPressed = {}
+        registerViewModel = vm
     )
 }
 
@@ -191,7 +197,6 @@ fun BodyRegisterScreenPreview() {
 @Composable
 fun RegisterScreenPreview() {
     RegisterScreen(
-        registerViewModel = viewModel(),
-        RegisterButtomPressed = {}
+        registerViewModel = viewModel()
     )
 }

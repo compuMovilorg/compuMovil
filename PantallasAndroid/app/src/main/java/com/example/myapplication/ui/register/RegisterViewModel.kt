@@ -31,4 +31,21 @@ class RegisterViewModel : ViewModel() {
         _uiState.update { it.copy(password = input) }
     }
 
+    fun register() {
+        val state = _uiState.value
+        val isValid = state.name.isNotBlank() &&
+                state.usuario.isNotBlank() &&
+                state.fechaNacimiento.isNotBlank() &&
+                state.email.isNotBlank() &&
+                state.password.isNotBlank()
+
+        _uiState.update {
+            if (isValid) {
+                it.copy(result = RegisterResult.Success)
+            } else {
+                it.copy(result = RegisterResult.Error("Campos incompletos"))
+            }
+        }
+    }
+
 }
