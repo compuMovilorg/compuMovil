@@ -9,7 +9,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.utils.ReviewCard
-import com.example.myapplication.data.local.LocalReviewsProvider.Reviews
 
 
 @Composable
@@ -19,6 +18,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val reviews = remember(state.searchQuery, state.reviews) { viewModel.filteredReviews }
 
     Column(
         modifier = Modifier
@@ -29,7 +29,7 @@ fun HomeScreen(
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(viewModel.filteredReviews) { review ->
+            items(reviews) { review ->
                 ReviewCard(
                     onReviewClick = { onReviewClick(review.id) },
                     review = review,

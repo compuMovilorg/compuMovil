@@ -17,16 +17,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
 import com.example.myapplication.utils.SettingsOption
 
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel = viewModel(),
+    viewModel: ProfileViewModel = hiltViewModel(),
     onConfiguracionClick: () -> Unit,
-    onNotificationClick: () -> Unit
+    onNotificationClick: () -> Unit,
+    onHistorialClick: () -> Unit,
+    onGuardadoClick: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -34,7 +36,6 @@ fun ProfileScreen(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Encabezado de la pantalla
         ProfileHeader(
             userImage = state.profilePic,
             modifier = Modifier.padding(top = 20.dp)
@@ -45,19 +46,19 @@ fun ProfileScreen(
         ProfileDetails(
             userName = state.userName,
             userEmail = state.userEmail,
-            onEditProfileClick = { /* Acción para editar perfil */ }
+            onEditProfileClick = { /* navegar a editar perfil si quieres */ }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Menú de opciones
         ProfileMenu(
-            onConfiguracionClick = onConfiguracionClick,
-            onNotificationClick = onNotificationClick
+            onHistorialClick = onHistorialClick,
+            onGuardadoClick = onGuardadoClick,
+            onNotificationClick = onNotificationClick,
+            onConfiguracionClick = onConfiguracionClick
         )
     }
 }
-
 
 @Composable
 fun ProfileHeader(
@@ -65,12 +66,9 @@ fun ProfileHeader(
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
-            .height(250.dp),
+        modifier = modifier.height(250.dp),
         contentAlignment = Alignment.Center
     ) {
-
-        // Contenido superpuesto: logo y foto de perfil
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.height(32.dp))
             Image(
@@ -98,20 +96,17 @@ fun ProfileDetails(
             .offset(y = (-40).dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Nombre de usuario
         Text(
             text = userName,
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSurface
         )
-        // Email de usuario
         Text(
             text = userEmail,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(16.dp))
-        // Botón para editar perfil
         Button(
             onClick = onEditProfileClick,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
@@ -125,19 +120,21 @@ fun ProfileDetails(
 @Composable
 fun ProfileMenu(
     modifier: Modifier = Modifier,
-    onConfiguracionClick: () -> Unit,
-    onNotificationClick: () -> Unit
+    onHistorialClick: () -> Unit,
+    onGuardadoClick: () -> Unit,
+    onNotificationClick: () -> Unit,
+    onConfiguracionClick: () -> Unit
 ) {
     Column(modifier = modifier.padding(horizontal = 24.dp)) {
         SettingsOption(
             icon = { Icon(Icons.Default.History, contentDescription = "Historial") },
             title = "Historial",
-            onClick = { /* Acción historial */ }
+            onClick = onHistorialClick
         )
         SettingsOption(
             icon = { Icon(Icons.Default.Bookmark, contentDescription = "Guardado") },
             title = "Guardado",
-            onClick = { /* Acción guardado */ }
+            onClick = onGuardadoClick
         )
         SettingsOption(
             icon = { Icon(Icons.Default.Notifications, contentDescription = "Notificaciones") },
@@ -157,9 +154,11 @@ fun ProfileMenu(
 fun ProfileScreenPreview() {
     MaterialTheme {
         ProfileScreen(
-            onConfiguracionClick = { /* Acción de configuración */ },
-            onNotificationClick = { /* Acción de notificaciones */ },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            onConfiguracionClick = {},
+            onNotificationClick = {},
+            onHistorialClick = {},
+            onGuardadoClick = {}
         )
     }
 }

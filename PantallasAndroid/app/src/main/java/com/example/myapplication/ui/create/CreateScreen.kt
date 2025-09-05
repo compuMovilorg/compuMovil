@@ -15,7 +15,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.utils.AppButton
 import com.example.myapplication.utils.StarRating
 
 @Composable
@@ -67,7 +69,6 @@ fun CreateScreenBody(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-
         Text(text = "Calificar", style = MaterialTheme.typography.bodyMedium)
         StarRating(
             rating = state.rating,
@@ -81,15 +82,13 @@ fun CreateScreenBody(
         Spacer(modifier = Modifier.height(8.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             item {
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                        .clickable { onAddImage() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("+")
-                }
+                AppButton(
+                    texto = "+",
+                    modifier = Modifier.size(64.dp),
+                    onClick = onAddImage,
+                    height = 64.dp,
+                    fontSize = 24.sp
+                )
             }
             items(state.selectedImages.size) { index ->
                 Image(
@@ -135,18 +134,16 @@ fun CreateScreenBody(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón publicar
-        Button(
-            onClick = {
-                onSaveClick(state.placeName, state.reviewText, state.rating)
-            },
+        AppButton(
+            texto = "Publicar reseña",
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text("Publicar reseña")
-        }
+            onClick = { onSaveClick(state.placeName, state.reviewText, state.rating) },
+            height = 60.dp,
+            fontSize = 18.sp
+        )
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

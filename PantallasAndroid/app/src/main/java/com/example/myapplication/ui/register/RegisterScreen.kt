@@ -11,16 +11,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
 import com.example.myapplication.utils.PasswordField
 import com.example.myapplication.utils.AppButton
 import com.example.myapplication.utils.LogoApp
 import com.example.myapplication.utils.CustomTextField
 import com.example.myapplication.utils.DateBirthField
+import android.util.Log
 
 @Composable
 fun MensajeBienvenida(
@@ -38,15 +38,11 @@ fun MensajeBienvenida(
 
 @Composable
 fun FormularioRegistro(
-    name: String,
+    state: RegisterState,
     onNameChange: (String) -> Unit,
-    usuario: String,
     onUsuarioChange: (String) -> Unit,
-    fechaNacimiento: String,
     onFechaNacimientoChange: (String) -> Unit,
-    email: String,
     onEmailChange: (String) -> Unit,
-    password: String,
     onPasswordChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -55,93 +51,92 @@ fun FormularioRegistro(
         modifier = modifier.fillMaxWidth()
     ) {
         CustomTextField(
-            value = name,
+            value = state.name,
             onValueChange = onNameChange,
             label = "Nombre",
             modifier = Modifier.fillMaxWidth()
         )
 
         CustomTextField(
-            value = usuario,
+            value = state.usuario,
             onValueChange = onUsuarioChange,
             label = "Usuario",
             modifier = Modifier.fillMaxWidth()
         )
 
         DateBirthField(
-            value = fechaNacimiento,
+            value = state.fechaNacimiento,
             onValueChange = onFechaNacimientoChange,
             modifier = Modifier.fillMaxWidth()
         )
 
         CustomTextField(
-            value = email,
+            value = state.email,
             onValueChange = onEmailChange,
             label = "Correo electrónico",
             modifier = Modifier.fillMaxWidth()
         )
 
         PasswordField(
-            value = password,
+            value = state.password,
             onValueChange = onPasswordChange,
             modifier = Modifier.fillMaxWidth()
         )
     }
 }
-
 @Composable
 fun BodyRegisterScreen(
     registerViewModel: RegisterViewModel,
-    RegisterButtomPressed: () -> Unit,
+    onRegisterSuccess: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val state by registerViewModel.uiState.collectAsState()
-    Box(
-        modifier = modifier
-            .fillMaxHeight()
-            .background(Color.White)
-            .padding(8.dp),
-        contentAlignment = Alignment.Center
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier.fillMaxSize()
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            MensajeBienvenida(
-                stringResource(R.string.nocta),
-                modifier = Modifier.padding(bottom = 10.dp)
-            )
+        MensajeBienvenida(
+            stringResource(R.string.nocta),
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
 
-            FormularioRegistro(
-                name = state.name,
-                onNameChange = { registerViewModel.updateName(it) },
-                usuario = state.usuario,
-                onUsuarioChange = { registerViewModel.updateUsuario(it) },
-                fechaNacimiento = state.fechaNacimiento,
-                onFechaNacimientoChange = { registerViewModel.updateFechaNacimiento(it) },
-                email = state.email,
-                onEmailChange = { registerViewModel.updateEmail(it) },
-                password = state.password,
-                onPasswordChange = { registerViewModel.updatePassword(it) }
-            )
+        FormularioRegistro(
+            state = state,
+            onNameChange = { registerViewModel.updateName(it) },
+            onUsuarioChange = { registerViewModel.updateUsuario(it) },
+            onFechaNacimientoChange = { registerViewModel.updateFechaNacimiento(it) },
+            onEmailChange = { registerViewModel.updateEmail(it) },
+            onPasswordChange = { registerViewModel.updatePassword(it) }
+        )
 
-            Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-            AppButton(
-                texto = stringResource(R.string.crear_cuenta),
-                modifier = Modifier.fillMaxWidth(),
-                onClick = RegisterButtomPressed
-            )
-        }
+        AppButton(
+            texto = stringResource(R.string.crear_cuenta),
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                registerViewModel.register(
+                    onSuccess = {
+                        Log.d("Register", "Usuario registrado: ${state.email} / ${state.usuario}")
+                        onRegisterSuccess()
+                    },
+                    onError = { message ->
+                        Log.e("Register", "Error al registrar: $message")
+                    }
+                )
+            }
+        )
     }
 }
 
+
 @Composable
 fun RegisterScreen(
-    RegisterButtomPressed: () -> Unit,
     modifier: Modifier = Modifier,
-    registerViewModel: RegisterViewModel = viewModel()
+    registerViewModel: RegisterViewModel = hiltViewModel(),
+    onRegisterSuccess: () -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -169,29 +164,12 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             BodyRegisterScreen(
-                RegisterButtomPressed = RegisterButtomPressed,
                 modifier = Modifier.fillMaxWidth(),
-                registerViewModel = registerViewModel
+                registerViewModel = registerViewModel,
+                onRegisterSuccess = onRegisterSuccess
             )
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun BodyRegisterScreenPreview() {
-    val vm: RegisterViewModel = viewModel()
-    BodyRegisterScreen(
-        registerViewModel = vm,
-        RegisterButtomPressed = {}
-    )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun RegisterScreenPreview() {
-    RegisterScreen(
-        registerViewModel = viewModel(),
-        RegisterButtomPressed = {}
-    )
-}

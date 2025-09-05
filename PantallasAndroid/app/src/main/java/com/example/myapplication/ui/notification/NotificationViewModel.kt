@@ -2,11 +2,14 @@
 package com.example.myapplication.ui.notification
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-class NotificationViewModel : ViewModel() {
+@HiltViewModel
+class NotificationViewModel @Inject constructor() : ViewModel() {
 
     private val _uiState = MutableStateFlow(NotificationState())
     val uiState: StateFlow<NotificationState> = _uiState

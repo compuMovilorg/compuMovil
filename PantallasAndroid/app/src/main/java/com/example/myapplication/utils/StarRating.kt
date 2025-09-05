@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.floor
 
 @Composable
@@ -19,6 +20,8 @@ fun StarRating(
     maxStars: Int = 5,
     onRatingChanged: ((Int) -> Unit)? = null
 ) {
+    val starColor = Color(0xFFFFC107)
+
     Row(modifier = modifier) {
         val fullStars = floor(rating).toInt()
         val hasHalfStar = (rating - fullStars) >= 0.5f
@@ -33,7 +36,7 @@ fun StarRating(
             Icon(
                 imageVector = icon,
                 contentDescription = "Star $i",
-                tint = Color.Yellow,
+                tint = starColor,
                 modifier = if (onRatingChanged != null) {
                     Modifier.clickable { onRatingChanged(i) }
                 } else {
@@ -43,3 +46,12 @@ fun StarRating(
         }
     }
 }
+
+//@Composable
+//@Preview(showBackground = true)
+//fun StarRatingPreview(){
+//    StarRating(
+//        modifier = Modifier
+//    )
+//}
+

@@ -10,11 +10,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.collectAsState
+import com.example.myapplication.utils.NotificationItem
 
 @Composable
 fun NotificationScreen(
     modifier: Modifier = Modifier,
-    viewModel: NotificationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: NotificationViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -76,40 +77,6 @@ fun NotificationScreen(
 }
 
 
-@Composable
-private fun NotificationItem(
-    title: String,
-    subtitle: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(2.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange
-        )
-    }
-}
 
 //@Preview(showBackground = true)
 //@Composable

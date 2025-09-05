@@ -8,6 +8,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.R
 import com.example.myapplication.data.GastroBar
 import com.example.myapplication.utils.StarRating
@@ -25,41 +29,56 @@ import com.example.myapplication.utils.AppButton
 
 @Composable
 fun DetailGastroBarScreen(
-    gastroBar: GastroBar,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: DetailGastroBarViewModel = hiltViewModel()
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        HeaderImage(imageRes = gastroBar.imagePlace)
+    val state by viewModel.uiState.collectAsState()
 
-        PlaceInfoSection(gastroBar = gastroBar)
+    LaunchedEffect(Unit) {
+        viewModel.buscarGastro()
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
+    state.gastroBar?.let { gastroBar ->
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-            AppButton(
-                texto = "Calificar y Escribir reseña",
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { /* Lógica para calificar */ }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedButton(
-                onClick = { /* Lógica para ver reseñas */ },
-                modifier = Modifier.fillMaxWidth()
+            HeaderImage(imageRes = gastroBar.imagePlace)
+            PlaceInfoSection(gastroBar = gastroBar)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Ver reseñas")
+                AppButton(
+                    texto = "Calificar y Escribir reseña",
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { /* TODO: lógica de calificación */ }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = { /* TODO: lógica ver reseñas */ },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Ver reseñas")
+                }
             }
+        }
+    } ?: run {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("GastroBar no encontrado")
         }
     }
 }
+
 
 @Composable
 fun HeaderImage(imageRes: Int) {
@@ -90,20 +109,11 @@ fun PlaceInfoSection(gastroBar: GastroBar) {
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        InfoRow(
-            icon = Icons.Default.LocationOn,
-            text = gastroBar.address
-        )
+        InfoRow(Icons.Default.LocationOn, gastroBar.address)
         Spacer(modifier = Modifier.height(8.dp))
-        InfoRow(
-            icon = Icons.Default.Schedule,
-            text = gastroBar.hours
-        )
+        InfoRow(Icons.Default.Schedule, gastroBar.hours)
         Spacer(modifier = Modifier.height(8.dp))
-        InfoRow(
-            icon = Icons.Default.Lightbulb,
-            text = gastroBar.cuisine
-        )
+        InfoRow(Icons.Default.Lightbulb, gastroBar.cuisine)
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = gastroBar.description,
@@ -137,9 +147,6 @@ fun DetailGastroBarScreenPreview() {
     )
 
     MaterialTheme {
-        DetailGastroBarScreen(
-            gastroBar = sampleGastroBar,
-            modifier = Modifier.fillMaxSize()
-        )
+        PlaceInfoSection(sampleGastroBar)
     }
 }

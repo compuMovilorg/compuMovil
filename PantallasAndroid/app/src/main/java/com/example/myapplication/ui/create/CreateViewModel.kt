@@ -5,8 +5,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import com.example.myapplication.R
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class CreateViewModel : ViewModel() {
+@HiltViewModel
+class CreateViewModel @Inject constructor() : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateState())
     val uiState: StateFlow<CreateState> = _uiState

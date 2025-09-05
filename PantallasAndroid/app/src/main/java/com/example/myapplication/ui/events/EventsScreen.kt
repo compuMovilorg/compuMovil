@@ -11,14 +11,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.data.EventInfo
 import com.example.myapplication.utils.SearchBarField
 import com.example.myapplication.utils.TagChip
@@ -55,9 +54,9 @@ fun BodyEventScreen(
                 onClick = { viewModel.updateSelectedTag("Hoy") }
             )
             TagChip(
-                text = "Proximo",
-                isSelected = state.selectedTag == "Proximo",
-                onClick = { viewModel.updateSelectedTag("Proximo") }
+                text = "Próximo",
+                isSelected = state.selectedTag == "Próximo",
+                onClick = { viewModel.updateSelectedTag("Próximo") }
             )
         }
 
@@ -121,27 +120,12 @@ fun BodyEventScreen(
 @Composable
 fun EventScreen(
     modifier: Modifier = Modifier,
-    events: List<EventInfo>,
-    onEventClick: (EventInfo) -> Unit = {}
+    onEventClick: (EventInfo) -> Unit = {},
+    viewModel: EventViewModel = hiltViewModel()
 ) {
-
-    val viewModel = remember { EventViewModel(events) }
-
     BodyEventScreen(
         modifier = modifier,
         viewModel = viewModel,
         onEventClick = onEventClick
     )
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun EventScreenPreview() {
-//    EventScreen(
-//        events = listOf(
-//            EventInfo("Hoy", "8:30 PM", "Bring me the horizon", R.drawable.gastrobarimg3),
-//            EventInfo("Proximo", "9:00 PM", "Ed Sheeran Live", R.drawable.gastrobarimg10)
-//        ),
-//        onEventClick = {}
-//    )
-//}

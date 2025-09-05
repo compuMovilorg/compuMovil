@@ -2,11 +2,16 @@ package com.example.myapplication.ui.events
 
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.data.EventInfo
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-class EventViewModel(initialEvents: List<EventInfo>) : ViewModel() {
+@HiltViewModel
+class EventViewModel @Inject constructor(
+    initialEvents: List<EventInfo>
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EventState(events = initialEvents))
     val uiState: StateFlow<EventState> = _uiState
@@ -22,11 +27,8 @@ class EventViewModel(initialEvents: List<EventInfo>) : ViewModel() {
     val filteredEvents: List<EventInfo>
         get() {
             val state = _uiState.value
-            return if (state.searchQuery.isBlank()) {
-                state.events
-            } else {
-                state.events.filter { it.title.contains(state.searchQuery, ignoreCase = true) }
+            return state.events.filter {
+                state.searchQuery.isBlank() || it.title.contains(state.searchQuery, ignoreCase = true)
             }
         }
-    }
-
+}

@@ -2,7 +2,6 @@ package com.example.myapplication.ui.log
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,15 +21,18 @@ import com.example.myapplication.R
 import com.example.myapplication.utils.PasswordField
 import com.example.myapplication.utils.CustomTextField
 import com.example.myapplication.utils.AppButton
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun LoginBody(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = viewModel(),
-    onLoginClick: (String, String) -> Unit,
+    onLoginSuccess: () -> Unit,
     onForgotPasswordClick: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     Column(
         modifier = modifier
@@ -80,7 +82,14 @@ fun LoginBody(
         AppButton(
             texto = stringResource(R.string.iniciar_sesion),
             modifier = Modifier.fillMaxWidth(),
-            onClick = { onLoginClick(state.email, state.password) }
+            onClick = {
+                viewModel.login(
+                    onSuccess = { onLoginSuccess() },
+                    onError = { message ->
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
         )
 
         // Link "Olvidaste tu contraseña"
@@ -98,12 +107,11 @@ fun LoginBody(
     }
 }
 
-
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = viewModel(),
-    onLoginClick: (String, String) -> Unit,
+    onLoginSuccess: () -> Unit,
     onForgotPasswordClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -117,7 +125,7 @@ fun LoginScreen(
         LoginBody(
             modifier = modifier.fillMaxSize(),
             viewModel = viewModel,
-            onLoginClick = onLoginClick,
+            onLoginSuccess = onLoginSuccess,
             onForgotPasswordClick = onForgotPasswordClick
         )
     }
@@ -127,7 +135,7 @@ fun LoginScreen(
 @Composable
 fun PreviewLoginBody() {
     LoginScreen(
-        onLoginClick = { _, _ -> },
+        onLoginSuccess = {},
         onForgotPasswordClick = {}
     )
 }
