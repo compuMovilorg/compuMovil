@@ -208,15 +208,12 @@ fun AppNavigation(
         ) {
             val detailViewModel: DetailGastroBarViewModel = hiltViewModel()
             val gastroBarId = it.arguments?.getInt("gastroBarId") ?: 0
-            val gastroBar = LocalGastroBarProvider.gastroBars.find { it.id == gastroBarId }
-            if (gastroBar != null) {
                 DetailGastroBarScreen(
                     modifier = modifier,
-                    viewModel = detailViewModel
+                    viewModel = detailViewModel,
+                    gastroBarId = gastroBarId
                 )
-            } else {
-                Text(text = "GastroBar no encontrado")
-            }
+
         }
     }
 }

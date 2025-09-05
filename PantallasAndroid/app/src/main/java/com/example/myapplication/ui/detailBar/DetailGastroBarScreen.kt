@@ -29,13 +29,14 @@ import com.example.myapplication.utils.AppButton
 
 @Composable
 fun DetailGastroBarScreen(
+    gastroBarId: Int,
     modifier: Modifier = Modifier,
     viewModel: DetailGastroBarViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.buscarGastro()
+        viewModel.buscarGastro(gastroBarId)
     }
 
     state.gastroBar?.let { gastroBar ->

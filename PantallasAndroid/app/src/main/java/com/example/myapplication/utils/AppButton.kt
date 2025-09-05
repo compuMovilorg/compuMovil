@@ -18,22 +18,21 @@ fun AppButton(
     texto: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    height: Dp = 50.dp,           // altura por defecto
-    fontSize: TextUnit = 16.sp     // tamaño de texto por defecto
+    height: Dp = 60.dp,
+    fontSize: TextUnit = 16.sp
 ) {
     Button(
         onClick = onClick,
+        modifier = modifier.height(height),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        ),
-        modifier = modifier
-            .padding(10.dp)
-            .height(height)   // altura personalizada
+            containerColor = MaterialTheme.colorScheme.primary
+        )
     ) {
         Text(
             text = texto,
-            fontSize = fontSize
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
+

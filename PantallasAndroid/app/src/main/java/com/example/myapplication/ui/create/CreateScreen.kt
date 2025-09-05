@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.utils.AppButton
+import com.example.myapplication.utils.CustomTextField
 import com.example.myapplication.utils.StarRating
 
 @Composable
@@ -59,11 +60,11 @@ fun CreateScreenBody(
         verticalArrangement = Arrangement.Top
     ) {
 
-        OutlinedTextField(
+        // Nombre del lugar
+        CustomTextField(
             value = state.placeName,
             onValueChange = onPlaceNameChange,
-            label = { Text("Nombre del lugar") },
-            placeholder = { Text("Buscar o seleccionar un gastrobar") },
+            label = "Nombre del lugar",
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -79,16 +80,20 @@ fun CreateScreenBody(
 
         // Fotos
         Text(text = "Fotos")
+
         Spacer(modifier = Modifier.height(8.dp))
+
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             item {
-                AppButton(
-                    texto = "+",
-                    modifier = Modifier.size(64.dp),
-                    onClick = onAddImage,
-                    height = 64.dp,
-                    fontSize = 24.sp
-                )
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                        .clickable { onAddImage() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("+")
+                }
             }
             items(state.selectedImages.size) { index ->
                 Image(
@@ -104,11 +109,10 @@ fun CreateScreenBody(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Reseña
-        OutlinedTextField(
+        CustomTextField(
             value = state.reviewText,
             onValueChange = onReviewTextChange,
-            label = { Text("Escribe tu reseña") },
-            placeholder = { Text("Escribe sobre el lugar...") },
+            label = "Escribe tu reseña",
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
@@ -132,17 +136,21 @@ fun CreateScreenBody(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
+        // Botón publicar
         AppButton(
             texto = "Publicar reseña",
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .align(Alignment.CenterHorizontally),
             onClick = { onSaveClick(state.placeName, state.reviewText, state.rating) },
-            height = 60.dp,
-            fontSize = 18.sp
+            height = 70.dp,
+            fontSize = 20.sp
         )
     }
 }
+
 
 
 @Preview(showBackground = true)

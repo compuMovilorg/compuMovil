@@ -10,20 +10,14 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class DetailGastroBarViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle
-) : ViewModel() {
-
-    private val gastroBarId: Int = savedStateHandle["gastroBarId"] ?: -1
+class DetailGastroBarViewModel @Inject constructor() : ViewModel() {
 
     private val _uiState = MutableStateFlow(
-        DetailGastroBarUiState(
-            gastroBar = LocalGastroBarProvider.gastroBars.find { it.id == gastroBarId }
-        )
+        DetailGastroBarUiState()
     )
     val uiState: StateFlow<DetailGastroBarUiState> = _uiState
 
-    fun buscarGastro() {
+    fun buscarGastro(gastroBarId: Int) {
         val gastroBar = LocalGastroBarProvider.gastroBars.find { it.id == gastroBarId }
         _uiState.value = _uiState.value.copy(gastroBar = gastroBar)
     }
