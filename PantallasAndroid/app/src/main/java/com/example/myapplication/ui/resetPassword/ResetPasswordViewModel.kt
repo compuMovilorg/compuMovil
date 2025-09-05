@@ -11,6 +11,9 @@ class ResetPasswordViewModel : ViewModel() {
     val email: StateFlow<String> get() = MutableStateFlow(_uiState.value.email)
     val uiState: StateFlow<ResetPasswordState> = _uiState
 
+    private val _navigateToLogin = MutableStateFlow(false)
+    val navigateToLogin: StateFlow<Boolean> = _navigateToLogin
+
     // Actualiza el email
     fun updateEmail(newEmail: String) {
         _uiState.update { it.copy(email = newEmail) }
@@ -19,5 +22,13 @@ class ResetPasswordViewModel : ViewModel() {
     fun sendResetPassword() {
         val currentEmail = _uiState.value.email
         println("Enviando link de restablecimiento a $currentEmail")
+    }
+
+    fun onNavigateToLogin() {
+        _navigateToLogin.value = true
+    }
+
+    fun onNavigated() {
+        _navigateToLogin.value = false
     }
 }

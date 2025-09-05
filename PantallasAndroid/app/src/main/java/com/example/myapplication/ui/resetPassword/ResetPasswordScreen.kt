@@ -25,8 +25,7 @@ import com.example.myapplication.utils.LogoApp
 @Composable
 fun ResetPasswordBody(
     modifier: Modifier = Modifier,
-    viewModel: ResetPasswordViewModel = viewModel(),
-    onLogInClick: () -> Unit
+    viewModel: ResetPasswordViewModel = viewModel()
 ) {
    val state by viewModel.uiState.collectAsState()
 
@@ -100,7 +99,7 @@ fun ResetPasswordBody(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
                     ),
-                    modifier = Modifier.clickable { onLogInClick() }
+                    modifier = Modifier.clickable { viewModel.onNavigateToLogin() }
                 )
             }
         }
@@ -111,9 +110,21 @@ fun ResetPasswordBody(
 @Composable
 fun ResetPasswordScreen(
     modifier: Modifier = Modifier,
+    viewModel: ResetPasswordViewModel = viewModel(),
     onLogInClick: () -> Unit = {}
 ) {
-    ResetPasswordBody(modifier = modifier, onLogInClick = onLogInClick)
+
+    val navigateToLogin by viewModel.navigateToLogin.collectAsState()
+
+    LaunchedEffect(navigateToLogin) {
+        if (navigateToLogin) {
+            onLogInClick()
+            viewModel.onNavigated()
+        }
+    }
+
+    ResetPasswordBody(modifier = modifier, viewModel = viewModel)
+
 }
 
 @Preview(showBackground = true)

@@ -23,6 +23,7 @@ import com.example.myapplication.data.EventInfo
 import com.example.myapplication.utils.SearchBarField
 import com.example.myapplication.utils.TagChip
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun BodyEventScreen(
