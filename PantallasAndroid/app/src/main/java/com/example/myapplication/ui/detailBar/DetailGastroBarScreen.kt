@@ -24,12 +24,12 @@ import com.example.myapplication.R
 import com.example.myapplication.data.GastroBar
 import com.example.myapplication.utils.StarRating
 import com.example.myapplication.utils.AppButton
-import androidx.lifecycle.viewmodel.compose.viewModel
+
 
 
 @Composable
 fun DetailGastroBarScreen(
-    viewModel: DetailGastroBarViewModel = viewModel(),
+    viewModel: DetailGastroBarViewModel,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()

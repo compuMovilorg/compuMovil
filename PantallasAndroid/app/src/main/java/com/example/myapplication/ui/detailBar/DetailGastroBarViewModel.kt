@@ -8,11 +8,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class DetailGastroBarViewModel(
-    gastroBar: GastroBar
+    private val gastroBar: GastroBar
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(DetailGastroBarUiState(gastroBar))
+
+    private val _uiState = MutableStateFlow(DetailGastroBarUiState())
     val uiState: StateFlow<DetailGastroBarUiState> = _uiState.asStateFlow()
 
+    init {
+        _uiState.value = DetailGastroBarUiState(gastroBar)
+    }
 }
 
 class DetailGastroBarViewModelFactory(

@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.myapplication.data.GastroBar
+import com.example.myapplication.data.local.LocalGastroBarProvider
 import com.example.myapplication.utils.SearchBarField
 import com.example.myapplication.utils.GastroBarGrid
 
@@ -43,13 +43,10 @@ fun BodySearchScreen(
 
 @Composable
 fun SearchScreen(
-    modifier: Modifier = Modifier,
-    gastroBars: List<GastroBar>,
-    viewModel: SearchViewModel = viewModel(),
-    onGastroBarClick: (Int) -> Unit
+    viewModel: SearchViewModel,
+    onGastroBarClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    viewModel.setGastroBars(gastroBars)
-
     BodySearchScreen(
         viewModel = viewModel,
         onGastroBarClick = onGastroBarClick,
@@ -60,20 +57,23 @@ fun SearchScreen(
 @Composable
 @Preview(showBackground = true)
 fun BodySearchScreenPreview() {
-    val vm: SearchViewModel = viewModel()
+    val vm: SearchViewModel = viewModel(
+        factory = SearchViewModelFactory(LocalGastroBarProvider.gastroBars)
+    )
     BodySearchScreen(
         viewModel = vm,
-        onGastroBarClick = {}
+        onGastroBarClick = {},
     )
 }
 
 @Composable
 @Preview(showBackground = true)
 fun SearchScreenPreview() {
-    val vm: SearchViewModel = viewModel()
+    val vm: SearchViewModel = viewModel(
+        factory = SearchViewModelFactory(LocalGastroBarProvider.gastroBars)
+    )
     SearchScreen(
-        gastroBars = com.example.myapplication.data.local.LocalGastroBarProvider.gastroBars,
         viewModel = vm,
-        onGastroBarClick = {}
+        onGastroBarClick = {},
     )
 }

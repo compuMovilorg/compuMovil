@@ -33,6 +33,8 @@ import com.example.myapplication.ui.search.SearchScreen
 import com.example.myapplication.ui.settings.SettingsScreen
 import com.example.myapplication.ui.settings.SettingsViewModel
 import com.example.myapplication.ui.start.StartScreen
+import com.example.myapplication.ui.search.SearchViewModel
+import com.example.myapplication.ui.search.SearchViewModelFactory
 
 sealed class Screen(val route: String) {
     object StartRoute : Screen("start")
@@ -117,8 +119,10 @@ fun AppNavigation(
         }
 
         composable(Screen.Search.route) {
+            val searchViewModel: SearchViewModel = viewModel(
+                factory = SearchViewModelFactory(LocalGastroBarProvider.gastroBars)
+            )
             SearchScreen(
-                gastroBars = LocalGastroBarProvider.gastroBars,
                 modifier = modifier,
                 onGastroBarClick = { gastroBarId ->
                     navController.navigate("detail/$gastroBarId")

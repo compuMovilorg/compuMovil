@@ -6,14 +6,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-class SearchViewModel : ViewModel() {
+class SearchViewModel(initialBars: List<GastroBar>) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchState())
     val uiState: StateFlow<SearchState> = _uiState
 
     // Inicializar la lista de gastrobares
-    fun setGastroBars(bars: List<GastroBar>) {
-        _uiState.update { it.copy(gastroBars = bars) }
+    init {
+        _uiState.update { it.copy(gastroBars = initialBars) }
     }
 
     // Actualizar la query de búsqueda
