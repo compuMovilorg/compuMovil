@@ -2,7 +2,6 @@ package com.example.myapplication.ui.log
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,9 +25,7 @@ import com.example.myapplication.utils.AppButton
 @Composable
 fun LoginBody(
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = viewModel(),
-    onLoginClick: (String, String) -> Unit,
-    onForgotPasswordClick: () -> Unit
+    viewModel: LoginViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -80,7 +77,7 @@ fun LoginBody(
         AppButton(
             texto = stringResource(R.string.iniciar_sesion),
             modifier = Modifier.fillMaxWidth(),
-            onClick = { onLoginClick(state.email, state.password) }
+            onClick = { viewModel.onLogin() }
         )
 
         // Link "Olvidaste tu contraseña"
@@ -92,7 +89,7 @@ fun LoginBody(
             modifier = Modifier
                 .padding(top = 16.dp)
                 .clickable {
-                    onForgotPasswordClick()
+                    viewModel.onForgotPassword()
                 }
         )
     }
@@ -103,9 +100,31 @@ fun LoginBody(
 fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = viewModel(),
-    onLoginClick: (String, String) -> Unit,
-    onForgotPasswordClick: () -> Unit
+    onLoginClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit,
+    onError: (String) -> Unit = {}
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                LoginEvent.NavigateToHome -> {
+                    onLoginClick()
+                    viewModel.clearEvent()
+                }
+                LoginEvent.NavigateToForgotPassword -> {
+                    onForgotPasswordClick()
+                    viewModel.clearEvent()
+                }
+                is LoginEvent.ShowError -> {
+                    onError(event.message)
+                    viewModel.clearEvent()
+                }
+                null -> Unit
+            }
+        }
+    }
+
+
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.fondolog),
@@ -116,9 +135,7 @@ fun LoginScreen(
 
         LoginBody(
             modifier = modifier.fillMaxSize(),
-            viewModel = viewModel,
-            onLoginClick = onLoginClick,
-            onForgotPasswordClick = onForgotPasswordClick
+            viewModel = viewModel
         )
     }
 }
@@ -127,7 +144,8 @@ fun LoginScreen(
 @Composable
 fun PreviewLoginBody() {
     LoginScreen(
-        onLoginClick = { _, _ -> },
-        onForgotPasswordClick = {}
+        onLoginClick = {},
+        onForgotPasswordClick = {},
+        onError = {}
     )
 }
