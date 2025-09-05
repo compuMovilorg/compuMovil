@@ -23,6 +23,3 @@ La app se asemeja a una red social, ya que fomenta la interacción entre usuario
 
 
 
-git clone -b correcciones --single-branch https://github.com/compuMovilorg/compuMovil.git compuMovil-correcciones
-cd compuMovil-correcciones
-git status
