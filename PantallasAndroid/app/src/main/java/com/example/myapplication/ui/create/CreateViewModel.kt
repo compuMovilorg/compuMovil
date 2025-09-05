@@ -5,11 +5,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import com.example.myapplication.R
+import kotlinx.coroutines.launch
+import androidx.lifecycle.viewModelScope
 
 class CreateViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateState())
     val uiState: StateFlow<CreateState> = _uiState
+
+    private val _navigateBack = MutableStateFlow(false)
+    val navigateBack: StateFlow<Boolean> = _navigateBack
 
     fun onPlaceNameChanged(input: String) {
         _uiState.update { it.copy(placeName = input) }
@@ -35,5 +40,16 @@ class CreateViewModel : ViewModel() {
                 it.copy(selectedTags = it.selectedTags + tag)
             }
         }
+    }
+
+    fun submitReview() {
+        val currentState = _uiState.value
+        viewModelScope.launch {
+            _navigateBack.value = true
+        }
+    }
+
+    fun onNavigated() {
+        _navigateBack.value = false
     }
 }

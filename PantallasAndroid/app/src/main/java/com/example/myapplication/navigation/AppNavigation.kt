@@ -137,12 +137,14 @@ fun AppNavigation(
 
         composable(Screen.Create.route) {
             CreateScreen(
-                onSaveClick = { _, _, _ ->
+                modifier = modifier,
+                onNavigateHome = {
+
                     navController.navigate(Screen.Home.route) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                modifier = modifier
+        }
             )
         }
 

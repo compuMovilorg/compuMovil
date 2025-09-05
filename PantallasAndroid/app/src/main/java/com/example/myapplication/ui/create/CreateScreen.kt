@@ -20,20 +20,23 @@ import com.example.myapplication.utils.StarRating
 
 @Composable
 fun CreateScreen(
-    onSaveClick: (String, String, Float) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CreateViewModel = viewModel()
+    viewModel: CreateViewModel = viewModel(),
+    onNavigateHome: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
+    val navigateBack by viewModel.navigateBack.collectAsState()
+
+    LaunchedEffect(navigateBack) {
+        if (navigateBack) {
+            onNavigateHome()
+            viewModel.onNavigated()
+        }
+    }
 
     CreateScreenBody(
         state = state,
-        onPlaceNameChange = viewModel::onPlaceNameChanged,
-        onReviewTextChange = viewModel::onReviewTextChanged,
-        onRatingChange = viewModel::onRatingChanged,
-        onAddImage = { viewModel.onAddImage() },
-        onToggleTag = viewModel::onToggleTag,
-        onSaveClick = onSaveClick,
+        viewModel = viewModel,
         modifier = modifier
     )
 }
@@ -41,12 +44,7 @@ fun CreateScreen(
 @Composable
 fun CreateScreenBody(
     state: CreateState,
-    onPlaceNameChange: (String) -> Unit,
-    onReviewTextChange: (String) -> Unit,
-    onRatingChange: (Float) -> Unit,
-    onAddImage: () -> Unit,
-    onToggleTag: (String) -> Unit,
-    onSaveClick: (String, String, Float) -> Unit,
+    viewModel: CreateViewModel,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -59,7 +57,7 @@ fun CreateScreenBody(
 
         OutlinedTextField(
             value = state.placeName,
-            onValueChange = onPlaceNameChange,
+            onValueChange = viewModel::onPlaceNameChanged,
             label = { Text("Nombre del lugar") },
             placeholder = { Text("Buscar o seleccionar un gastrobar") },
             modifier = Modifier.fillMaxWidth()
@@ -71,7 +69,7 @@ fun CreateScreenBody(
         Text(text = "Calificar", style = MaterialTheme.typography.bodyMedium)
         StarRating(
             rating = state.rating,
-            onRatingChanged = { onRatingChange(it.toFloat()) }
+            onRatingChanged = { viewModel.onRatingChanged(it.toFloat()) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -85,7 +83,7 @@ fun CreateScreenBody(
                     modifier = Modifier
                         .size(64.dp)
                         .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                        .clickable { onAddImage() },
+                        .clickable { viewModel.onAddImage() },
                     contentAlignment = Alignment.Center
                 ) {
                     Text("+")
@@ -107,7 +105,7 @@ fun CreateScreenBody(
         // Reseña
         OutlinedTextField(
             value = state.reviewText,
-            onValueChange = onReviewTextChange,
+            onValueChange = viewModel::onReviewTextChanged,
             label = { Text("Escribe tu reseña") },
             placeholder = { Text("Escribe sobre el lugar...") },
             modifier = Modifier
@@ -123,7 +121,7 @@ fun CreateScreenBody(
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("Cocteles", "Ambiente", "Servicio", "Precio").forEach { tag ->
                 AssistChip(
-                    onClick = { onToggleTag(tag) },
+                    onClick = { viewModel.onToggleTag(tag) },
                     label = { Text(tag) },
                     colors = AssistChipDefaults.assistChipColors(
                         containerColor = if (tag in state.selectedTags) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
@@ -138,7 +136,7 @@ fun CreateScreenBody(
         // Botón publicar
         Button(
             onClick = {
-                onSaveClick(state.placeName, state.reviewText, state.rating)
+                viewModel.submitReview()
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
@@ -151,7 +149,5 @@ fun CreateScreenBody(
 @Preview(showBackground = true)
 @Composable
 fun PreviewCreateScreen() {
-    CreateScreen(
-        onSaveClick = { _, _, _ -> }
-    )
+    CreateScreen()
 }
