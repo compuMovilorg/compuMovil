@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import com.example.myapplication.ui.register.RegisterViewModel
+
 import androidx.navigation.navArgument
 import com.example.myapplication.ui.detailBar.DetailGastroBarViewModel
 import com.example.myapplication.ui.detailBar.DetailGastroBarViewModelFactory
@@ -21,6 +22,7 @@ import com.example.myapplication.data.local.LocalReviewsProvider
 import com.example.myapplication.data.local.LocalEventsProvider
 import com.example.myapplication.ui.create.CreateScreen
 import com.example.myapplication.ui.detailBar.DetailGastroBarScreen
+
 import com.example.myapplication.ui.detailBar.DetailGastroBarViewModel
 import com.example.myapplication.ui.detailBar.DetailGastroBarViewModelFactory
 import com.example.myapplication.ui.home.HomeScreen

@@ -32,7 +32,7 @@ fun DetailGastroBarScreen(
     viewModel: DetailGastroBarViewModel,
     modifier: Modifier = Modifier
 ) {
-    val gastroBar = viewModel.uiState.gastroBar
+    val uiState = viewModel.uiState
 
     Column(
         modifier = modifier
@@ -130,9 +130,7 @@ fun InfoRow(icon: ImageVector, text: String) {
 @Preview(showBackground = true)
 @Composable
 fun DetailGastroBarScreenPreview() {
-
     MaterialTheme {
-        val viewModel = DetailGastroBarViewModel(sampleGastroBar)
         DetailGastroBarScreen(
             viewModel = DetailGastroBarViewModel(1),
             modifier = Modifier.fillMaxSize()
