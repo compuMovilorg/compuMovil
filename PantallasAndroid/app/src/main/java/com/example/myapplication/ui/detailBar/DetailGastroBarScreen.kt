@@ -8,8 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +22,7 @@ import com.example.myapplication.R
 import com.example.myapplication.data.GastroBar
 import com.example.myapplication.utils.StarRating
 import com.example.myapplication.utils.AppButton
+import kotlinx.coroutines.flow.collect
 
 
 
@@ -34,6 +33,18 @@ fun DetailGastroBarScreen(
 ) {
     val uiState = viewModel.uiState
 
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                DetailGastroBarEvent.RateClick -> {
+                    // TODO: Handle navigation to rating screen
+                }
+                DetailGastroBarEvent.ViewReviews -> {
+                    // TODO: Handle navigation to reviews screen
+                }
+            }
+        }
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -54,11 +65,11 @@ fun DetailGastroBarScreen(
             AppButton(
                 texto = "Calificar y Escribir reseña",
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { /* Lógica para calificar */ }
+                onClick = { viewModel.onRateClick() }
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedButton(
-                onClick = { /* Lógica para ver reseñas */ },
+                onClick = { viewModel.onViewReviews() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Ver reseñas")

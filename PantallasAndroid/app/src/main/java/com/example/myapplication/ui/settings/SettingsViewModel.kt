@@ -11,6 +11,20 @@ class SettingsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsState())
     val uiState: StateFlow<SettingsState> = _uiState
 
+    fun onPersonalInfo() {
+
+    }
+
+    fun onPrivacy() {
+
+    }
+
+    fun onBlocked() {
+
+    }
+
+
+
 
     fun logout() {
         _uiState.update { it.copy(isLoggedOut = true) }

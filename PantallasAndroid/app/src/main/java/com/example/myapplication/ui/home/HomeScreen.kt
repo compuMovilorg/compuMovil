@@ -29,7 +29,7 @@ fun HomeScreen(
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(reviews) { review ->  
+            items(reviews) { review ->
                 ReviewCard(
                     onReviewClick = { onReviewClick(review.id) },
                     review = review,

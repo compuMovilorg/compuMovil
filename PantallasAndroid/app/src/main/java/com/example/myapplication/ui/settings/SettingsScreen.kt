@@ -41,7 +41,7 @@ fun SettingsScreen(
         SettingsOption(
             icon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
             title = stringResource(R.string.informacionpersonal),
-            onClick = { /* Navegar */ }
+            onClick = viewModel::onPersonalInfo
         )
 
         Divider()
@@ -49,7 +49,7 @@ fun SettingsScreen(
         SettingsOption(
             icon = { Icon(Icons.Default.Lock, contentDescription = null) },
             title = stringResource(R.string.privacidad),
-            onClick = { /* Navegar */ }
+            onClick = viewModel::onPrivacy
         )
 
         Divider()
