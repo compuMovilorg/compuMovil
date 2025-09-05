@@ -13,7 +13,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import com.example.myapplication.ui.register.RegisterViewModel
 import androidx.navigation.navArgument
-import androidx.compose.material3.Text
+import com.example.myapplication.ui.detailBar.DetailGastroBarViewModel
+import com.example.myapplication.ui.detailBar.DetailGastroBarViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.data.local.LocalGastroBarProvider
 import com.example.myapplication.data.local.LocalReviewsProvider
@@ -174,23 +175,20 @@ fun AppNavigation(
             )
         }
 
+
+
         composable(
             route = "detail/{gastroBarId}",
             arguments = listOf(navArgument("gastroBarId") { type = NavType.IntType })
         ) { backStackEntry ->
             val gastroBarId = backStackEntry.arguments?.getInt("gastroBarId") ?: 0
-            val gastroBar = LocalGastroBarProvider.gastroBars.find { it.id == gastroBarId }
-            if (gastroBar != null) {
-                val detailViewModel: DetailGastroBarViewModel = viewModel(
-                    factory = DetailGastroBarViewModelFactory(gastroBar)
-                )
-                DetailGastroBarScreen(
-                    viewModel = detailViewModel,
-                    modifier = modifier
-                )
-            } else {
-                Text(text = "GastroBar no encontrado")
-            }
+            val viewModel: DetailGastroBarViewModel = viewModel(
+                factory = DetailGastroBarViewModelFactory(gastroBarId)
+            )
+            DetailGastroBarScreen(
+                viewModel = viewModel,
+                modifier = modifier
+            )
         }
     }
 }
