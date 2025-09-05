@@ -20,15 +20,31 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
 import com.example.myapplication.utils.SettingsOption
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = viewModel(),
-    onConfiguracionClick: () -> Unit,
-    onNotificationClick: () -> Unit
+    onEditProfile: () -> Unit,
+    onHistory: () -> Unit,
+    onSaved: () -> Unit,
+    onNotifications: () -> Unit,
+    onSettings: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                ProfileEvent.EditProfile -> onEditProfile()
+                ProfileEvent.OpenHistory -> onHistory()
+                ProfileEvent.OpenSaved -> onSaved()
+                ProfileEvent.OpenNotifications -> onNotifications()
+                ProfileEvent.OpenSettings -> onSettings()
+            }
+        }
+    }
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -45,15 +61,18 @@ fun ProfileScreen(
         ProfileDetails(
             userName = state.userName,
             userEmail = state.userEmail,
-            onEditProfileClick = { /* Acción para editar perfil */ }
+            onEditProfileClick = { viewModel.editProfile() }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Menú de opciones
         ProfileMenu(
-            onConfiguracionClick = onConfiguracionClick,
-            onNotificationClick = onNotificationClick
+            onHistoryClick = { viewModel.openHistory() },
+            onSavedClick = { viewModel.openSaved() },
+            onNotificationClick = { viewModel.openNotifications() },
+            onSettingsClick = { viewModel.openSettings() }
+
         )
     }
 }
@@ -125,19 +144,21 @@ fun ProfileDetails(
 @Composable
 fun ProfileMenu(
     modifier: Modifier = Modifier,
-    onConfiguracionClick: () -> Unit,
-    onNotificationClick: () -> Unit
+    onHistoryClick: () -> Unit,
+    onSavedClick: () -> Unit,
+    onNotificationClick: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     Column(modifier = modifier.padding(horizontal = 24.dp)) {
         SettingsOption(
             icon = { Icon(Icons.Default.History, contentDescription = "Historial") },
             title = "Historial",
-            onClick = { /* Acción historial */ }
+            onClick = onHistoryClick
         )
         SettingsOption(
             icon = { Icon(Icons.Default.Bookmark, contentDescription = "Guardado") },
             title = "Guardado",
-            onClick = { /* Acción guardado */ }
+            onClick = onSavedClick
         )
         SettingsOption(
             icon = { Icon(Icons.Default.Notifications, contentDescription = "Notificaciones") },
@@ -147,7 +168,7 @@ fun ProfileMenu(
         SettingsOption(
             icon = { Icon(Icons.Default.Settings, contentDescription = "Configuración") },
             title = "Configuración",
-            onClick = onConfiguracionClick
+            onClick = onSettingsClick
         )
     }
 }
@@ -157,8 +178,11 @@ fun ProfileMenu(
 fun ProfileScreenPreview() {
     MaterialTheme {
         ProfileScreen(
-            onConfiguracionClick = { /* Acción de configuración */ },
-            onNotificationClick = { /* Acción de notificaciones */ },
+            onEditProfile = {},
+            onHistory = {},
+            onSaved = {},
+            onNotifications = {},
+            onSettings = {},
             modifier = Modifier.fillMaxSize()
         )
     }

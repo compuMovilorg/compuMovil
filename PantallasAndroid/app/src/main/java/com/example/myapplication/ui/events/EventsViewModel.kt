@@ -11,12 +11,19 @@ class EventViewModel(initialEvents: List<EventInfo>) : ViewModel() {
     private val _uiState = MutableStateFlow(EventState(events = initialEvents))
     val uiState: StateFlow<EventState> = _uiState
 
+    private val _selectedEvent = MutableStateFlow<EventInfo?>(null)
+    val selectedEvent: StateFlow<EventInfo?> = _selectedEvent
+
     fun updateSearchQuery(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
     }
 
     fun updateSelectedTag(tag: String) {
         _uiState.update { it.copy(selectedTag = tag) }
+    }
+
+    fun selectEvent(event: EventInfo) {
+        _selectedEvent.value = event
     }
 
     val filteredEvents: List<EventInfo>
@@ -28,5 +35,4 @@ class EventViewModel(initialEvents: List<EventInfo>) : ViewModel() {
                 state.events.filter { it.title.contains(state.searchQuery, ignoreCase = true) }
             }
         }
-    }
-
+}

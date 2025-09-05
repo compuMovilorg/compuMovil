@@ -22,11 +22,11 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.EventInfo
 import com.example.myapplication.utils.SearchBarField
 import com.example.myapplication.utils.TagChip
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun BodyEventScreen(
     viewModel: EventViewModel,
-    onEventClick: (EventInfo) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -81,7 +81,7 @@ fun BodyEventScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp)
-                        .clickable { onEventClick(event) },
+                        .clickable { viewModel.selectEvent(event) },
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Row(
@@ -126,11 +126,15 @@ fun EventScreen(
 ) {
 
     val viewModel = remember { EventViewModel(events) }
+    val selectedEvent by viewModel.selectedEvent.collectAsState()
+
+    LaunchedEffect(selectedEvent) {
+        selectedEvent?.let { onEventClick(it) }
+    }
 
     BodyEventScreen(
         modifier = modifier,
-        viewModel = viewModel,
-        onEventClick = onEventClick
+        viewModel = viewModel
     )
 }
 

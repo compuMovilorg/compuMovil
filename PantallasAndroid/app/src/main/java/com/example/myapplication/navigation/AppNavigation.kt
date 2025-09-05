@@ -156,8 +156,11 @@ fun AppNavigation(
         composable(Screen.Profile.route) {
             ProfileScreen(
                 modifier = modifier,
-                onConfiguracionClick = { navController.navigate(Screen.SettingsRoute.route) },
-                onNotificationClick = { navController.navigate(Screen.Notification.route) }
+                onEditProfile = { /* TODO: navigate to edit profile */ },
+                onHistory = { /* TODO: navigate to history screen */ },
+                onSaved = { /* TODO: navigate to saved items */ },
+                onNotifications = { navController.navigate(Screen.Notification.route) },
+                onSettings = { navController.navigate(Screen.SettingsRoute.route) }
             )
         }
 

@@ -6,7 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="1558d861-ef1d-4b5e-8699-005e29bed627" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PantallasAndroid/app/src/main/java/com/example/myapplication/ui/log/LogScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/PantallasAndroid/app/src/main/java/com/example/myapplication/ui/log/LogScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PantallasAndroid/app/src/main/java/com/example/myapplication/navigation/AppNavigation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/PantallasAndroid/app/src/main/java/com/example/myapplication/navigation/AppNavigation.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PantallasAndroid/app/src/main/java/com/example/myapplication/ui/events/EventsScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/PantallasAndroid/app/src/main/java/com/example/myapplication/ui/events/EventsScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PantallasAndroid/app/src/main/java/com/example/myapplication/ui/profile/ProfileScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/PantallasAndroid/app/src/main/java/com/example/myapplication/ui/profile/ProfileScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PantallasAndroid/app/src/main/java/com/example/myapplication/ui/profile/ProfileViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/PantallasAndroid/app/src/main/java/com/example/myapplication/ui/profile/ProfileViewModel.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
