@@ -2,7 +2,7 @@ package com.example.myapplication.ui.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.data.datasource.AuthRemoteDataSource
+import com.example.myapplication.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    private val authRepository: AuthRemoteDataSource
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterState())
@@ -55,15 +55,16 @@ class RegisterViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            try {
-                authRepository.register(
-                    email = state.email,
-                    password = state.password
-                )
+            val result = authRepository.register(state.email, state.password)
+
+            if (result.isSuccess) {
+                _uiState.update { it.copy(navigate = true) }
                 clearForm()
                 onSuccess()
-            } catch (e: Exception) {
-                onError(e.message ?: "Error desconocido")
+            } else {
+                val mensaje = result.exceptionOrNull()?.message ?: "Error al registrar usuario"
+                _uiState.update { it.copy(errorMessage = mensaje) }
+                onError(mensaje)
             }
         }
     }

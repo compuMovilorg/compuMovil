@@ -1,6 +1,5 @@
 package com.example.myapplication.ui.profile
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -11,14 +10,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.myapplication.R
+import com.example.myapplication.utils.ProfileAsyncImage
 import com.example.myapplication.utils.SettingsOption
 
 @Composable
@@ -28,7 +24,8 @@ fun ProfileScreen(
     onConfiguracionClick: () -> Unit,
     onNotificationClick: () -> Unit,
     onHistorialClick: () -> Unit,
-    onGuardadoClick: () -> Unit
+    onGuardadoClick: () -> Unit,
+    onEditProfileClick: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -37,7 +34,7 @@ fun ProfileScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ProfileHeader(
-            userImage = state.profilePic,
+            userImageUrl = state.profilePicUrl,
             modifier = Modifier.padding(top = 20.dp)
         )
 
@@ -46,7 +43,7 @@ fun ProfileScreen(
         ProfileDetails(
             userName = state.userName,
             userEmail = state.userEmail,
-            onEditProfileClick = { /* navegar a editar perfil si quieres */ }
+            onEditProfileClick = onEditProfileClick
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -62,8 +59,8 @@ fun ProfileScreen(
 
 @Composable
 fun ProfileHeader(
-    userImage: Int,
-    modifier: Modifier = Modifier
+    userImageUrl: String?,
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier.height(250.dp),
@@ -71,13 +68,9 @@ fun ProfileHeader(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.height(32.dp))
-            Image(
-                painter = painterResource(id = userImage),
-                contentDescription = "Profile Picture",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
+            ProfileAsyncImage(
+                profileImage = userImageUrl ?: "",
+                size = 200
             )
         }
     }
@@ -158,7 +151,8 @@ fun ProfileScreenPreview() {
             onConfiguracionClick = {},
             onNotificationClick = {},
             onHistorialClick = {},
-            onGuardadoClick = {}
+            onGuardadoClick = {},
+            onEditProfileClick = {}
         )
     }
 }

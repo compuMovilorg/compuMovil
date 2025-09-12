@@ -61,6 +61,8 @@ dependencies {
     implementation(libs.ui)
     implementation(libs.runtime)
 
+
+
     val nav_version = "2.7.2"
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation("androidx.compose.material:material-icons-extended:1.7.0")
@@ -73,6 +75,11 @@ dependencies {
     implementation(libs.dagger.hilt)
     implementation(libs.hilt.compose.navigation)
     kapt(libs.dagger.kapt)
+
+    implementation ("com.google.firebase:firebase-storage-ktx")
+
+    //Coil
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
     //Firebase
     implementation(platform(libs.firebase.bom))

@@ -5,5 +5,7 @@ data class RegisterState(
     val usuario: String = "",
     val fechaNacimiento: String = "",
     val email: String = "",
-    val password: String = ""
+    val password: String = "",
+    val navigate: Boolean = false,
+    val errorMessage: String? = null
 )

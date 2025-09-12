@@ -9,11 +9,21 @@ class AuthRepository @Inject constructor(
 ) {
     val currentUser: FirebaseUser? = authRemoteDataSource.currentUser
 
-    suspend fun login(email: String, password: String){
-        authRemoteDataSource.login(email, password)
+    suspend fun login(email: String, password: String):Result<Unit>{
+        try {
+            authRemoteDataSource.login(email,password)
+            return Result.success(Unit)
+        }catch (e: Exception){
+            return Result.failure(e)
+        }
     }
-    suspend fun register(email: String, password: String){
-        authRemoteDataSource.register(email, password)
+    suspend fun register(email: String, password: String):Result<Unit>{
+        try {
+            authRemoteDataSource.register(email, password)
+            return Result.success(Unit)
+        }catch (e: Exception){
+            return Result.failure(e)
+        }
     }
     fun logout(){
         authRemoteDataSource.logout()

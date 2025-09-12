@@ -16,10 +16,6 @@ class HomeViewModel : ViewModel() {
         _uiState.update { it.copy(reviews = LocalReviewsProvider.Reviews) }
     }
 
-    fun updateSearchQuery(query: String) {
-        _uiState.update { it.copy(searchQuery = query) }
-    }
-
     val filteredReviews: List<ReviewInfo>
         get() = if (_uiState.value.searchQuery.isBlank()) {
             _uiState.value.reviews
@@ -30,7 +26,4 @@ class HomeViewModel : ViewModel() {
             }
         }
 
-    fun getReviewById(id: Int): ReviewInfo? {
-        return uiState.value.reviews.find { it.id == id }
-    }
 }

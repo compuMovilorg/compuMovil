@@ -30,6 +30,8 @@ import com.example.myapplication.ui.log.LoginScreen
 import com.example.myapplication.ui.log.LoginViewModel
 import com.example.myapplication.ui.notification.NotificationScreen
 import com.example.myapplication.ui.notification.NotificationViewModel
+import com.example.myapplication.ui.profile.EditProfileScreen
+import com.example.myapplication.ui.profile.EditProfileViewModel
 import com.example.myapplication.ui.profile.ProfileScreen
 import com.example.myapplication.ui.profile.ProfileViewModel
 import com.example.myapplication.ui.register.RegisterScreen
@@ -53,6 +55,7 @@ sealed class Screen(val route: String) {
     object Create : Screen("create")
     object Events : Screen("events")
     object Profile : Screen("profile")
+    object EditProfile : Screen("editProfile")
     object SettingsRoute : Screen("settings")
     object Notification : Screen("notification")
 }
@@ -105,8 +108,6 @@ fun AppNavigation(
                 }
             )
         }
-
-
 
 
         composable(Screen.ResetPassword.route) {
@@ -178,7 +179,16 @@ fun AppNavigation(
                 onConfiguracionClick = { navController.navigate(Screen.SettingsRoute.route) },
                 onNotificationClick = { navController.navigate(Screen.Notification.route) },
                 onHistorialClick = { /* aquí podrías navegar a Historial */ },
-                onGuardadoClick = { /* aquí podrías navegar a Guardado */ }
+                onGuardadoClick = { /* aquí podrías navegar a Guardado */ },
+                onEditProfileClick = {navController.navigate(Screen.EditProfile.route)}
+            )
+        }
+
+        composable(Screen.EditProfile.route) {
+            val editProfileViewModel: EditProfileViewModel = hiltViewModel()
+            EditProfileScreen(
+                modifier = modifier,
+                viewModel = editProfileViewModel
             )
         }
 
