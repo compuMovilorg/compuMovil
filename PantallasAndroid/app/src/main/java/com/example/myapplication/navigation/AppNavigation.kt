@@ -18,6 +18,7 @@ import androidx.navigation.navArgument
 import com.example.myapplication.data.local.LocalEventsProvider
 import com.example.myapplication.data.local.LocalGastroBarProvider
 import com.example.myapplication.data.local.LocalReviewsProvider
+import com.example.myapplication.ui.Splash.SplashScreen
 import com.example.myapplication.ui.create.CreateScreen
 import com.example.myapplication.ui.create.CreateViewModel
 import com.example.myapplication.ui.detailBar.DetailGastroBarScreen
@@ -58,6 +59,8 @@ sealed class Screen(val route: String) {
     object EditProfile : Screen("editProfile")
     object SettingsRoute : Screen("settings")
     object Notification : Screen("notification")
+
+    object Splash : Screen("splash")
 }
 
 @Composable
@@ -67,7 +70,7 @@ fun AppNavigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.StartRoute.route,
+        startDestination = Screen.Splash.route,
         modifier = modifier
     ) {
         composable(Screen.StartRoute.route) {
@@ -134,6 +137,21 @@ fun AppNavigation(
                     }
                 },
                 viewModel = homeViewModel
+            )
+        }
+        composable(Screen.Splash.route){
+            SplashScreen(
+                navigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(id = 0) { inclusive = true }
+                    }
+                },
+                navigateToStart = {
+                    navController.navigate(Screen.StartRoute.route) {
+                        popUpTo(id = 0) { inclusive = true }
+                    }
+                },
+                splashViewModel = hiltViewModel()
             )
         }
 
