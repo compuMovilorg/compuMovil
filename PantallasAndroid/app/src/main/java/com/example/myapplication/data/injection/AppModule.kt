@@ -15,10 +15,5 @@ import javax.inject.Singleton
 object AppModule {
 
     @Provides
-    @Singleton
-    fun provideGastroBars(): List<GastroBar> {
-        return LocalGastroBarProvider.gastroBars
-    }
-    @Provides
     fun provideEvents(): List<EventInfo> = LocalEventsProvider.events
 }

@@ -1,6 +1,7 @@
 package com.example.myapplication.data.repository
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.data.datasource.AuthRemoteDataSource
 import com.example.myapplication.data.datasource.StorageRemoteDataSource
@@ -25,6 +26,7 @@ class StorageRepository @Inject constructor(
             auth.updateProfileImage(url)
             Result.success(url)
         } catch (e: Exception) {
+            Log.d("Error_app", e.toString())
             val message = when (e) {
                 is StorageException -> when (e.errorCode) {
                     StorageException.ERROR_OBJECT_NOT_FOUND -> "El archivo no existe en el servidor."

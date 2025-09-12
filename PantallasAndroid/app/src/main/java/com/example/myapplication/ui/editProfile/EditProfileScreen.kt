@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.profile
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -22,15 +23,14 @@ fun EditProfileScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            selectedImageUri = it
+            Log.d("EditProfile", "Selected image Uri: $it")
             viewModel.uploadImageToFirebase(it)
-        }
+        } ?: Log.d("EditProfile", "No image selected")
     }
 
     Column(
