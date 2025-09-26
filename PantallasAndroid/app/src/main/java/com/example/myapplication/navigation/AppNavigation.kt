@@ -7,6 +7,7 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -126,19 +127,27 @@ fun AppNavigation(
 
         composable(Screen.Home.route) {
             val homeViewModel: HomeViewModel = hiltViewModel()
+            val uiState = homeViewModel.uiState.collectAsState()
+
             HomeScreen(
                 modifier = modifier,
                 onReviewClick = { reviewId ->
-                    val review = LocalReviewsProvider.Reviews.find { it.id == reviewId }
-                    val idGastroBar = review?.gastroBarId ?: 0
+                    // Buscar la review desde el uiState (no del provider directo)
+                    val review = uiState.value.reviews.find { it.id == reviewId }
+                    val gastroBar = review?.placeName?.let { placeName ->
+                        LocalGastroBarProvider.gastroBars.find { it.name == placeName }
+                    }
                     Log.d("HomeScreen", "Review ID: $reviewId")
-                    review?.let {
-                        navController.navigate("detail/$idGastroBar")
+                    Log.d("HomeScreen", "GastroBar encontrado: ${gastroBar?.id}")
+
+                    gastroBar?.let {
+                        navController.navigate("detail/${it.id}")
                     }
                 },
                 viewModel = homeViewModel
             )
         }
+
         composable(Screen.Splash.route){
             SplashScreen(
                 navigateToHome = {
@@ -154,6 +163,7 @@ fun AppNavigation(
                 splashViewModel = hiltViewModel()
             )
         }
+
 
         composable(Screen.Search.route) {
             val searchViewModel: SearchViewModel = hiltViewModel()

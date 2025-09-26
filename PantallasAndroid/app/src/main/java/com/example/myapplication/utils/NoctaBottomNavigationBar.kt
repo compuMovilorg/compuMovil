@@ -28,11 +28,9 @@ fun NoctaBottomNavigationBar(
     modifier: Modifier = Modifier
 ) {
     NavigationBar(
-        modifier = modifier.height(56.dp),
-        windowInsets = WindowInsets.safeDrawing.only(
-            WindowInsetsSides.Top + WindowInsetsSides.Start + WindowInsetsSides.End
+        modifier = modifier.height(56.dp)
         )
-    ) {
+     {
 
 
         bottomNavItems.forEach { item ->

@@ -11,5 +11,4 @@ data class ReviewInfo(
     val reviewText: String,
     val likes: Int,
     val comments: Int,
-    val gastroBarId: Int
 )

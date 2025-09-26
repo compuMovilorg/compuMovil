@@ -186,7 +186,7 @@ fun PreviewReviewCard() {
         reviewText = "Un lugar muy acogedor con excelente café y atención al cliente.",
         likes = 120,
         comments = 45,
-        gastroBarId = 1
+        //gastroBarId = 1
     )
     ReviewCard(
         review = review,
