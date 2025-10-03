@@ -68,5 +68,6 @@ export function setupRelations() {
     foreignKey: "gastroBarId",
     as: "gastroBar",
     });
-
+    Articulos.hasMany(Review, { foreignKey: "articuloId", as: "reviews" });
+    Review.belongsTo(Articulos, { foreignKey: "articuloId", as: "articulo" });
 }
