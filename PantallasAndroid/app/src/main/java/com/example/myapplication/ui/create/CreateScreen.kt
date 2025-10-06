@@ -23,11 +23,18 @@ import com.example.myapplication.utils.StarRating
 
 @Composable
 fun CreateScreen(
-    onSaveClick: (String, String, Float) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CreateViewModel = viewModel()
+    viewModel: CreateViewModel = viewModel(),
+    onSaveClick: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(state.navigateBack) {
+        if (state.navigateBack) {
+            onSaveClick()
+        }
+    }
+
 
     CreateScreenBody(
         state = state,
@@ -49,7 +56,7 @@ fun CreateScreenBody(
     onRatingChange: (Float) -> Unit,
     onAddImage: () -> Unit,
     onToggleTag: (String) -> Unit,
-    onSaveClick: (String, String, Float) -> Unit,
+    onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -129,7 +136,8 @@ fun CreateScreenBody(
                     onClick = { onToggleTag(tag) },
                     label = { Text(tag) },
                     colors = AssistChipDefaults.assistChipColors(
-                        containerColor = if (tag in state.selectedTags) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        containerColor = if (tag in state.selectedTags)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                         else Color.Transparent
                     )
                 )
@@ -144,19 +152,10 @@ fun CreateScreenBody(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .align(Alignment.CenterHorizontally),
-            onClick = { onSaveClick(state.placeName, state.reviewText, state.rating) },
+            onClick = onSaveClick,
             height = 70.dp,
             fontSize = 20.sp
         )
     }
 }
 
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewCreateScreen() {
-    CreateScreen(
-        onSaveClick = { _, _, _ -> }
-    )
-}

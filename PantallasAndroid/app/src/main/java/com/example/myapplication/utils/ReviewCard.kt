@@ -23,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.data.ReviewInfo
 
@@ -51,8 +52,8 @@ fun ReviewCard(
                 placeName = review.placeName
             )
 
-            Image(
-                painter = painterResource(id = review.placeImage),
+            AsyncImage(
+                model = review.placeImage,
                 contentDescription = "Imagen del lugar",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -75,24 +76,22 @@ fun ReviewCard(
 }
 
 
+
 @Composable
 fun ReviewCardHeader(
-    userImage: Int,
-    userName: String,
+    userImage: String?,
+    userName: String?,
     placeName: String
 ) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = painterResource(id = userImage),
-                contentDescription = "User image",
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
+            ProfileAsyncImage(
+                profileImage = userImage ?: "",
+                size = 40
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = userName,
+                text = userName?: "",
                 style = MaterialTheme.typography.titleMedium
             )
         }
@@ -103,6 +102,7 @@ fun ReviewCardHeader(
         )
     }
 }
+
 
 @Composable
 fun ReviewCardBody(reviewText: String) {
@@ -150,7 +150,7 @@ fun ReviewCardFooter(
 @Composable
 fun ReviewCardHeaderPreview() {
     ReviewCardHeader(
-        userImage = R.drawable.usr1,
+        userImage = "",
         userName = "Carlos Perez",
         placeName = "Café del Parque"
     )
@@ -178,8 +178,8 @@ fun ReviewCardBodyPreview() {
 @Composable
 fun PreviewReviewCard() {
     val review = ReviewInfo(
-        userImage = R.drawable.usr1,
-        placeImage = R.drawable.gastrobarimg1,
+        userImage = "",
+        placeImage = "",
         id = 1,
         name = "Carlos Perez",
         placeName = "Café del Parque",

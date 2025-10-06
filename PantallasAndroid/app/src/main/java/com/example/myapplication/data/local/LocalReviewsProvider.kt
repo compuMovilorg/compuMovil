@@ -10,7 +10,7 @@ class LocalReviewsProvider @Inject constructor() {
     val reviews: List<ReviewInfo> = listOf(
         ReviewInfo(
             id = 1,
-            userImage = R.drawable.usr1,
+            userImage = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
             placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 1 }.imagePlace,
             name = "Ana Torres",
             placeName = LocalGastroBarProvider.gastroBars.first { it.id == 1 }.name,
@@ -20,7 +20,7 @@ class LocalReviewsProvider @Inject constructor() {
         ),
         ReviewInfo(
             id = 2,
-            userImage = R.drawable.usr1,
+            userImage = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
             placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 2 }.imagePlace,
             name = "Carlos Perez",
             placeName = LocalGastroBarProvider.gastroBars.first { it.id == 2 }.name,
@@ -30,7 +30,7 @@ class LocalReviewsProvider @Inject constructor() {
         ),
         ReviewInfo(
             id = 3,
-            userImage = R.drawable.usr1,
+            userImage = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
             placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 3 }.imagePlace,
             name = "Laura Gómez",
             placeName = LocalGastroBarProvider.gastroBars.first { it.id == 3 }.name,
@@ -40,7 +40,7 @@ class LocalReviewsProvider @Inject constructor() {
         ),
         ReviewInfo(
             id = 4,
-            userImage = R.drawable.usr1,
+            userImage = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
             placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 4 }.imagePlace,
             name = "Luis Hernández",
             placeName = LocalGastroBarProvider.gastroBars.first { it.id == 4 }.name,
@@ -50,7 +50,7 @@ class LocalReviewsProvider @Inject constructor() {
         ),
         ReviewInfo(
             id = 5,
-            userImage = R.drawable.usr1,
+            userImage = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
             placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 5 }.imagePlace,
             name = "Sofía Vargas",
             placeName = LocalGastroBarProvider.gastroBars.first { it.id == 5 }.name,
@@ -60,7 +60,7 @@ class LocalReviewsProvider @Inject constructor() {
         ),
         ReviewInfo(
             id = 6,
-            userImage = R.drawable.usr1,
+            userImage =  "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
             placeImage = LocalGastroBarProvider.gastroBars.first { it.id == 6 }.imagePlace,
             name = "Javier Moreno",
             placeName = LocalGastroBarProvider.gastroBars.first { it.id == 6 }.name,

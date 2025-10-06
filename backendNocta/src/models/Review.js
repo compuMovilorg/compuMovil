@@ -4,6 +4,11 @@ import { sequelize } from "../database/database.js";
 export const Review = sequelize.define(
   "reviews",
   {
+    id: { 
+        type: DataTypes.INTEGER, 
+        primaryKey: true, 
+        autoIncrement: true 
+    },
     userId: { 
         type: DataTypes.INTEGER, 
         allowNull: false,
@@ -12,14 +17,21 @@ export const Review = sequelize.define(
             key: 'id'
         },
     },
-    id: { 
+    gastroBarId: { 
         type: DataTypes.INTEGER, 
-        primaryKey: true, 
-        autoIncrement: true 
+        allowNull: true,
+        references: {
+            model: 'gastrobars', // nombre de la tabla de GastroBar
+            key: 'id'
+        },
     },
     placeName: { 
         type: DataTypes.STRING, 
         allowNull: false 
+    },
+    imagePlace: { 
+        type: DataTypes.STRING, 
+        allowNull: true
     },
     reviewText: { 
         type: DataTypes.TEXT, 
@@ -41,6 +53,12 @@ export const Review = sequelize.define(
         references: {
             model: 'reviews',
             key: 'id'
+        },
+    },
+    userImg: {
+        type: DataTypes.VIRTUAL,
+        get() {
+            return this.user ? this.user.profileImage : null;
         },
     },
   },

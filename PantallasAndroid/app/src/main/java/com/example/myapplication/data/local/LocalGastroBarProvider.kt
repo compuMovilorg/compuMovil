@@ -9,7 +9,7 @@ object LocalGastroBarProvider {
         GastroBar(
             id = 1,
             name = "Santa Juana Gastrobar",
-            imagePlace = R.drawable.gastrobarimg1,
+            imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg1.png?alt=media&token=4a350408-b0cc-456b-91a6-e2a7c0713bcc",
             rating = 4.5f,
             reviewCount = 30,
             address = "Calle 71 #11-51",
@@ -20,7 +20,7 @@ object LocalGastroBarProvider {
         GastroBar(
             id = 2,
             name = "Mono bandido",
-            imagePlace = R.drawable.gastrobarimg2,
+            imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg2.jpg?alt=media&token=fabb803a-176d-4eac-bdca-0873e53dd58c",
             rating = 4.2f,
             reviewCount = 18,
             address = "Carrera 12 #85-20",
@@ -31,7 +31,7 @@ object LocalGastroBarProvider {
         GastroBar(
             id = 3,
             name = "Matilde",
-            imagePlace = R.drawable.gastrobarimg3,
+            imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg3.jpg?alt=media&token=76b61f04-1fbb-490f-aaf5-6ebe4336ca8c",
             rating = 4.7f,
             reviewCount = 42,
             address = "Av. Chile #9-60",
@@ -42,7 +42,7 @@ object LocalGastroBarProvider {
         GastroBar(
             id = 4,
             name = "Cabrera",
-            imagePlace = R.drawable.gastrobarimg4,
+            imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg4.jpg?alt=media&token=30449e71-b0c2-4eb3-8d4d-340bb5adfdc0",
             rating = 4.3f,
             reviewCount = 25,
             address = "Calle 59 #8-32",
@@ -53,7 +53,7 @@ object LocalGastroBarProvider {
         GastroBar(
             id = 5,
             name = "Astorias",
-            imagePlace = R.drawable.gastrobarimg5,
+            imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg5.jpg?alt=media&token=f6f1d4d8-a25c-4a77-8008-5ca9f2c11a68",
             rating = 4.6f,
             reviewCount = 35,
             address = "Carrera 7 #70-25",
@@ -64,7 +64,7 @@ object LocalGastroBarProvider {
         GastroBar(
             id = 6,
             name = "Egua",
-            imagePlace = R.drawable.gastrobarimg6,
+            imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg6.jpg?alt=media&token=7d3b50b1-7361-495c-8bab-e9020490b6c8",
             rating = 4.8f,
             reviewCount = 40,
             address = "Carrera 14 #93-12",
@@ -75,7 +75,7 @@ object LocalGastroBarProvider {
         GastroBar(
             id = 7,
             name = "Cantina",
-            imagePlace = R.drawable.gastrobarimg7,
+            imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg7.jpg?alt=media&token=4dbb2e0d-7a98-494e-8cbc-70ffd299efaa",
             rating = 4.4f,
             reviewCount = 27,
             address = "Calle 80 #15-45",
@@ -86,7 +86,7 @@ object LocalGastroBarProvider {
         GastroBar(
             id = 8,
             name = "Radio Estrella",
-            imagePlace = R.drawable.gastrobarimg8,
+            imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg8.jpg?alt=media&token=08ff7e08-8bbd-4737-a1a6-b872e7ac1fc2",
             rating = 4.6f,
             reviewCount = 33,
             address = "Carrera 10 #65-22",
@@ -97,7 +97,7 @@ object LocalGastroBarProvider {
         GastroBar(
             id = 9,
             name = "Oceano",
-            imagePlace = R.drawable.gastrobarimg9,
+            imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg9.jpg?alt=media&token=a0afcbf3-3016-44f4-9d3a-4a3410916844",
             rating = 4.5f,
             reviewCount = 29,
             address = "Calle 64 #9-14",
@@ -108,7 +108,7 @@ object LocalGastroBarProvider {
         GastroBar(
             id = 10,
             name = "Santorini",
-            imagePlace = R.drawable.gastrobarimg10,
+            imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg10.jpg?alt=media&token=623af3de-5fc7-4fac-b3a6-8a385290171d",
             rating = 4.7f,
             reviewCount = 38,
             address = "Carrera 11 #84-09",

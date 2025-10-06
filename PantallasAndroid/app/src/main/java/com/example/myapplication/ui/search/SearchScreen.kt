@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.search
 
+import GastroBarGrid
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -8,7 +9,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.data.GastroBar
 import com.example.myapplication.utils.SearchBarField
-import com.example.myapplication.utils.GastroBarGrid
 
 @Composable
 fun BodySearchScreen(

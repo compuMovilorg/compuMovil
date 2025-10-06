@@ -1,15 +1,21 @@
 package com.example.myapplication.ui.create
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import com.example.myapplication.R
+import com.example.myapplication.data.repository.ReviewRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CreateViewModel @Inject constructor() : ViewModel() {
+class CreateViewModel @Inject constructor(
+    private val reviewRepository: ReviewRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateState())
     val uiState: StateFlow<CreateState> = _uiState
@@ -39,4 +45,24 @@ class CreateViewModel @Inject constructor() : ViewModel() {
             }
         }
     }
+
+    fun createReview() {
+        viewModelScope.launch {
+            val result = reviewRepository.createReview(
+                userId = 1,
+                placeName = uiState.value.placeName,
+                reviewText = uiState.value.reviewText,
+                parentReviewId = null
+            )
+
+            if (result.isSuccess) {
+                _uiState.update { it.copy(navigateBack = true) }
+            } else {
+                _uiState.update { it.copy(error = result.exceptionOrNull()?.message) }
+            }
+        }
+    }
 }
+
+
+

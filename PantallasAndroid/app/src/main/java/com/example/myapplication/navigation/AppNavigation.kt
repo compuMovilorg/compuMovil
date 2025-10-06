@@ -180,15 +180,17 @@ fun AppNavigation(
         composable(Screen.Create.route) {
             val createViewModel: CreateViewModel = hiltViewModel()
             CreateScreen(
-                onSaveClick = { _, _, _ ->
+                modifier = modifier,
+                viewModel = createViewModel,
+                onSaveClick = {
+                    createViewModel.createReview() // llama a createReview
                     navController.navigate(Screen.Home.route) {
                         popUpTo(0) { inclusive = true }
                     }
-                },
-                modifier = modifier,
-                viewModel = createViewModel
+                }
             )
         }
+
 
         composable(Screen.Events.route) {
             val eventViewModel: EventViewModel = hiltViewModel()

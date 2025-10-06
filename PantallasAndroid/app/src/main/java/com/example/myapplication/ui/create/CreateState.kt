@@ -5,5 +5,7 @@ data class CreateState(
     val reviewText: String = "",
     val rating: Float = 0f,
     val selectedImages: List<Int> = emptyList(),
-    val selectedTags: List<String> = emptyList()
-)
+    val selectedTags: List<String> = emptyList(),
+    val navigateBack: Boolean = false,
+    val error: String? = null
+    )

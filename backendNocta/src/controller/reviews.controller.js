@@ -1,16 +1,24 @@
 import { Review } from "../models/Review.js";
 import { User } from "../models/Users.js";
 import { Articulos } from "../models/Articulo.js";
+import { GastroBar } from "../models/gastroBar.js";
 
 // Obtener todas las reseñas
 export const getReviews = async (req, res) => {
     try {
         const reviews = await Review.findAll({
-            include : {
-                model: User,
-                as: 'user',
-                attributes: ['id', 'username', 'email'],
-             },
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'username', 'email', 'profileImage'],
+                },
+                {
+                    model: GastroBar,
+                    as: 'gastroBar',
+                    attributes: ['id', 'name', 'imagePlace'],
+                },
+            ],
         });
         return res.json(reviews);
     } catch (error) {

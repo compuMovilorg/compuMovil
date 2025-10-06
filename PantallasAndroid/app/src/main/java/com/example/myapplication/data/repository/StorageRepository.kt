@@ -40,4 +40,30 @@ class StorageRepository @Inject constructor(
             Result.failure(Exception(message))
         }
     }
+    suspend fun uploadGastrobares(uri: Uri, gastrobarId: String): Result<String> {
+        return try {
+            val userId = auth.currentUser?.uid
+                ?: return Result.failure(Exception("Ningún usuario logeado"))
+
+            val path = "gastrobares/$userId/$gastrobarId.jpg"
+            val url = storage.uploadImage(path, uri)
+
+            Result.success(url)
+        } catch (e: Exception) {
+            Log.d("Error_app", e.toString())
+            val message = when (e) {
+                is StorageException -> when (e.errorCode) {
+                    StorageException.ERROR_OBJECT_NOT_FOUND -> "El archivo no existe en el servidor."
+                    StorageException.ERROR_NOT_AUTHENTICATED -> "Debes iniciar sesión para subir imágenes."
+                    StorageException.ERROR_NOT_AUTHORIZED -> "No tienes permisos para esta acción."
+                    StorageException.ERROR_QUOTA_EXCEEDED -> "Se alcanzó el límite de almacenamiento."
+                    else -> "Error de almacenamiento: ${e.message}"
+                }
+                else -> e.message ?: "Error desconocido al subir la imagen."
+            }
+            Result.failure(Exception(message))
+        }
+    }
+
+
 }

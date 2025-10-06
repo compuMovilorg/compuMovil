@@ -42,6 +42,10 @@ export const User = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    profileImage: {
+      type: DataTypes.STRING, // URL o ruta de la imagen
+      allowNull: true,
+    },
   },
   {
     timestamps: true,

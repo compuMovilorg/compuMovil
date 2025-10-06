@@ -1,26 +1,98 @@
 package com.example.myapplication.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.ReviewInfo
-import com.example.myapplication.data.local.LocalReviewsProvider
+import com.example.myapplication.data.repository.GastroBarRepository
+import com.example.myapplication.data.repository.ReviewRepository
+import com.example.myapplication.data.repository.StorageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val localReviewsProvider: LocalReviewsProvider
+    private val gastroBarRepository: GastroBarRepository,
+    private val reviewRepository: ReviewRepository,
+    private val storageRepository: StorageRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeState())
     val uiState: StateFlow<HomeState> = _uiState
 
-    private val reviews = localReviewsProvider.reviews
-
     init {
-        _uiState.update { it.copy(reviews = reviews) }
+        loadReviews()
+        loadGastrobares()
+    }
+
+    private fun loadReviews() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            val result = reviewRepository.getReviews()
+            result.fold(
+                onSuccess = { reviews ->
+
+                    // Agregar Log para depurar URLs de imágenes
+                    reviews.forEach { review ->
+                        Log.d(
+                            "HomeViewModel",
+                            "Review ID: ${review.id}, PlaceImage: ${review.placeImage}, UserImage: ${review.userImage}"
+                        )
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            reviews = reviews,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
+                },
+                onFailure = { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            reviews = emptyList(),
+                            isLoading = false,
+                            errorMessage = throwable.message ?: "Error al cargar reseñas"
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+
+    private fun loadGastrobares() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            val result = gastroBarRepository.getGastroBares()
+            result.fold(
+                onSuccess = { gastrobares ->
+                    _uiState.update {
+                        it.copy(
+                            gastrobares = gastrobares,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
+                },
+                onFailure = { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            gastrobares = emptyList(),
+                            isLoading = false,
+                            errorMessage = throwable.message ?: "Error al cargar gastrobares"
+                        )
+                    }
+                }
+            )
+        }
     }
 
     val filteredReviews: List<ReviewInfo>

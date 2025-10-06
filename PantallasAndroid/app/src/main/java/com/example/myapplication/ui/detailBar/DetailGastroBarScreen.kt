@@ -1,6 +1,5 @@
 package com.example.myapplication.ui.detailBar
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,14 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.myapplication.R
+import coil.compose.AsyncImage
 import com.example.myapplication.data.GastroBar
 import com.example.myapplication.utils.StarRating
 import com.example.myapplication.utils.AppButton
@@ -45,7 +40,7 @@ fun DetailGastroBarScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            HeaderImage(imageRes = gastroBar.imagePlace)
+            HeaderImage(imageUrl = gastroBar.imagePlace)
             PlaceInfoSection(gastroBar = gastroBar)
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -80,13 +75,12 @@ fun DetailGastroBarScreen(
     }
 }
 
-
 @Composable
-fun HeaderImage(imageRes: Int) {
-    Image(
-        painter = painterResource(id = imageRes),
+fun HeaderImage(imageUrl: String?) {
+    AsyncImage(
+        model = imageUrl?: "",
         contentDescription = "Gastrobar Image",
-        contentScale = ContentScale.Crop,
+        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
         modifier = Modifier
             .fillMaxWidth()
             .height(250.dp)
@@ -98,7 +92,7 @@ fun PlaceInfoSection(gastroBar: GastroBar) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
             text = gastroBar.name,
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
             fontSize = 24.sp
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -129,25 +123,5 @@ fun InfoRow(icon: ImageVector, text: String) {
         Icon(imageVector = icon, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(8.dp))
         Text(text = text, style = MaterialTheme.typography.bodyLarge)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DetailGastroBarScreenPreview() {
-    val sampleGastroBar = GastroBar(
-        id = 1,
-        imagePlace = R.drawable.gastrobarimg1,
-        name = "Santa Juana Gastrobar",
-        rating = 4.5f,
-        reviewCount = 30,
-        address = "Calle 71 #11-51",
-        hours = "Lunes a Sábado de 8:00 am. a 11:00 pm\nDomingos y festivos, de 7:30 a.m. a 11:00 p.m",
-        cuisine = "Fusión Colombiana",
-        description = "Santa Juana es un gastrobar en Quinta Camacho que fusiona arte y gastronomía. Ofrece una experiencia única con cocina latina, coctelería artesanal y un ambiente lleno de diseño e inspiración ancestral."
-    )
-
-    MaterialTheme {
-        PlaceInfoSection(sampleGastroBar)
     }
 }
