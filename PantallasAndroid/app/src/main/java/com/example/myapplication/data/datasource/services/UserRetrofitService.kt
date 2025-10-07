@@ -22,4 +22,12 @@ interface UserRetrofitService {
 
     @DELETE("users/{id}")
     suspend fun deleteUser(@Path("id") id: Int)
+
+    // Buscar usuario por email
+    @GET("users/by-email")
+    suspend fun getUserByEmail(@Query("email") email: String): UserDto
+
+    // Buscar usuario por firebaseUid
+    @GET("users/by-firebase-uid")
+    suspend fun getUserByFirebaseUid(@Query("firebaseUid") firebaseUid: String): UserDto
 }

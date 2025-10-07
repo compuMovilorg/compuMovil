@@ -28,4 +28,12 @@ class UserRetrofitDataSourceImpl @Inject constructor(
     override suspend fun deleteUser(id: Int) {
         service.deleteUser(id)
     }
+
+    override suspend fun getUserByEmail(email: String): UserDto {
+        return service.getUserByEmail(email)
+    }
+
+    override suspend fun getUserByFirebaseUid(firebaseUid: String): UserDto {
+        return service.getUserByFirebaseUid(firebaseUid)
+    }
 }

@@ -108,4 +108,3 @@ class UserViewModel @Inject constructor(
     val userReviews: List<com.example.myapplication.data.ReviewInfo>
         get() = _uiState.value.reviews
 }
-

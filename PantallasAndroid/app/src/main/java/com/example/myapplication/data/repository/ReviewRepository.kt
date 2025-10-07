@@ -60,8 +60,6 @@ class ReviewRepository @Inject constructor(
             Result.failure(e)
         }
     }
-
-    // 🔹 NUEVO MÉTODO: obtener reseñas de un gastrobar específico
     suspend fun getReviewsByGastroBar(gastroBarId: Int): Result<List<ReviewInfo>> {
         return try {
             val reviews = reviewRemoteDataSource.getReviewsByGastroBar(gastroBarId)

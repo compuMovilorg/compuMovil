@@ -1,0 +1,176 @@
+//package com.example.myapplication.ui.mainUser
+//
+//import androidx.compose.foundation.layout.*
+//import androidx.compose.foundation.lazy.LazyColumn
+//import androidx.compose.foundation.lazy.items
+//import androidx.compose.material3.*
+//import androidx.compose.runtime.*
+//import androidx.compose.ui.Alignment
+//import androidx.compose.ui.Modifier
+//import androidx.compose.ui.text.font.FontWeight
+//import androidx.compose.ui.unit.dp
+//import androidx.hilt.navigation.compose.hiltViewModel
+//import com.example.myapplication.data.ReviewInfo
+//import com.example.myapplication.ui.mainuser.MainUserState
+//import com.example.myapplication.ui.mainuser.MainUserViewModel
+//import com.example.myapplication.utils.EditReviewDialog
+//import com.example.myapplication.utils.MyReviewItem
+//import com.example.myapplication.utils.ProfileAsyncImage
+//
+//@Composable
+//fun MainUserScreen(
+//    viewModel: MainUserViewModel = hiltViewModel()
+//) {
+//    val state by viewModel.uiState.collectAsState()
+//
+//    MainUserBody(
+//        state = state,
+//        onRetry = { viewModel.load() },
+//        onEdit = { viewModel.startEdit(it) },
+//        onDelete = { viewModel.deleteReview(it) },
+//        onEditTextChange = { viewModel.updateEditingText(it) },
+//        onCancelEdit = { viewModel.cancelEdit() },
+//        onConfirmEdit = { viewModel.confirmEdit() }
+//    )
+//}
+//
+//@Composable
+//private fun MainUserBody(
+//    state: MainUserState,
+//    onRetry: () -> Unit,
+//    onEdit: (ReviewInfo) -> Unit,
+//    onDelete: (Int) -> Unit,
+//    onEditTextChange: (String) -> Unit,
+//    onCancelEdit: () -> Unit,
+//    onConfirmEdit: () -> Unit,
+//    modifier: Modifier = Modifier
+//) {
+//    when {
+//        state.isLoading -> {
+//            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//                CircularProgressIndicator()
+//            }
+//        }
+//
+//        state.errorMessage != null && state.user == null -> {
+//            // Error sin datos cargados: mostramos botón de reintento
+//            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+//                    Text(text = state.errorMessage)
+//                    Spacer(Modifier.height(12.dp))
+//                    Button(onClick = onRetry) { Text("Reintentar") }
+//                }
+//            }
+//        }
+//
+//        state.user != null -> {
+//            val user = state.user
+//            LazyColumn(
+//                modifier = modifier
+//                    .fillMaxSize()
+//                    .padding(16.dp)
+//            ) {
+//                // Cabecera (similar a la de UserScreen, sin topBar local)
+//                item {
+//                    Row(
+//                        verticalAlignment = Alignment.CenterVertically,
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(top = 100.dp)
+//                    ) {
+//                        ProfileAsyncImage(
+//                            profileImage = user?.profileImage ?: "",
+//                            size = 90
+//                        )
+//
+//                        Spacer(modifier = Modifier.width(16.dp))
+//
+//                        Column(
+//                            verticalArrangement = Arrangement.Center,
+//                            horizontalAlignment = Alignment.Start,
+//                            modifier = Modifier.weight(1f)
+//                        ) {
+//                            Text(
+//                                text = user?.username.orEmpty(),
+//                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+//                            )
+//                            val displayName = user?.name ?: ""
+//                            if (displayName.isNotBlank()) {
+//                                Spacer(modifier = Modifier.height(2.dp))
+//                                Text(text = displayName, style = MaterialTheme.typography.bodyMedium)
+//                            }
+//                            Spacer(modifier = Modifier.height(8.dp))
+//                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+//                                Text(
+//                                    text = "Seguidores: ${user?.followersCount ?: 0}",
+//                                    style = MaterialTheme.typography.bodyMedium
+//                                )
+//                                Text("·", style = MaterialTheme.typography.bodyMedium)
+//                                Text(
+//                                    text = "Siguiendo: ${user?.followingCount ?: 0}",
+//                                    style = MaterialTheme.typography.bodyMedium
+//                                )
+//                            }
+//                        }
+//                    }
+//                    Spacer(modifier = Modifier.height(12.dp))
+//                    Divider()
+//                    Spacer(modifier = Modifier.height(8.dp))
+//                }
+//
+//                // Lista de mis reviews
+//                if (state.reviews.isEmpty()) {
+//                    item {
+//                        Box(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(20.dp),
+//                            contentAlignment = Alignment.Center
+//                        ) {
+//                            Text(text = "Aún no has publicado reseñas")
+//                        }
+//                    }
+//                } else {
+//                    items(
+//                        items = state.reviews,
+//                        key = { it.id }
+//                    ) { review ->
+//                        MyReviewItem(
+//                            review = review,
+//                            isDeleting = state.deletingId == review.id,
+//                            onEdit = { onEdit(review) },
+//                            onDelete = { onDelete(review.id) }
+//                        )
+//                    }
+//                }
+//
+//                // Si quieres mostrar errores transitorios aunque haya datos:
+//                if (state.errorMessage != null) {
+//                    item {
+//                        Spacer(Modifier.height(8.dp))
+//                        AssistChip(
+//                            onClick = onRetry,
+//                            label = { Text(state.errorMessage) }
+//                        )
+//                    }
+//                }
+//            }
+//
+//            // Diálogo de edición
+//            if (state.editing != null) {
+//                EditReviewDialog(
+//                    editing = state.editing,
+//                    onTextChange = onEditTextChange,
+//                    onCancel = onCancelEdit,
+//                    onConfirm = onConfirmEdit
+//                )
+//            }
+//        }
+//
+//        else -> {
+//            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//                Text("No hay datos para mostrar")
+//            }
+//        }
+//    }
+//}

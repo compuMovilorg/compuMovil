@@ -25,11 +25,34 @@ class UserRepository @Inject constructor(
         }
     }
 
-
     // Obtener un usuario por ID
     suspend fun getUserById(id: Int): Result<UserInfo> {
         return try {
             val user = userRemoteDataSource.getUserById(id)
+            Result.success(user.toUserInfo())
+        } catch (e: HttpException) {
+            Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // 🔹 Buscar por email (mismo patrón de try/catch que el resto)
+    suspend fun getUserByEmail(email: String): Result<UserInfo> {
+        return try {
+            val user = userRemoteDataSource.getUserByEmail(email)
+            Result.success(user.toUserInfo())
+        } catch (e: HttpException) {
+            Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // 🔹 Buscar por firebaseUid (mismo patrón de try/catch que el resto)
+    suspend fun getUserByFirebaseUid(firebaseUid: String): Result<UserInfo> {
+        return try {
+            val user = userRemoteDataSource.getUserByFirebaseUid(firebaseUid)
             Result.success(user.toUserInfo())
         } catch (e: HttpException) {
             Result.failure(e)

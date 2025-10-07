@@ -14,11 +14,41 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateViewModel @Inject constructor(
-    private val reviewRepository: ReviewRepository
+    private val reviewRepository: ReviewRepository,
+    private val gastroBarRepository: com.example.myapplication.data.repository.GastroBarRepository // ⬅️ agrega esto
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateState())
     val uiState: StateFlow<CreateState> = _uiState
+
+    init {
+        loadGastrobares()
+    }
+
+    private fun loadGastrobares() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingGastrobares = true, error = null) }
+            val result = gastroBarRepository.getGastroBares()
+            result.fold(
+                onSuccess = { list ->
+                    _uiState.update {
+                        it.copy(
+                            gastrobares = list,
+                            isLoadingGastrobares = false
+                        )
+                    }
+                },
+                onFailure = { e ->
+                    _uiState.update {
+                        it.copy(
+                            isLoadingGastrobares = false,
+                            error = e.message ?: "Error cargando gastrobares"
+                        )
+                    }
+                }
+            )
+        }
+    }
 
     fun onPlaceNameChanged(input: String) {
         _uiState.update { it.copy(placeName = input) }

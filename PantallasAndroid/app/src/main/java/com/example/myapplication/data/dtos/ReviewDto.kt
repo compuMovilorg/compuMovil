@@ -10,7 +10,7 @@ data class ReviewDto(
     val reviewText: String,
     val likes: Int = 0,
     val comments: Int = 0,
-    val parentReviewId: Int?,
+    val parentReviewId: Int? = null,
     val createdAt: String,
     val updatedAt: String,
     val user: UserDto?,          // Relación con el usuario

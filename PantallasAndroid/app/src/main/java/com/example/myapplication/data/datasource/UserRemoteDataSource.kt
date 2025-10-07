@@ -5,6 +5,8 @@ import com.example.myapplication.data.dtos.UserDto
 interface UserRemoteDataSource {
     suspend fun getAllUsers(): List<UserDto>
     suspend fun getUserById(id: Int): UserDto
+    suspend fun getUserByEmail(email: String): UserDto
+    suspend fun getUserByFirebaseUid(firebaseUid: String): UserDto
     suspend fun createUser(user: UserDto): Unit
     suspend fun updateUser(id: Int, user: UserDto): Unit
     suspend fun deleteUser(id: Int): Unit
