@@ -12,10 +12,8 @@ export const Articulos = sequelize.define(
     gastroBarId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: "gastrobars", // nombre de la tabla
-        key: "id",
-      },
+      unique: true,                  
+      references: { model: "gastrobars", key: "id" },
       onDelete: "CASCADE",
     },
     titulo: {

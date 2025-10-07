@@ -119,12 +119,10 @@ fun BodyEventScreen(
 
 @Composable
 fun EventScreen(
-    modifier: Modifier = Modifier,
     onEventClick: (EventInfo) -> Unit = {},
     viewModel: EventViewModel = hiltViewModel()
 ) {
     BodyEventScreen(
-        modifier = modifier,
         viewModel = viewModel,
         onEventClick = onEventClick
     )

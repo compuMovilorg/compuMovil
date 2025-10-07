@@ -10,18 +10,18 @@ import {
 const router = Router();
 
 // Obtener todos los gastrobares
-router.get("/gastrobars", getGastroBars);
+router.get("/", getGastroBars);
 
 // Crear un nuevo gastrobar
-router.post("/gastrobars", createGastroBar);
-
-// Actualizar un gastrobar existente
-router.put("/gastrobars/:id", updateGastroBar);
-
-// Eliminar un gastrobar
-router.delete("/gastrobars/:id", deleteGastroBar);
+router.post("/", createGastroBar);
 
 // Obtener gastrobar por id
-router.get("/gastrobars/:id", getGastroBarById);
+router.get("/:id", getGastroBarById);
+
+// Actualizar un gastrobar existente
+router.put("/:id", updateGastroBar);
+
+// Eliminar un gastrobar
+router.delete("/:id", deleteGastroBar);
 
 export default router;

@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,23 +16,41 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.myapplication.data.GastroBar
-import com.example.myapplication.utils.StarRating
 import com.example.myapplication.utils.AppButton
+import com.example.myapplication.utils.StarRating
 
+// -----------------------------------------------------------------------------
+// PANTALLA DELGADA: solo delega al Body
+// -----------------------------------------------------------------------------
 @Composable
 fun DetailGastroBarScreen(
     gastroBarId: Int,
+    viewModel: DetailGastroBarViewModel = hiltViewModel(),
+    onViewReviewsClick: (Int, String?) -> Unit // 👈 nuevo callback
+) {
+    DetailGastroBarBody(
+        gastroBarId = gastroBarId,
+        viewModel = viewModel,
+        onViewReviewsClick = onViewReviewsClick
+    )
+}
+
+@Composable
+fun DetailGastroBarBody(
+    gastroBarId: Int,
     modifier: Modifier = Modifier,
-    viewModel: DetailGastroBarViewModel = hiltViewModel()
+    viewModel: DetailGastroBarViewModel,
+    onViewReviewsClick: (Int, String?) -> Unit // 👈 pasa al body
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(gastroBarId) {
         viewModel.buscarGastro(gastroBarId)
     }
 
@@ -54,11 +74,14 @@ fun DetailGastroBarScreen(
                 AppButton(
                     texto = "Calificar y Escribir reseña",
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = { /* TODO: lógica de calificación */ }
+                    onClick = { /* TODO */ }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
-                    onClick = { /* TODO: lógica ver reseñas */ },
+                    onClick = {
+                        // 👇 Navega a BarReviews con id y nombre
+                        onViewReviewsClick(gastroBar.id, gastroBar.name)
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(text = "Ver reseñas")
@@ -67,7 +90,7 @@ fun DetailGastroBarScreen(
         }
     } ?: run {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Text("GastroBar no encontrado")
@@ -75,10 +98,13 @@ fun DetailGastroBarScreen(
     }
 }
 
+// -----------------------------------------------------------------------------
+// COMPONENTES DE UI REUTILIZABLES (sin cambios de lógica)
+// -----------------------------------------------------------------------------
 @Composable
 fun HeaderImage(imageUrl: String?) {
     AsyncImage(
-        model = imageUrl?: "",
+        model = imageUrl ?: "",
         contentDescription = "Gastrobar Image",
         contentScale = androidx.compose.ui.layout.ContentScale.Crop,
         modifier = Modifier
@@ -92,7 +118,7 @@ fun PlaceInfoSection(gastroBar: GastroBar) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
             text = gastroBar.name,
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             fontSize = 24.sp
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -120,7 +146,12 @@ fun PlaceInfoSection(gastroBar: GastroBar) {
 @Composable
 fun InfoRow(icon: ImageVector, text: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(imageVector = icon, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp))
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.Gray,
+            modifier = Modifier.size(20.dp)
+        )
         Spacer(modifier = Modifier.width(8.dp))
         Text(text = text, style = MaterialTheme.typography.bodyLarge)
     }

@@ -1,5 +1,6 @@
 package com.example.myapplication.data.repository
 
+import android.util.Log
 import retrofit2.HttpException
 import com.example.myapplication.data.ReviewInfo
 import com.example.myapplication.data.datasource.impl.ReviewRetrofitDataSourceImpl
@@ -45,7 +46,45 @@ class ReviewRepository @Inject constructor(
         }
     }
 
-    suspend fun createReview( userId: Int, placeName: String, reviewText: String,parentReviewId: Int? = null): Result<Unit> {
+    suspend fun getReviewsByUser(userId: Int): Result<List<ReviewInfo>> {
+        return try {
+            val reviews = reviewRemoteDataSource.getReviewsByUser(userId)
+            val reviewsInfo = reviews.map { it.toReviewInfo() }
+            Log.d("ReviewRepository", "✅ Se obtuvieron ${reviewsInfo.size} reseñas del usuario $userId")
+            Result.success(reviewsInfo)
+        } catch (e: HttpException) {
+            Log.e("ReviewRepository", "❌ HttpException ${e.code()} - ${e.message()}", e)
+            Result.failure(e)
+        } catch (e: Exception) {
+            Log.e("ReviewRepository", "❌ Exception general: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    // 🔹 NUEVO MÉTODO: obtener reseñas de un gastrobar específico
+    suspend fun getReviewsByGastroBar(gastroBarId: Int): Result<List<ReviewInfo>> {
+        return try {
+            val reviews = reviewRemoteDataSource.getReviewsByGastroBar(gastroBarId)
+            val reviewsInfo = reviews.map { it.toReviewInfo() }
+
+            Log.d("ReviewRepository", "Se obtuvieron ${reviewsInfo.size} reseñas del gastrobar $gastroBarId")
+
+            Result.success(reviewsInfo)
+        } catch (e: HttpException) {
+            Log.e("ReviewRepository", "HttpException ${e.code()} - ${e.message()}", e)
+            Result.failure(e)
+        } catch (e: Exception) {
+            Log.e("ReviewRepository", "Exception general en getReviewsByGastroBar: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun createReview(
+        userId: Int,
+        placeName: String,
+        reviewText: String,
+        parentReviewId: Int? = null
+    ): Result<Unit> {
         return try {
             val createReviewDto = CreateReviewDto(userId, placeName, reviewText, parentReviewId)
             reviewRemoteDataSource.createReview(createReviewDto)
@@ -54,6 +93,7 @@ class ReviewRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
     suspend fun updateReview(id: Int, review: CreateReviewDto): Result<Unit> {
         return try {
             reviewRemoteDataSource.updateReview(id, review)

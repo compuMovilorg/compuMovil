@@ -70,7 +70,7 @@ fun ProfileHeader(
             Spacer(modifier = Modifier.height(32.dp))
             ProfileAsyncImage(
                 profileImage = userImageUrl ?: "",
-                size = 200
+                size = 100
             )
         }
     }

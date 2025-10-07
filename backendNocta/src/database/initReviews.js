@@ -4,6 +4,7 @@ const initialReviews = [
   {
     userId: 1,
     gastroBarId: 1,
+    articuloId: 1,
     profileImage: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
     placeName: "Santa Juana Gastrobar",
     imagePlace: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg1.png?alt=media&token=4a350408-b0cc-456b-91a6-e2a7c0713bcc",
@@ -15,6 +16,7 @@ const initialReviews = [
   {
     userId: 2,
     gastroBarId: 2,
+    articuloId: 2,
     profileImage: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
     placeName: "Mono bandido",
     imagePlace: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg2.jpg?alt=media&token=fabb803a-176d-4eac-bdca-0873e53dd58c",
@@ -26,6 +28,7 @@ const initialReviews = [
   {
     userId: 3,
     gastroBarId: 3,
+    articuloId: 3,
     profileImage: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
     placeName: "Matilde",
     imagePlace: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg3.jpg?alt=media&token=76b61f04-1fbb-490f-aaf5-6ebe4336ca8c",
@@ -37,6 +40,7 @@ const initialReviews = [
   {
     userId: 4,
     gastroBarId: 4,
+    articuloId: 4,
     profileImage: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
     placeName: "Cabrera",
     imagePlace: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg4.jpg?alt=media&token=30449e71-b0c2-4eb3-8d4d-340bb5adfdc0",
@@ -48,6 +52,7 @@ const initialReviews = [
   {
     userId: 5,
     gastroBarId: 5,
+    articuloId: 5,
     profileImage: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
     placeName: "Astorias",
     imagePlace: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg5.jpg?alt=media&token=f6f1d4d8-a25c-4a77-8008-5ca9f2c11a68",
@@ -59,6 +64,7 @@ const initialReviews = [
   {
     userId: 1,
     gastroBarId: 6,
+    articuloId: 6,
     profileImage: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
     placeName: "Egua",
     imagePlace: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg6.jpg?alt=media&token=7d3b50b1-7361-495c-8bab-e9020490b6c8",
@@ -70,6 +76,7 @@ const initialReviews = [
   {
     userId: 2,
     gastroBarId: 7,
+    articuloId: 1,
     profileImage: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
     placeName: "Cantina",
     imagePlace: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg7.jpg?alt=media&token=4dbb2e0d-7a98-494e-8cbc-70ffd299efaa",
@@ -81,6 +88,7 @@ const initialReviews = [
   {
     userId: 3,
     gastroBarId: 8,
+    articuloId: 2,
     profileImage: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
     placeName: "Radio Estrella",
     imagePlace: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg8.jpg?alt=media&token=08ff7e08-8bbd-4737-a1a6-b872e7ac1fc2",
@@ -92,6 +100,7 @@ const initialReviews = [
   {
     userId: 4,
     gastroBarId: 9,
+    articuloId: 3,
     profileImage: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
     placeName: "Oceano",
     imagePlace: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg9.jpg?alt=media&token=a0afcbf3-3016-44f4-9d3a-4a3410916844",
@@ -103,6 +112,7 @@ const initialReviews = [
   {
     userId: 5,
     gastroBarId: 10,
+    articuloId: 4,
     profileImage: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/usr1.png?alt=media&token=a28c0778-494b-4e4c-8378-64d33450fe9d",
     placeName: "Santorini",
     imagePlace: "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg10.jpg?alt=media&token=623af3de-5fc7-4fac-b3a6-8a385290171d",
@@ -118,7 +128,7 @@ export async function loadInitialReviews() {
     const count = await Review.count();
     if (count === 0) {
       await Review.bulkCreate(initialReviews);
-      console.log("Reviews iniciales de gastrobares cargadas con placeImage, userImg y gastroBarId.");
+      console.log("Reviews iniciales de gastrobares cargadas con placeImage, userImg, gastroBarId y articuloId.");
     } else {
       console.log("Las reviews ya existen en la base de datos.");
     }

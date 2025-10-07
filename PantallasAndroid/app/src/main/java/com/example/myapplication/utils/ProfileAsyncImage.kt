@@ -18,7 +18,7 @@ fun ProfileAsyncImage(
     profileImage: String,
     size: Int,
     modifier: Modifier = Modifier
-){
+) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(profileImage)
@@ -27,8 +27,8 @@ fun ProfileAsyncImage(
         error = painterResource(id = R.drawable.user_image_icon),
         placeholder = painterResource(id = R.drawable.loading_img),
         contentDescription = "Profile Picture",
-        modifier = Modifier
-            .size(100.dp)
+        modifier = modifier
+            .size(size.dp)
             .clip(CircleShape),
         contentScale = ContentScale.Crop
     )

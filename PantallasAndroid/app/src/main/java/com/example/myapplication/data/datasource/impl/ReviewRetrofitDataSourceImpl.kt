@@ -35,4 +35,12 @@ class ReviewRetrofitDataSourceImpl @Inject constructor(
     override suspend fun getReviewsReplies(id: Int): List<ReviewDto> {
         return service.getReviewsReplies(id)
     }
+
+    override suspend fun getReviewsByUser(userId: Int): List<ReviewDto> {
+        return service.getReviewsByUser(userId)
+    }
+
+    override suspend fun getReviewsByGastroBar(gastroBarId: Int): List<ReviewDto> {
+        return service.getReviewsByGastroBar(gastroBarId)
+    }
 }

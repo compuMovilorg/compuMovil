@@ -1,0 +1,102 @@
+package com.example.myapplication.ui.barReviews
+
+import android.util.Log
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.ReviewInfo
+import com.example.myapplication.data.repository.ReviewRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class BarReviewsViewModel @Inject constructor(
+    private val reviewRepository: ReviewRepository,
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(BarReviewsState())
+    val uiState: StateFlow<BarReviewsState> = _uiState
+
+    // Guardamos el ID actual para poder recargar
+    private var currentGastroBarId: Int? = null
+
+    init {
+        // Si navegas con: "barReviews/{gastroBarId}?gastroBarName={name}"
+        val idArg: Int? = savedStateHandle["gastroBarId"]
+        val nameArg: String? = savedStateHandle["gastroBarName"]
+        if (idArg != null) {
+            _uiState.update { it.copy(gastroBarId = idArg, gastroBarName = nameArg) }
+            loadReviewsByBar(idArg)
+        } else {
+            _uiState.update { it.copy(errorMessage = "GastroBar no especificado") }
+        }
+    }
+
+    fun setGastroBar(id: Int, name: String? = null) {
+        currentGastroBarId = id
+        _uiState.update { it.copy(gastroBarId = id, gastroBarName = name ?: it.gastroBarName) }
+    }
+
+    fun load(gastroBarId: Int, gastroBarName: String? = null) {
+        setGastroBar(gastroBarId, gastroBarName)
+        loadReviewsByBar(gastroBarId)
+    }
+
+    private fun loadReviewsByBar(gastroBarId: Int) {
+        currentGastroBarId = gastroBarId
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            val result = reviewRepository.getReviewsByGastroBar(gastroBarId)
+            result.fold(
+                onSuccess = { reviews ->
+                    // Logs opcionales para depurar imágenes/URLs como en Home
+                    reviews.forEach { r ->
+                        Log.d("BarReviewsVM", "Review ID=${r.id}, placeImage=${r.placeImage}, userImage=${r.userImage}")
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            reviews = reviews,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
+                },
+                onFailure = { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            reviews = emptyList(),
+                            isLoading = false,
+                            errorMessage = throwable.message ?: "Error al cargar reseñas"
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    fun reload() {
+        currentGastroBarId?.let { loadReviewsByBar(it) }
+    }
+
+    fun onSearchQueryChange(query: String) {
+        _uiState.update { it.copy(searchQuery = query) }
+    }
+
+    val filteredReviews: List<ReviewInfo>
+        get() = if (_uiState.value.searchQuery.isBlank()) {
+            _uiState.value.reviews
+        } else {
+            val q = _uiState.value.searchQuery
+            _uiState.value.reviews.filter { review ->
+                review.placeName.contains(q, ignoreCase = true) ||
+                        review.reviewText.contains(q, ignoreCase = true)
+            }
+        }
+}

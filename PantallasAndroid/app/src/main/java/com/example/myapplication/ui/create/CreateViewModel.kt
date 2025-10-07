@@ -62,6 +62,10 @@ class CreateViewModel @Inject constructor(
             }
         }
     }
+
+    fun onSelectGastroBar(id: Int, name: String) {
+        _uiState.update { it.copy(selectedGastroBarId = id, placeName = name) }
+    }
 }
 
 

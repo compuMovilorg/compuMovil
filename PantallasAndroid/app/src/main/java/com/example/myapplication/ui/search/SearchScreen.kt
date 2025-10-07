@@ -13,17 +13,15 @@ import com.example.myapplication.utils.SearchBarField
 @Composable
 fun BodySearchScreen(
     viewModel: SearchViewModel,
-    onGastroBarClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    onGastroBarClick: (Int) -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .padding(8.dp)
     ) {
-
         SearchBarField(
             modifier = Modifier.padding(top = 16.dp),
             value = state.searchQuery,
@@ -43,7 +41,6 @@ fun BodySearchScreen(
 
 @Composable
 fun SearchScreen(
-    modifier: Modifier = Modifier,
     gastroBars: List<GastroBar>,
     viewModel: SearchViewModel = viewModel(),
     onGastroBarClick: (Int) -> Unit
@@ -52,13 +49,12 @@ fun SearchScreen(
 
     BodySearchScreen(
         viewModel = viewModel,
-        onGastroBarClick = onGastroBarClick,
-        modifier = modifier
+        onGastroBarClick = onGastroBarClick
     )
 }
 
-@Composable
 @Preview(showBackground = true)
+@Composable
 fun BodySearchScreenPreview() {
     val vm: SearchViewModel = viewModel()
     BodySearchScreen(
@@ -67,8 +63,8 @@ fun BodySearchScreenPreview() {
     )
 }
 
-@Composable
 @Preview(showBackground = true)
+@Composable
 fun SearchScreenPreview() {
     val vm: SearchViewModel = viewModel()
     SearchScreen(
