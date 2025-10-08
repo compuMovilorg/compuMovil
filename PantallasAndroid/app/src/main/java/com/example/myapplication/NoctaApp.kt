@@ -24,9 +24,7 @@ fun NoctaApp(
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry.value?.destination?.route
 
-    val userViewModel: UserViewModel = hiltViewModel() // ✅ obtienes la instancia del ViewModel
-    val userState = userViewModel.uiState.collectAsState() // ✅ observar el estado
-
+   // val userId: String? = currentUser?.uid ?: ""
     val showBar = currentRoute != Screen.StartRoute.route &&
             currentRoute != Screen.Login.route &&
             currentRoute != Screen.Register.route
@@ -41,8 +39,7 @@ fun NoctaApp(
         bottomBar = {
             if (NavigationLogic.shouldShowBottomBar(currentRoute)) {
                 NoctaBottomNavigationBar(
-                    navController = navController,
-                    currentUserId = userState.value.user?.id ?: 0 // ✅ acceso correcto
+                    navController = navController
                 )
             }
         }

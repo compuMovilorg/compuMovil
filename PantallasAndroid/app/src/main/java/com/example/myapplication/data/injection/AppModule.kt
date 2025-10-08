@@ -6,7 +6,7 @@ import com.example.myapplication.data.datasource.services.GastroBarRetrofitServi
 import com.example.myapplication.data.datasource.services.ReviewRetrofitService
 import com.example.myapplication.data.datasource.services.UserRetrofitService
 import com.example.myapplication.data.local.LocalEventsProvider
-import com.example.myapplication.data.local.LocalGastroBarProvider
+//import com.example.myapplication.data.local.LocalGastroBarProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

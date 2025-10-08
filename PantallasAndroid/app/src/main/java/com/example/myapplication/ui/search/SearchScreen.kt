@@ -34,7 +34,7 @@ fun BodySearchScreen(
         GastroBarGrid(
             gastroBars = viewModel.filteredBars,
             modifier = Modifier.fillMaxSize(),
-            onGridItemClick = { bar -> onGastroBarClick(bar.id) }
+            onGridItemClick = { bar -> onGastroBarClick(bar.id.toInt()) }
         )
     }
 }

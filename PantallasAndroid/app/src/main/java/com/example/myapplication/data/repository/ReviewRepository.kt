@@ -4,12 +4,13 @@ import android.util.Log
 import retrofit2.HttpException
 import com.example.myapplication.data.ReviewInfo
 import com.example.myapplication.data.datasource.impl.ReviewRetrofitDataSourceImpl
+import com.example.myapplication.data.datasource.impl.firestore.ReviewFireStoreDataSourceImpl
 import com.example.myapplication.data.dtos.CreateReviewDto
 import com.example.myapplication.data.dtos.toReviewInfo
 import javax.inject.Inject
 
 class ReviewRepository @Inject constructor(
-    private val reviewRemoteDataSource: ReviewRetrofitDataSourceImpl
+    private val reviewRemoteDataSource: ReviewFireStoreDataSourceImpl
 ) {
     suspend fun getReviews(): Result<List<ReviewInfo>> {
         return try {

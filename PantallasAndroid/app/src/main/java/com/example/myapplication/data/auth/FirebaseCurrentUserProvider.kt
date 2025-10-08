@@ -18,14 +18,14 @@ class FirebaseCurrentUserProvider @Inject constructor(
 
         // 1) Intentar por UID
         userRepository.getUserByFirebaseUid(uid).fold(
-            onSuccess = { return it.id },
+            onSuccess = { return it.id.toInt() },
             onFailure = { Log.d("CurrentUserProvider", "No mapeado por uid=$uid") }
         )
 
         // 2) Intentar por email (si existe)
         if (!email.isNullOrBlank()) {
             userRepository.getUserByEmail(email).fold(
-                onSuccess = { return it.id },
+                onSuccess = { return it.id.toInt() },
                 onFailure = { Log.d("CurrentUserProvider", "No mapeado por email=$email") }
             )
         }

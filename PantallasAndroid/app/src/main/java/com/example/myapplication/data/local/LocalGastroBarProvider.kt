@@ -7,7 +7,7 @@ object LocalGastroBarProvider {
 
     val gastroBars = listOf(
         GastroBar(
-            id = 1,
+            id = "1",
             name = "Santa Juana Gastrobar",
             imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg1.png?alt=media&token=4a350408-b0cc-456b-91a6-e2a7c0713bcc",
             rating = 4.5f,
@@ -18,7 +18,7 @@ object LocalGastroBarProvider {
             description = "Santa Juana es un gastrobar en Quinta Camacho que fusiona arte y gastronomía. Ofrece cocina latina, coctelería artesanal y un ambiente lleno de diseño ancestral."
         ),
         GastroBar(
-            id = 2,
+            id = "2",
             name = "Mono bandido",
             imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg2.jpg?alt=media&token=fabb803a-176d-4eac-bdca-0873e53dd58c",
             rating = 4.2f,
@@ -29,7 +29,7 @@ object LocalGastroBarProvider {
             description = "Un gastrobar que combina sabores del mundo con vinos y cocteles exclusivos en un ambiente moderno y acogedor."
         ),
         GastroBar(
-            id = 3,
+            id = "3",
             name = "Matilde",
             imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg3.jpg?alt=media&token=76b61f04-1fbb-490f-aaf5-6ebe4336ca8c",
             rating = 4.7f,
@@ -40,7 +40,7 @@ object LocalGastroBarProvider {
             description = "Platos inspirados en la riqueza de la cordillera de los Andes, con un enfoque en ingredientes locales frescos."
         ),
         GastroBar(
-            id = 4,
+            id = "4",
             name = "Cabrera",
             imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg4.jpg?alt=media&token=30449e71-b0c2-4eb3-8d4d-340bb5adfdc0",
             rating = 4.3f,
@@ -51,7 +51,7 @@ object LocalGastroBarProvider {
             description = "Un espacio donde el arte y la gastronomía conviven, ofreciendo cenas temáticas y cocteles artesanales."
         ),
         GastroBar(
-            id = 5,
+            id = "5",
             name = "Astorias",
             imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg5.jpg?alt=media&token=f6f1d4d8-a25c-4a77-8008-5ca9f2c11a68",
             rating = 4.6f,
@@ -62,7 +62,7 @@ object LocalGastroBarProvider {
             description = "Experiencia gastronómica tropical con frutas exóticas, mariscos frescos y tragos inspirados en el Caribe."
         ),
         GastroBar(
-            id = 6,
+            id = "6",
             name = "Egua",
             imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg6.jpg?alt=media&token=7d3b50b1-7361-495c-8bab-e9020490b6c8",
             rating = 4.8f,
@@ -73,7 +73,7 @@ object LocalGastroBarProvider {
             description = "Un rincón inspirado en la brisa marina, con platos frescos de mariscos y una selección especial de vinos blancos."
         ),
         GastroBar(
-            id = 7,
+            id = "7",
             name = "Cantina",
             imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg7.jpg?alt=media&token=4dbb2e0d-7a98-494e-8cbc-70ffd299efaa",
             rating = 4.4f,
@@ -84,7 +84,7 @@ object LocalGastroBarProvider {
             description = "Un espacio íntimo con luces tenues y música en vivo, especializado en cócteles creativos y tapas internacionales."
         ),
         GastroBar(
-            id = 8,
+            id = "8",
             name = "Radio Estrella",
             imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg8.jpg?alt=media&token=08ff7e08-8bbd-4737-a1a6-b872e7ac1fc2",
             rating = 4.6f,
@@ -95,7 +95,7 @@ object LocalGastroBarProvider {
             description = "Propuesta culinaria que mezcla tradición y modernidad, con ingredientes locales reinventados en platos únicos."
         ),
         GastroBar(
-            id = 9,
+            id = "9",
             name = "Oceano",
             imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg9.jpg?alt=media&token=a0afcbf3-3016-44f4-9d3a-4a3410916844",
             rating = 4.5f,
@@ -106,7 +106,7 @@ object LocalGastroBarProvider {
             description = "Un ambiente rústico que resalta lo mejor de la cultura andina con música folclórica en vivo y platos tradicionales."
         ),
         GastroBar(
-            id = 10,
+            id = "10",
             name = "Santorini",
             imagePlace = "https://firebasestorage.googleapis.com/v0/b/nocta-95b8c.firebasestorage.app/o/GastroBares%2Fgastrobarimg10.jpg?alt=media&token=623af3de-5fc7-4fac-b3a6-8a385290171d",
             rating = 4.7f,

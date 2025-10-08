@@ -105,4 +105,7 @@ dependencies {
     //fireStore
 
     implementation("com.google.firebase:firebase-firestore")
+
+    // Para usar 'await()' en Tasks de Firebase:
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 }

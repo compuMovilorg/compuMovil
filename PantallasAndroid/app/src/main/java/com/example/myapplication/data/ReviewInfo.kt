@@ -5,8 +5,8 @@ import androidx.annotation.DrawableRes
 data class ReviewInfo(
     val userImage: String?,
     val placeImage: String?,
-    val userId: Int,
-    val id: Int,
+    val userId: String,
+    val id: String,
     val name: String?,
     val placeName: String,
     val reviewText: String,

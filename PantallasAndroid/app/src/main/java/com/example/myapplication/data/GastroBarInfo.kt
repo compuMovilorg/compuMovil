@@ -11,7 +11,7 @@ package com.example.myapplication.data
 
 data class GastroBar(
     val imagePlace: String?,
-    val id: Int,
+    val id: String,
     val name: String,
     val rating: Float,
     val reviewCount: Int,

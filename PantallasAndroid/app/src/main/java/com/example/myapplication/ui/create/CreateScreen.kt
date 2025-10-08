@@ -78,7 +78,7 @@ fun CreateScreenBody(
             onValueChange = onPlaceNameChange,
             onSelect = { selected ->
                 // ✅ Llamamos al VM con (id, name). El VM setea también placeName.
-                onSelectGastroBar(selected.id, selected.name)
+                onSelectGastroBar(selected.id.toInt(), selected.name)
             },
             isLoading = state.isLoadingGastrobares,
             label = "Nombre del lugar",

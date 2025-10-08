@@ -71,6 +71,6 @@ export const Review = sequelize.define(
     },
   },
   {
-    timestamps: false,
+    timestamps: true,
   }
 );

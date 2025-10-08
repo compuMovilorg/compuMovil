@@ -1,7 +1,7 @@
 package com.example.myapplication.data
 
 data class UserInfo(
-    val id: Int,
+    val id: String,
     val username: String,
     val email: String,
     val name: String,

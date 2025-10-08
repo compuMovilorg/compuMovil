@@ -1,15 +1,17 @@
 package com.example.myapplication.data.repository
 
+import android.util.Log
 import retrofit2.HttpException
 import com.example.myapplication.data.UserInfo
 import com.example.myapplication.data.datasource.impl.UserRetrofitDataSourceImpl
-import com.example.myapplication.data.dtos.UserDto
-import com.example.myapplication.data.dtos.UserProfileDto
-import com.example.myapplication.data.dtos.toUserInfo
+import com.example.myapplication.data.datasource.impl.firestore.userFirestoreDataSourceImpl
+import com.example.myapplication.data.dtos.RegisterUserDto
+import com.example.myapplication.data.dtos.UserDtoGeneric
 import javax.inject.Inject
+import kotlin.math.log
 
 class UserRepository @Inject constructor(
-    private val userRemoteDataSource: UserRetrofitDataSourceImpl
+    private val userRemoteDataSource: userFirestoreDataSourceImpl
 ) {
 
     // Obtener todos los usuarios (lista general)
@@ -62,7 +64,7 @@ class UserRepository @Inject constructor(
     }
 
     // Crear un usuario general
-    suspend fun createUser(user: UserDto): Result<Unit> {
+    suspend fun createUser(user: UserDtoGeneric): Result<Unit> {
         return try {
             userRemoteDataSource.createUser(user)
             Result.success(Unit)
@@ -72,10 +74,10 @@ class UserRepository @Inject constructor(
     }
 
     // Crear/actualizar perfil del usuario logueado
-    suspend fun updateUserProfile(id: Int, profile: UserProfileDto): Result<Unit> {
+    suspend fun updateUserProfile(id: Int, profile: UserDtoGeneric): Result<Unit> {
         return try {
             // Se asume que el data source maneja UserProfileDto igual que UserDto
-            userRemoteDataSource.updateUser(id, profile as UserDto)
+            userRemoteDataSource.updateUser(id, profile) // revisar
             Result.success(Unit)
         } catch (e: HttpException) {
             Result.failure(e)
@@ -92,6 +94,20 @@ class UserRepository @Inject constructor(
         } catch (e: HttpException) {
             Result.failure(e)
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    suspend fun registerUser( name: String,  username: String, birthdate: String, userId: String
+    ): Result<Unit> {
+        return try {
+            val registerUserDto = RegisterUserDto(name, username, birthdate)
+            userRemoteDataSource.registerUser(registerUserDto, userId)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Log.d("UserRepository", "registerUser: HttpException: ${e.message()}")
+            Result.failure(e)
+        } catch (e: Exception) {
+            Log.e("UserRepository", "registerUser: Exception: ${e.message}", e)
             Result.failure(e)
         }
     }

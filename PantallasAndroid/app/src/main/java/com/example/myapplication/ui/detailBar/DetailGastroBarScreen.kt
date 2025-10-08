@@ -35,7 +35,7 @@ fun DetailGastroBarScreen(
     onViewReviewsClick: (Int, String?) -> Unit // 👈 nuevo callback
 ) {
     DetailGastroBarBody(
-        gastroBarId = gastroBarId,
+        gastroBarId = gastroBarId.toString(),
         viewModel = viewModel,
         onViewReviewsClick = onViewReviewsClick
     )
@@ -43,7 +43,7 @@ fun DetailGastroBarScreen(
 
 @Composable
 fun DetailGastroBarBody(
-    gastroBarId: Int,
+    gastroBarId: String,
     modifier: Modifier = Modifier,
     viewModel: DetailGastroBarViewModel,
     onViewReviewsClick: (Int, String?) -> Unit // 👈 pasa al body
@@ -51,7 +51,7 @@ fun DetailGastroBarBody(
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(gastroBarId) {
-        viewModel.buscarGastro(gastroBarId)
+        viewModel.buscarGastro(gastroBarId.toInt())
     }
 
     state.gastroBar?.let { gastroBar ->
@@ -80,7 +80,7 @@ fun DetailGastroBarBody(
                 OutlinedButton(
                     onClick = {
                         // 👇 Navega a BarReviews con id y nombre
-                        onViewReviewsClick(gastroBar.id, gastroBar.name)
+                        onViewReviewsClick(gastroBar.id.toInt(), gastroBar.name)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {

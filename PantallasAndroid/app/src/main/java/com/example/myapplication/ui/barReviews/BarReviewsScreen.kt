@@ -18,10 +18,10 @@ import com.example.myapplication.utils.ReviewCard
 // -----------------------------------------------------------------------------
 @Composable
 fun BarReviewsScreen(
-    gastroBarId: Int,
+    gastroBarId: String,                      // ← String
     gastroBarName: String? = null,
-    onReviewClick: (Int) -> Unit,
-    onUserClick: (Int) -> Unit
+    onReviewClick: (String) -> Unit,          // ← String
+    onUserClick: (String) -> Unit             // ← String
 ) {
     BarReviewsBody(
         gastroBarId = gastroBarId,
@@ -31,20 +31,19 @@ fun BarReviewsScreen(
     )
 }
 
-// -----------------------------------------------------------------------------
-// BODY: maneja toda la lógica, estado, modifier y UI (similar al HomeScreen)
-// -----------------------------------------------------------------------------
 @Composable
 fun BarReviewsBody(
-    gastroBarId: Int,
+    gastroBarId: String,                      // ← String
     gastroBarName: String? = null,
-    onReviewClick: (Int) -> Unit,
-    onUserClick: (Int) -> Unit,
+    onReviewClick: (String) -> Unit,          // ← String
+    onUserClick: (String) -> Unit,            // ← String
     modifier: Modifier = Modifier,
     viewModel: BarReviewsViewModel = hiltViewModel()
 ) {
-    LaunchedEffect(gastroBarId) {
-        viewModel.load(gastroBarId, gastroBarName)
+    // Si tu VM aún recibe Int, convierte aquí:
+    LaunchedEffect(gastroBarId, gastroBarName) {
+        val idInt = gastroBarId.toIntOrNull() ?: 0
+        viewModel.load(idInt, gastroBarName)
     }
 
     val state by viewModel.uiState.collectAsState()
@@ -58,25 +57,20 @@ fun BarReviewsBody(
     ) {
         when {
             state.isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                CircularProgressIndicator(Modifier.align(Alignment.Center))
             }
-
             state.errorMessage != null -> {
                 Text(
                     text = state.errorMessage ?: "Error desconocido",
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-
             state.reviews.isEmpty() -> {
                 Text(
                     text = "Aún no hay reseñas para este lugar",
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-
             else -> {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -87,7 +81,10 @@ fun BarReviewsBody(
                             review = review,
                             modifier = Modifier.fillMaxWidth(),
                             onReviewClick = { onReviewClick(review.id) },
-                            onUserClick = { onUserClick(review.userId) }
+                            onUserClick = {
+                                // Navega solo si tenemos authorId
+                                review.userId?.let { onUserClick(it) }
+                            }
                         )
                     }
                 }
@@ -95,3 +92,4 @@ fun BarReviewsBody(
         }
     }
 }
+

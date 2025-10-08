@@ -59,14 +59,20 @@ class DetailGastroBarViewModel @Inject constructor(
                 val reviewsResult = reviewRepository.getReviews()
                 reviewsResult.onSuccess { allReviews ->
 
-                    // Filtrar reviews del bar por name
+                    // Reviews del bar por nombre
                     val barReviews = allReviews.filter { it.placeName == barName }
 
-                    // Para cada review, obtener sus replies desde el repository
-                    val reviewsWithReplies = barReviews.map { review ->
-                        val repliesResult = reviewRepository.getReviewsReplies(review.id)
-                        val replies = repliesResult.getOrElse { emptyList() }
-                        review.id to replies
+                    // 🔧 Convertimos el id (String) a Int de forma segura para ambos usos
+                    val reviewsWithReplies: List<Pair<Int, List<ReviewInfo>>> = barReviews.mapNotNull { review ->
+                        val reviewIdInt = review.id.toIntOrNull()
+                        if (reviewIdInt == null) {
+                            // Si no se puede convertir, lo saltamos (o podrías manejarlo distinto)
+                            null
+                        } else {
+                            val repliesResult = reviewRepository.getReviewsReplies(reviewIdInt)
+                            val replies = repliesResult.getOrElse { emptyList() }
+                            reviewIdInt to replies
+                        }
                     }
 
                     _uiState.update {
@@ -85,4 +91,5 @@ class DetailGastroBarViewModel @Inject constructor(
             }
         }
     }
+
 }

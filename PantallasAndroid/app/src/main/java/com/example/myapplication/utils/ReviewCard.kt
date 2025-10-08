@@ -28,8 +28,8 @@ fun ReviewCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onReviewClick(review.id) },
-        colors = CardDefaults.cardColors(
+            .clickable { onReviewClick(review.id.toInt()) },
+            colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(4.dp)
@@ -42,7 +42,7 @@ fun ReviewCard(
             ReviewCardHeader(
                 userImage = review.userImage,
                 userName = review.name,
-                onUserClick = { onUserClick(review.userId) }
+                onUserClick = { onUserClick(review.userId.toInt()) }
             )
            // 2️⃣ Nombre del lugar arriba de la imagen
             Text(

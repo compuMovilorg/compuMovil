@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.ReviewInfo
 import com.example.myapplication.data.repository.ReviewRepository
+import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BarReviewsViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
+    private val userRepository: UserRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 

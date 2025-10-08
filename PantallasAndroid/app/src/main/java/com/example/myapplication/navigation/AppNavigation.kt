@@ -62,7 +62,7 @@ sealed class Screen(val route: String) {
     object Create : Screen("create")
     object Events : Screen("events")
     object User : Screen("user/{userId}") {
-        fun createRoute(userId: Int) = "user/$userId"
+        fun createRoute(userId: String) = "user/$userId"
     }
 
     object Profile : Screen("profile")
@@ -70,7 +70,7 @@ sealed class Screen(val route: String) {
     object SettingsRoute : Screen("settings")
     object Notification : Screen("notification")
     object BarReviews : Screen("barReviews/{gastroBarId}?gastroBarName={gastroBarName}") {
-        fun createRoute(gastroBarId: Int, gastroBarName: String? = null) =
+        fun createRoute(gastroBarId: String, gastroBarName: String? = null) =
             "barReviews/$gastroBarId?gastroBarName=${gastroBarName ?: ""}"
     }
     object Splash : Screen("splash")
@@ -142,7 +142,7 @@ fun AppNavigation(
                 modifier = modifier,
                 viewModel = homeViewModel,
                 onReviewClick = { reviewId ->
-                    val review = uiState.value.reviews.find { it.id == reviewId }
+                    val review = uiState.value.reviews.find { it.id.toInt() == reviewId }
                     val gastroBar = review?.placeName?.let { placeName ->
                         LocalGastroBarProvider.gastroBars.find { it.name == placeName }
                     }
@@ -252,23 +252,29 @@ fun AppNavigation(
 
         composable(
             route = "detail/{gastroBarId}",
-            arguments = listOf(navArgument("gastroBarId") { type = NavType.IntType })
+            arguments = listOf(navArgument("gastroBarId") { type = NavType.StringType })
         ) {
             val detailViewModel: DetailGastroBarViewModel = hiltViewModel()
-            val gastroBarId = it.arguments?.getInt("gastroBarId") ?: 0
+            val gastroBarIdStr = it.arguments?.getString("gastroBarId") ?: ""
+
+            // Si tu VM/repo aún espera Int:
+            val gastroBarId = gastroBarIdStr.toIntOrNull() ?: 0
+
             DetailGastroBarScreen(
                 viewModel = detailViewModel,
                 gastroBarId = gastroBarId,
                 onViewReviewsClick = { id, name ->
-                    navController.navigate("barReviews/${id}?gastroBarName=${name}")
+                    // id aquí es Int; conviértelo:
+                    navController.navigate(Screen.BarReviews.createRoute(id.toString(), name))
                 }
             )
         }
 
+
         composable(
             route = Screen.BarReviews.route,
             arguments = listOf(
-                navArgument("gastroBarId") { type = NavType.IntType },
+                navArgument("gastroBarId") { type = NavType.StringType },
                 navArgument("gastroBarName") {
                     type = NavType.StringType
                     defaultValue = ""
@@ -277,23 +283,24 @@ fun AppNavigation(
             )
         ) { backStackEntry ->
             val barReviewsVM: BarReviewsViewModel = hiltViewModel(backStackEntry)
-            val gastroBarId = backStackEntry.arguments?.getInt("gastroBarId") ?: 0
+            val gastroBarIdStr = backStackEntry.arguments?.getString("gastroBarId") ?: ""
             val gastroBarName = backStackEntry.arguments?.getString("gastroBarName")
+
+            // Si tu VM espera Int:
+            val gastroBarId = gastroBarIdStr.toIntOrNull() ?: 0
 
             val state by barReviewsVM.uiState.collectAsState()
 
             BarReviewsScreen(
-                gastroBarId = gastroBarId,
+                gastroBarId = gastroBarId.toString(), // si la pantalla espera Int
                 gastroBarName = gastroBarName,
-                onReviewClick = { reviewId ->
-                    val review = state.reviews.find { it.id == reviewId }
-                    // navController.navigate("detail/${review?.gastroBarId ?: gastroBarId}")
-                },
-                onUserClick = { userId ->
-                    navController.navigate(Screen.User.createRoute(userId))
+                onReviewClick = { /* ... */ },
+                onUserClick = { userIdInt ->
+                    navController.navigate(Screen.User.createRoute(userIdInt))
                 }
             )
         }
+
 
         composable(
             route = "user/{userId}",

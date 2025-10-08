@@ -50,10 +50,10 @@ fun HomeScreen(
                 ) {
                     items(reviews) { review ->
                         ReviewCard(
-                            onReviewClick = { onReviewClick(review.id) },
+                            onReviewClick = { onReviewClick(review.id.toInt()) },
                             review = review,
                             modifier = Modifier.fillMaxWidth(),
-                            onUserClick = {onUserClick(review.userId)}
+                            onUserClick = {onUserClick(review.userId.toInt())}
                         )
                     }
                 }
