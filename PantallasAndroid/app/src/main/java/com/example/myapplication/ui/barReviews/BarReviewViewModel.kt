@@ -24,18 +24,20 @@ class BarReviewsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(BarReviewsState())
     val uiState: StateFlow<BarReviewsState> = _uiState
 
-    // Guardamos el ID actual para poder recargar
     private var currentGastroBarId: Int? = null
 
     init {
-        // Si navegas con: "barReviews/{gastroBarId}?gastroBarName={name}"
-        val idArg: Int? = savedStateHandle["gastroBarId"]
+        // Lee como String y convierte
+        val idStr: String? = savedStateHandle["gastroBarId"]
         val nameArg: String? = savedStateHandle["gastroBarName"]
-        if (idArg != null) {
+
+        val idArg = idStr?.toIntOrNull()
+        if (idArg == null) {
+            Log.e("BarReviewsVM", "Arg gastroBarId inválido: $idStr")
+            _uiState.update { it.copy(errorMessage = "GastroBar no especificado") }
+        } else {
             _uiState.update { it.copy(gastroBarId = idArg, gastroBarName = nameArg) }
             loadReviewsByBar(idArg)
-        } else {
-            _uiState.update { it.copy(errorMessage = "GastroBar no especificado") }
         }
     }
 

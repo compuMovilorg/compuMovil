@@ -7,5 +7,6 @@ data class RegisterState(
     val email: String = "",
     val password: String = "",
     val navigate: Boolean = false,
+    val isLoading: Boolean = false,
     val errorMessage: String? = null
 )

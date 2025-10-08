@@ -28,7 +28,7 @@ class UserRepository @Inject constructor(
     }
 
     // Obtener un usuario por ID
-    suspend fun getUserById(id: Int): Result<UserInfo> {
+    suspend fun getUserById(id: String): Result<UserInfo> {
         return try {
             val user = userRemoteDataSource.getUserById(id)
             Result.success(user.toUserInfo())
@@ -74,7 +74,7 @@ class UserRepository @Inject constructor(
     }
 
     // Crear/actualizar perfil del usuario logueado
-    suspend fun updateUserProfile(id: Int, profile: UserDtoGeneric): Result<Unit> {
+    suspend fun updateUserProfile(id: String, profile: UserDtoGeneric): Result<Unit> {
         return try {
             // Se asume que el data source maneja UserProfileDto igual que UserDto
             userRemoteDataSource.updateUser(id, profile) // revisar
@@ -87,7 +87,7 @@ class UserRepository @Inject constructor(
     }
 
     // Eliminar usuario
-    suspend fun deleteUser(id: Int): Result<Unit> {
+    suspend fun deleteUser(id: String): Result<Unit> {
         return try {
             userRemoteDataSource.deleteUser(id)
             Result.success(Unit)
