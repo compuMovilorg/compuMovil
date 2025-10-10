@@ -60,7 +60,7 @@ dependencies {
     implementation(libs.androidx.foundation)
     implementation(libs.ui)
     implementation(libs.runtime)
-
+    implementation(libs.androidx.compose.runtime)
 
 
     val nav_version = "2.7.2"

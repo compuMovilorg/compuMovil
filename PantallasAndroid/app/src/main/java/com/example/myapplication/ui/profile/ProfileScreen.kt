@@ -1,6 +1,8 @@
 package com.example.myapplication.ui.profile
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -16,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.utils.ProfileAsyncImage
 import com.example.myapplication.utils.SettingsOption
+import com.example.myapplication.utils.ReviewCard
 
 @Composable
 fun ProfileScreen(
@@ -23,37 +26,108 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     onConfiguracionClick: () -> Unit,
     onNotificationClick: () -> Unit,
-    onHistorialClick: () -> Unit,
+    onHistorialClick: (Int) -> Unit,
     onGuardadoClick: () -> Unit,
     onEditProfileClick: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    Column(
+    LazyColumn(
         modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(bottom = 24.dp)
     ) {
-        ProfileHeader(
-            userImageUrl = state.profilePicUrl,
-            modifier = Modifier.padding(top = 20.dp)
-        )
+        item {
+            ProfileHeader(
+                userImageUrl = state.profilePicUrl,
+                modifier = Modifier.padding(top = 20.dp)
+            )
+        }
 
-        Spacer(modifier = Modifier.padding(bottom = 8.dp))
 
-        ProfileDetails(
-            userName = state.userName,
-            userEmail = state.userEmail,
-            onEditProfileClick = onEditProfileClick
-        )
+        item { Spacer(modifier = Modifier.height(8.dp)) }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        item {
+            ProfileDetails(
+                userName = state.userName,
+                userEmail = state.userEmail,
+                onEditProfileClick = onEditProfileClick
+            )
+        }
 
-        ProfileMenu(
-            onHistorialClick = onHistorialClick,
-            onGuardadoClick = onGuardadoClick,
-            onNotificationClick = onNotificationClick,
-            onConfiguracionClick = onConfiguracionClick
-        )
+        item { Spacer(modifier = Modifier.height(8.dp)) }
+
+        item {
+            ProfileMenu(
+                modifier = Modifier.fillMaxWidth(),
+                onHistorialClick = {
+                    state.userId?.let(onHistorialClick)
+                },
+                onGuardadoClick = onGuardadoClick,
+                onNotificationClick = onNotificationClick,
+                onConfiguracionClick = onConfiguracionClick
+            )
+        }
+
+        item {
+            Divider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp))
+        }
+
+        item {
+            ProfileReviewsHeader()
+        }
+
+        when {
+            state.isLoadingReviews -> {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+
+            state.reviewsError != null -> {
+                item {
+                    Text(
+                        text = state.reviewsError ?: "",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                    )
+                }
+            }
+
+            state.reviews.isEmpty() -> {
+                item {
+                    Text(
+                        text = "Aún no has publicado reseñas.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                    )
+                }
+            }
+
+            else -> {
+                items(state.reviews, key = { it.id }) { review ->
+                    ReviewCard(
+                        onReviewClick = {},
+                        onUserClick = {},
+                        review = review,
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp, vertical = 8.dp)
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -150,9 +224,25 @@ fun ProfileScreenPreview() {
             modifier = Modifier.fillMaxSize(),
             onConfiguracionClick = {},
             onNotificationClick = {},
-            onHistorialClick = {},
+            onHistorialClick = { _ -> },
             onGuardadoClick = {},
             onEditProfileClick = {}
         )
+    }
+}
+
+@Composable
+fun ProfileReviewsHeader(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = "Historial de reseñas",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }

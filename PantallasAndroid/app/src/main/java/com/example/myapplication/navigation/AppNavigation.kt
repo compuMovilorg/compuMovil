@@ -50,6 +50,7 @@ import com.example.myapplication.ui.settings.SettingsViewModel
 import com.example.myapplication.ui.start.StartScreen
 import com.example.myapplication.ui.user.UserScreen
 import com.example.myapplication.ui.user.UserViewModel
+import java.nio.file.WatchEvent
 
 sealed class Screen(val route: String) {
     object StartRoute : Screen("start")
@@ -78,7 +79,7 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppNavigation(
-    modifier: Modifier = Modifier,
+    modifier: WatchEvent.Modifier = Modifier,
     navController: NavHostController
 ) {
     NavHost(
@@ -216,7 +217,9 @@ fun AppNavigation(
                 viewModel = profileViewModel,
                 onConfiguracionClick = { navController.navigate(Screen.SettingsRoute.route) },
                 onNotificationClick = { navController.navigate(Screen.Notification.route) },
-                onHistorialClick = { },
+                onHistorialClick = { userId ->
+                    navController.navigate(Screen.User.createRoute(userId))
+                },
                 onGuardadoClick = { },
                 onEditProfileClick = { navController.navigate(Screen.EditProfile.route) }
             )
