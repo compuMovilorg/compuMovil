@@ -79,7 +79,7 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppNavigation(
-    modifier: WatchEvent.Modifier = Modifier,
+    modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
     NavHost(

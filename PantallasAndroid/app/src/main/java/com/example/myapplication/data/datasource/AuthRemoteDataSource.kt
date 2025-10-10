@@ -10,7 +10,8 @@ import kotlinx.coroutines.tasks.await
 class AuthRemoteDataSource @Inject constructor(
     private val auth: FirebaseAuth
 ) {
-    val currentUser: FirebaseUser?= auth.currentUser
+    val currentUser: FirebaseUser?
+        get() = auth.currentUser
 
     suspend fun login(email: String, password: String):Unit {
         auth.signInWithEmailAndPassword(email, password).await()

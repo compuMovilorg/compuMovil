@@ -42,7 +42,7 @@ fun NoctaApp(
             if (NavigationLogic.shouldShowBottomBar(currentRoute)) {
                 NoctaBottomNavigationBar(
                     navController = navController,
-                    currentUserId = userState.value.user?.id ?: 0 // ✅ acceso correcto
+                    currentUserId = userState.value.user?.id ?: 0
                 )
             }
         }
