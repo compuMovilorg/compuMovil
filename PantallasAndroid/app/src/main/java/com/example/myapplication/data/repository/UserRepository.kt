@@ -4,14 +4,16 @@ import android.util.Log
 import retrofit2.HttpException
 import com.example.myapplication.data.UserInfo
 import com.example.myapplication.data.datasource.impl.UserRetrofitDataSourceImpl
-import com.example.myapplication.data.datasource.impl.firestore.userFirestoreDataSourceImpl
+import com.example.myapplication.data.datasource.impl.firestore.UserFirestoreDataSourceImpl
 import com.example.myapplication.data.dtos.RegisterUserDto
 import com.example.myapplication.data.dtos.UserDtoGeneric
 import javax.inject.Inject
 import kotlin.math.log
 
+private const val TAG = "UserRepository"
+
 class UserRepository @Inject constructor(
-    private val userRemoteDataSource: userFirestoreDataSourceImpl
+    private val userRemoteDataSource: UserFirestoreDataSourceImpl
 ) {
 
     // Obtener todos los usuarios (lista general)
@@ -51,7 +53,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    // 🔹 Buscar por firebaseUid (mismo patrón de try/catch que el resto)
+    // 🔹 Buscar por firebaseUid
     suspend fun getUserByFirebaseUid(firebaseUid: String): Result<UserInfo> {
         return try {
             val user = userRemoteDataSource.getUserByFirebaseUid(firebaseUid)
@@ -97,18 +99,32 @@ class UserRepository @Inject constructor(
             Result.failure(e)
         }
     }
-    suspend fun registerUser( name: String,  username: String, birthdate: String, userId: String
-    ): Result<Unit> {
-        return try {
-            val registerUserDto = RegisterUserDto(name, username, birthdate)
-            userRemoteDataSource.registerUser(registerUserDto, userId)
-            Result.success(Unit)
-        } catch (e: HttpException) {
-            Log.d("UserRepository", "registerUser: HttpException: ${e.message()}")
-            Result.failure(e)
-        } catch (e: Exception) {
-            Log.e("UserRepository", "registerUser: Exception: ${e.message}", e)
-            Result.failure(e)
-        }
+    suspend fun registerUser(
+        name: String,
+        username: String,
+        birthdate: String,
+        userId: String
+    ): Result<Unit> = runCatching {
+        Log.d(TAG, "registerUser(params) -> name='$name', username='$username', birthdate='$birthdate', uid='$userId'")
+
+        require(userId.isNotBlank()) { "UID de Firebase vacío" }
+        require(!userId.contains("@")) { "UID inválido (parece un email): $userId" }
+
+        val dto = RegisterUserDto(
+            name = name.trim(),
+            username = username.trim(),
+            birthdate = birthdate.trim()
+        )
+
+        Log.d(TAG, "registerUser(dto) -> $dto")
+
+        userRemoteDataSource.registerUser(dto, userId)
+
+        Log.d(TAG, "registerUser: saved OK at users/$userId")
+
+        // 👇 Fuerza que el bloque retorne Unit (no Int)
+        Unit
+    }.onFailure { e ->
+        Log.e(TAG, "registerUser error: ${e.javaClass.simpleName}: ${e.message}", e)
     }
 }

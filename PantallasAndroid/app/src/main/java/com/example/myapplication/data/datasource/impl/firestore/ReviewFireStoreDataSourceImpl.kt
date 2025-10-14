@@ -1,5 +1,6 @@
 package com.example.myapplication.data.datasource.impl.firestore
 
+import android.util.Log
 import com.example.myapplication.data.datasource.ReviewRemoteDataSource
 import com.example.myapplication.data.dtos.CreateReviewDto
 import com.example.myapplication.data.dtos.ReviewDto

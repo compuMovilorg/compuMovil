@@ -5,34 +5,43 @@ import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.UserRepository
 import javax.inject.Inject
 
+private const val TAG = "CurrentUserProvider"
+
 class FirebaseCurrentUserProvider @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository
 ) : CurrentUserProvider {
+    override suspend fun currentUserId(): String? {
+        TODO("Not yet implemented")
+    }
 
-    override suspend fun currentUserId(): Int? {
+    override suspend fun currentFirebaseUid(): String? {
+        val uid = authRepository.currentUser?.uid
+        Log.d(TAG, "currentFirebaseUid -> $uid")
+        return uid
+    }
+
+    override suspend fun currentBackendUserId(): String? {
         val fbUser = authRepository.currentUser ?: return null
-
         val uid = fbUser.uid
         val email = fbUser.email
 
-        // 1) Intentar por UID
+        // 1) Buscar por UID
         userRepository.getUserByFirebaseUid(uid).fold(
-            onSuccess = { return it.id.toInt() },
-            onFailure = { Log.d("CurrentUserProvider", "No mapeado por uid=$uid") }
+            onSuccess = { return it.id },
+            onFailure = { Log.d(TAG, "No mapeado por uid=$uid: ${it.message}") }
         )
 
-        // 2) Intentar por email (si existe)
+        // 2) Fallback por email
         if (!email.isNullOrBlank()) {
             userRepository.getUserByEmail(email).fold(
-                onSuccess = { return it.id.toInt() },
-                onFailure = { Log.d("CurrentUserProvider", "No mapeado por email=$email") }
+                onSuccess = { return it.id },
+                onFailure = { Log.d(TAG, "No mapeado por email=$email: ${it.message}") }
             )
         }
 
-        // 3) No crear ni registrar: falla explícita
-        throw IllegalStateException(
-            "Usuario autenticado en Firebase pero no existe en el backend (uid=$uid, email=$email)"
-        )
+        // 3) No reventar la app; simplemente no está mapeado
+        Log.w(TAG, "Firebase autenticado pero sin mapping backend (uid=$uid, email=$email)")
+        return null
     }
 }

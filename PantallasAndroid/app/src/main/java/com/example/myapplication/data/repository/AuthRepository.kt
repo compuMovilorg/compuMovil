@@ -3,49 +3,31 @@ package com.example.myapplication.data.repository
 import com.example.myapplication.data.datasource.AuthRemoteDataSource
 import com.google.firebase.auth.FirebaseUser
 import javax.inject.Inject
+import kotlinx.coroutines.withTimeout
 
 class AuthRepository @Inject constructor(
-    private val authRemoteDataSource: AuthRemoteDataSource,
-    private val userRepository: UserRepository // <-- INYECTA
+    private val authRemoteDataSource: AuthRemoteDataSource
 ) {
     val currentUser: FirebaseUser?
         get() = authRemoteDataSource.currentUser
 
-    suspend fun login(email: String, password: String): Result<Unit> {
-        return try {
+    /** Inicia sesión. NO escribe perfil. */
+    suspend fun login(email: String, password: String): Result<Unit> = runCatching {
+        withTimeout(15_000) {
             authRemoteDataSource.login(email, password)
-            // Upsert del perfil en Firestore con los datos mínimos que tengas
-            val uid = currentUser?.uid ?: return Result.failure(IllegalStateException("Auth ok pero sin currentUser"))
-            // Coloca aquí los campos que quieras guardar (puedes pedirlos a la UI)
-            userRepository.registerUser(
-                name = currentUser?.displayName ?: "",
-                username = email.substringBefore("@"),
-                birthdate = "", // si lo tienes
-                userId = uid // MUY IMPORTANTE: usar uid
-            ).getOrThrow()
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+        }
+        Unit
+    }
+
+    /**
+     * Registra al usuario y devuelve el UID NUEVO.
+     * NO escribe perfil; el ViewModel decide cuándo/qué guardar en Firestore.
+     */
+    suspend fun register(email: String, password: String): Result<String> = runCatching {
+        withTimeout(15_000) {
+            authRemoteDataSource.register(email, password) // ← devuelve UID
         }
     }
 
-    suspend fun register(email: String, password: String): Result<Unit> {
-        return try {
-            authRemoteDataSource.register(email, password)
-            val uid = currentUser?.uid ?: return Result.failure(IllegalStateException("Auth ok pero sin currentUser"))
-            userRepository.registerUser(
-                name = currentUser?.displayName ?: "",
-                username = email.substringBefore("@"),
-                birthdate = "",
-                userId = uid
-            ).getOrThrow()
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    fun logout() {
-        authRemoteDataSource.logout()
-    }
+    fun logout() = authRemoteDataSource.logout()
 }
