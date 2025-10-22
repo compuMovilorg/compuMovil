@@ -3,15 +3,21 @@ package com.example.myapplication.data.repository
 import android.util.Log
 import retrofit2.HttpException
 import com.example.myapplication.data.ReviewInfo
-import com.example.myapplication.data.datasource.impl.ReviewRetrofitDataSourceImpl
+import com.example.myapplication.data.datasource.UserRemoteDataSource
 import com.example.myapplication.data.datasource.impl.firestore.ReviewFireStoreDataSourceImpl
+import com.example.myapplication.data.datasource.impl.firestore.UserFirestoreDataSourceImpl
 import com.example.myapplication.data.dtos.CreateReviewDto
+import com.example.myapplication.data.dtos.CreateReviewUserDto
+import com.example.myapplication.data.dtos.UserDtoGeneric
+import com.example.myapplication.data.dtos.UserProfileDto
 import com.example.myapplication.data.dtos.toReviewInfo
 import javax.inject.Inject
 
 class ReviewRepository @Inject constructor(
-    private val reviewRemoteDataSource: ReviewFireStoreDataSourceImpl
+    private val reviewRemoteDataSource: ReviewFireStoreDataSourceImpl,
+    private val userRemoteDataSource: UserFirestoreDataSourceImpl,
 ) {
+
     suspend fun getReviews(): Result<List<ReviewInfo>> {
         return try {
             val reviews = reviewRemoteDataSource.getAllReviews()
@@ -24,7 +30,7 @@ class ReviewRepository @Inject constructor(
         }
     }
 
-    suspend fun getReviewById(id: Int): Result<ReviewInfo> {
+    suspend fun getReviewById(id: String): Result<ReviewInfo> {
         return try {
             val review = reviewRemoteDataSource.getReviewById(id)
             Result.success(review.toReviewInfo())
@@ -35,7 +41,7 @@ class ReviewRepository @Inject constructor(
         }
     }
 
-    suspend fun getReviewsReplies(id: Int): Result<List<ReviewInfo>> {
+    suspend fun getReviewsReplies(id: String): Result<List<ReviewInfo>> {
         return try {
             val reviews = reviewRemoteDataSource.getReviewsReplies(id)
             val reviewsInfo = reviews.map { it.toReviewInfo() }
@@ -47,10 +53,11 @@ class ReviewRepository @Inject constructor(
         }
     }
 
-    suspend fun getReviewsByUser(userId: Int): Result<List<ReviewInfo>> {
+    suspend fun getReviewsByUser(userId: String): Result<List<ReviewInfo>> {
         return try {
             val reviews = reviewRemoteDataSource.getReviewsByUser(userId)
             val reviewsInfo = reviews.map { it.toReviewInfo() }
+
             Log.d("ReviewRepository", "✅ Se obtuvieron ${reviewsInfo.size} reseñas del usuario $userId")
             Result.success(reviewsInfo)
         } catch (e: HttpException) {
@@ -61,31 +68,50 @@ class ReviewRepository @Inject constructor(
             Result.failure(e)
         }
     }
-    suspend fun getReviewsByGastroBar(gastroBarId: Int): Result<List<ReviewInfo>> {
+
+    suspend fun getReviewsByGastroBar(gastroBarId: String): Result<List<ReviewInfo>> {
         return try {
             val reviews = reviewRemoteDataSource.getReviewsByGastroBar(gastroBarId)
             val reviewsInfo = reviews.map { it.toReviewInfo() }
 
-            Log.d("ReviewRepository", "Se obtuvieron ${reviewsInfo.size} reseñas del gastrobar $gastroBarId")
-
+            Log.d("ReviewRepository", "✅ Se obtuvieron ${reviewsInfo.size} reseñas del gastrobar $gastroBarId")
             Result.success(reviewsInfo)
         } catch (e: HttpException) {
-            Log.e("ReviewRepository", "HttpException ${e.code()} - ${e.message()}", e)
+            Log.e("ReviewRepository", "❌ HttpException ${e.code()} - ${e.message()}", e)
             Result.failure(e)
         } catch (e: Exception) {
-            Log.e("ReviewRepository", "Exception general en getReviewsByGastroBar: ${e.message}", e)
+            Log.e("ReviewRepository", "❌ Exception general en getReviewsByGastroBar: ${e.message}", e)
             Result.failure(e)
         }
     }
 
     suspend fun createReview(
-        userId: Int,
+        userId: String,
         placeName: String,
         reviewText: String,
-        parentReviewId: Int? = null
+        parentReviewId: String? = null
     ): Result<Unit> {
         return try {
-            val createReviewDto = CreateReviewDto(userId, placeName, reviewText, parentReviewId)
+            // Llamada a la instancia (no a la interfaz)
+            val userDto: UserDtoGeneric = userRemoteDataSource.getUserById(userId)
+
+            // Mapea al DTO que espera CreateReviewDto (UserProfileDto)
+            val userProfile = UserProfileDto(
+                id = userDto.id,
+                username = userDto.username,
+                name = userDto.name,
+                profileImage = userDto.profileImage
+            )
+
+            val createReviewDto = CreateReviewDto(
+                userId = userId,
+                placeName = placeName,
+                reviewText = reviewText,
+                parentReviewId = parentReviewId,
+                placeImage = null,
+                user = userProfile
+            )
+
             reviewRemoteDataSource.createReview(createReviewDto)
             Result.success(Unit)
         } catch (e: Exception) {
@@ -93,7 +119,9 @@ class ReviewRepository @Inject constructor(
         }
     }
 
-    suspend fun updateReview(id: Int, review: CreateReviewDto): Result<Unit> {
+
+
+    suspend fun updateReview(id: String, review: CreateReviewDto): Result<Unit> {
         return try {
             reviewRemoteDataSource.updateReview(id, review)
             Result.success(Unit)
@@ -104,7 +132,7 @@ class ReviewRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteReview(id: Int): Result<Unit> {
+    suspend fun deleteReview(id: String): Result<Unit> {
         return try {
             reviewRemoteDataSource.deleteReview(id)
             Result.success(Unit)

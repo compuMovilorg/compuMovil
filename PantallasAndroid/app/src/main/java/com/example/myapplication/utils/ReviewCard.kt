@@ -17,19 +17,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.myapplication.data.ReviewInfo
+import android.util.Log
 
 @Composable
 fun ReviewCard(
-    onReviewClick: (Int) -> Unit,
-    onUserClick: (Int) -> Unit,
+    onReviewClick: (String) -> Unit, // ahora recibe String
+    onUserClick: (String) -> Unit,   // ahora recibe String (userId)
     review: ReviewInfo,
     modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onReviewClick(review.id.toInt()) },
-            colors = CardDefaults.cardColors(
+            .clickable {
+                val id = review.id
+                if (!id.isNullOrBlank()) {
+                    onReviewClick(id)
+                } else {
+                    Log.w("ReviewCard", "Review id vacío o nulo, click ignorado")
+                }
+            },
+        colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(4.dp)
@@ -42,17 +50,25 @@ fun ReviewCard(
             ReviewCardHeader(
                 userImage = review.userImage,
                 userName = review.name,
-                onUserClick = { onUserClick(review.userId.toInt()) }
+                onUserClick = {
+                    val userId = review.userId
+                    if (!userId.isNullOrBlank()) {
+                        onUserClick(userId)
+                    } else {
+                        Log.w("ReviewCard", "User id vacío o nulo, click ignorado")
+                    }
+                }
             )
-           // 2️⃣ Nombre del lugar arriba de la imagen
+
+            // 2️⃣ Nombre del lugar arriba de la imagen
             Text(
-                text = review.placeName,
+                text = review.placeName ?: "",
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
             )
 
             // 3️⃣ Imagen del lugar
             AsyncImage(
-                model = review.placeImage,
+                model = review.placeImage ?: "",
                 contentDescription = "Imagen del lugar",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -62,7 +78,7 @@ fun ReviewCard(
             )
 
             // 4️⃣ Texto de la reseña
-            ReviewCardBody(review.reviewText)
+            ReviewCardBody(review.reviewText ?: "")
 
             // 5️⃣ Footer
             ReviewCardFooter(
@@ -86,7 +102,7 @@ fun ReviewCardHeader(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onUserClick() } // 👈 acción de clic
+            .clickable { onUserClick() } // acción de clic
             .padding(vertical = 4.dp)
     ) {
         ProfileAsyncImage(
@@ -100,7 +116,6 @@ fun ReviewCardHeader(
         )
     }
 }
-
 
 @Composable
 fun ReviewCardBody(reviewText: String) {
@@ -141,50 +156,28 @@ fun ReviewCardFooter(
         }
     }
 }
-//@Preview(showBackground = true)
-//@Composable
-//fun ReviewCardHeaderPreview() {
-//    ReviewCardHeader(
-//        userImage = "",
-//        userName = "Carlos Perez",
-//    )
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun ReviewCardFooterPreview() {
-//    ReviewCardFooter(
-//        likes = 120,
-//        comments = 45,
-//        onLikeClick = {},
-//        onCommentClick = {},
-//        onShareClick = {}
-//    )
-//}
 
-//@Preview(showBackground = true)
-//@Composable
-//fun ReviewCardBodyPreview() {
-//    ReviewCardBody(reviewText = "Un lugar muy acogedor con excelente café y atención al cliente.")
-//}
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewReviewCard() {
-//    val review = ReviewInfo(
-//        userImage = "",
-//        placeImage = "",
-//        id = 1,
-//        name = "Carlos Perez",
-//        placeName = "Café del Parque",
-//        reviewText = "Un lugar muy acogedor con excelente café y atención al cliente.",
-//        likes = 120,
-//        comments = 45,
-//        //gastroBarId = 1
-//    )
-//    ReviewCard(
-//        review = review,
-//        onReviewClick = {},
-//        modifier = Modifier
-//    )
-//}
+/*
+Previews (actualiza ReviewInfo según tu modelo real si lo usas)
+@Preview(showBackground = true)
+@Composable
+fun PreviewReviewCard() {
+    val review = ReviewInfo(
+        id = "abc123",
+        userId = "user123",
+        userImage = "",
+        placeImage = "",
+        name = "Carlos Perez",
+        placeName = "Café del Parque",
+        reviewText = "Un lugar muy acogedor con excelente café y atención al cliente.",
+        likes = 120,
+        comments = 45
+    )
+    ReviewCard(
+        review = review,
+        onReviewClick = {},
+        onUserClick = {},
+        modifier = Modifier.padding(8.dp)
+    )
+}
+*/

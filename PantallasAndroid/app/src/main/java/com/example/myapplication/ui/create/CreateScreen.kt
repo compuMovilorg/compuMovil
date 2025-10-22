@@ -38,13 +38,13 @@ fun CreateScreen(
     CreateScreenBody(
         state = state,
         onPlaceNameChange = viewModel::onPlaceNameChanged,
-        // ⬇️ ahora el callback acepta (id, name) y casa con tu VM
+        // ahora el callback acepta (id: String, name: String)
         onSelectGastroBar = viewModel::onSelectGastroBar,
         onReviewTextChange = viewModel::onReviewTextChanged,
         onRatingChange = viewModel::onRatingChanged,
         onAddImage = { viewModel.onAddImage() },
         onToggleTag = viewModel::onToggleTag,
-        onSaveClick = onSaveClick,
+        onSaveClick = { viewModel.createReview() },
         modifier = modifier
     )
 }
@@ -53,7 +53,7 @@ fun CreateScreen(
 fun CreateScreenBody(
     state: CreateState,
     onPlaceNameChange: (String) -> Unit,
-    onSelectGastroBar: (Int, String) -> Unit,
+    onSelectGastroBar: (String, String) -> Unit, // <-- String, String
     onReviewTextChange: (String) -> Unit,
     onRatingChange: (Float) -> Unit,
     onAddImage: () -> Unit,
@@ -69,16 +69,15 @@ fun CreateScreenBody(
         verticalArrangement = Arrangement.Top
     ) {
 
-        // ─────────────────────────────────────────────────────────────────────
         // Nombre del lugar -> AUTOCOMPLETE con Picker
-        // ─────────────────────────────────────────────────────────────────────
         GastroBarPicker(
-            items = state.gastrobares,                  // List<GastroBar> o tu tipo equivalente
+            items = state.gastrobares,                  // List<GastroBar>
             value = state.placeName,
             onValueChange = onPlaceNameChange,
             onSelect = { selected ->
-                // ✅ Llamamos al VM con (id, name). El VM setea también placeName.
-                onSelectGastroBar(selected.id.toInt(), selected.name)
+                // Llamamos al VM con (id: String, name: String).
+                // Asegúrate que selected.id es String en tu modelo GastroBar.
+                onSelectGastroBar(selected.id, selected.name ?: "")
             },
             isLoading = state.isLoadingGastrobares,
             label = "Nombre del lugar",

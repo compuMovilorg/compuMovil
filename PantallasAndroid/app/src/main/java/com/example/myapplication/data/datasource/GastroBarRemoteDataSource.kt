@@ -5,8 +5,8 @@ import com.example.myapplication.data.dtos.GastroBarDto
 
 interface GastroBarRemoteDataSource {
     suspend fun getAllGastroBares(): List<GastroBarDto>
-    suspend fun getGastroBarById(id: Int): GastroBarDto
+    suspend fun getGastroBarById(id: String): GastroBarDto
     suspend fun createGastroBar(gastrobar: CreateGastroBarDto)
-    suspend fun updateGastroBar(id: Int, gastrobar: CreateGastroBarDto)
-    suspend fun deleteGastroBar(id: Int)
+    suspend fun updateGastroBar(id: String, gastrobar: CreateGastroBarDto)
+    suspend fun deleteGastroBar(id: String)
 }

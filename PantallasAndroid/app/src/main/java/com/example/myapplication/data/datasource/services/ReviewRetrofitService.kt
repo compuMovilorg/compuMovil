@@ -9,29 +9,29 @@ interface ReviewRetrofitService {
     suspend fun getAllReviews(): List<ReviewDto>
 
     @GET("reviews/{id}")
-    suspend fun getReviewById(@Path("id") id: Int): ReviewDto
+    suspend fun getReviewById(@Path("id") id: String): ReviewDto
 
     @POST("reviews")
     suspend fun createReview(@Body review: CreateReviewDto): ReviewDto
 
     @PUT("reviews/{id}")
     suspend fun updateReview(
-        @Path("id") id: Int,
+        @Path("id") id: String,
         @Body review: CreateReviewDto
     ): ReviewDto
 
     @DELETE("reviews/{id}")
-    suspend fun deleteReview(@Path("id") id: Int)
+    suspend fun deleteReview(@Path("id") id: String)
 
     @GET("reviews/{id}/replies")
-    suspend fun getReviewsReplies(@Path("id") id: Int): List<ReviewDto>
+    suspend fun getReviewsReplies(@Path("id") id: String): List<ReviewDto>
 
     @GET("reviews/user/{userId}")
-    suspend fun getReviewsByUser(@Path("userId") userId: Int): List<ReviewDto>
+    suspend fun getReviewsByUser(@Path("userId") userId: String): List<ReviewDto>
 
     @GET("reviews/gastrobar/{gastroBarId}")
     suspend fun getReviewsByGastroBar(
-        @Path("gastroBarId") gastroBarId: Int
+        @Path("gastroBarId") gastroBarId: String
     ): List<ReviewDto>
 
 }

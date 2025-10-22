@@ -5,11 +5,12 @@ import com.example.myapplication.data.dtos.CreateGastroBarDto
 import com.example.myapplication.data.dtos.GastroBarDto
 import com.example.myapplication.data.dtos.toGastroBarInfo
 import com.example.myapplication.data.GastroBar
+import com.example.myapplication.data.datasource.impl.firestore.GastroBarFireStoreDataSourceImpl
 import retrofit2.HttpException
 import javax.inject.Inject
 
 class GastroBarRepository @Inject constructor(
-    private val gastroBarRemoteDataSource: GastroBarRetrofitDataSourceImpl
+    private val gastroBarRemoteDataSource: GastroBarFireStoreDataSourceImpl
 ) {
     suspend fun getGastroBares(): Result<List<GastroBar>> {
         return try {
@@ -23,7 +24,7 @@ class GastroBarRepository @Inject constructor(
         }
     }
 
-    suspend fun getGastroBarById(id: Int): Result<GastroBar> {
+    suspend fun getGastroBarById(id: String): Result<GastroBar> {
         return try {
             val gastrobar = gastroBarRemoteDataSource.getGastroBarById(id)
             Result.success(gastrobar.toGastroBarInfo())
@@ -43,7 +44,7 @@ class GastroBarRepository @Inject constructor(
         hours: String?,
         cuisine: String?,
         description: String?,
-        reviewId: Int?
+        reviewId: String?
     ): Result<Unit> {
         return try {
             val dto = CreateGastroBarDto(
@@ -64,7 +65,7 @@ class GastroBarRepository @Inject constructor(
         }
     }
 
-    suspend fun updateGastroBar(id: Int, dto: CreateGastroBarDto): Result<Unit> {
+    suspend fun updateGastroBar(id: String, dto: CreateGastroBarDto): Result<Unit> {
         return try {
             gastroBarRemoteDataSource.updateGastroBar(id, dto)
             Result.success(Unit)
@@ -75,7 +76,7 @@ class GastroBarRepository @Inject constructor(
         }
     }
 
-    suspend fun deleteGastroBar(id: Int): Result<Unit> {
+    suspend fun deleteGastroBar(id: String): Result<Unit> {
         return try {
             gastroBarRemoteDataSource.deleteGastroBar(id)
             Result.success(Unit)

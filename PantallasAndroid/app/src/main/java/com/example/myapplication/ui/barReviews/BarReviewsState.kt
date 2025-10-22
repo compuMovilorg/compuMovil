@@ -3,7 +3,7 @@ package com.example.myapplication.ui.barReviews
 import com.example.myapplication.data.ReviewInfo
 
 data class BarReviewsState(
-    val gastroBarId: Int? = null,
+    val gastroBarId: String? = null,
     val gastroBarName: String? = null,
 
     val searchQuery: String = "",

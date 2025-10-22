@@ -7,13 +7,14 @@ import com.example.myapplication.data.dtos.ReviewDto
 import javax.inject.Inject
 
 class ReviewRetrofitDataSourceImpl @Inject constructor(
-    val service: ReviewRetrofitService
-)  : ReviewRemoteDataSource {
+    private val service: ReviewRetrofitService
+) : ReviewRemoteDataSource {
+
     override suspend fun getAllReviews(): List<ReviewDto> {
         return service.getAllReviews()
     }
 
-    override suspend fun getReviewById(id: Int): ReviewDto {
+    override suspend fun getReviewById(id: String): ReviewDto {
         return service.getReviewById(id)
     }
 
@@ -21,26 +22,26 @@ class ReviewRetrofitDataSourceImpl @Inject constructor(
         service.createReview(review)
     }
 
-    override suspend fun deleteReview(id: Int) {
-       service.deleteReview(id)
+    override suspend fun deleteReview(id: String) {
+        service.deleteReview(id)
     }
 
     override suspend fun updateReview(
-        id: Int,
+        id: String,
         review: CreateReviewDto
     ) {
         service.updateReview(id, review)
     }
 
-    override suspend fun getReviewsReplies(id: Int): List<ReviewDto> {
+    override suspend fun getReviewsReplies(id: String): List<ReviewDto> {
         return service.getReviewsReplies(id)
     }
 
-    override suspend fun getReviewsByUser(userId: Int): List<ReviewDto> {
+    override suspend fun getReviewsByUser(userId: String): List<ReviewDto> {
         return service.getReviewsByUser(userId)
     }
 
-    override suspend fun getReviewsByGastroBar(gastroBarId: Int): List<ReviewDto> {
+    override suspend fun getReviewsByGastroBar(gastroBarId: String): List<ReviewDto> {
         return service.getReviewsByGastroBar(gastroBarId)
     }
 }

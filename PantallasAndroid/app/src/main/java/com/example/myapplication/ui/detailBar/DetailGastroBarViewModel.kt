@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.detailBar
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.ReviewInfo
@@ -21,32 +22,27 @@ class DetailGastroBarViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(DetailGastroBarUiState())
     val uiState: StateFlow<DetailGastroBarUiState> = _uiState
 
-    init {
-        loadFirstGastroBar()
-    }
+    // ✅ Quitamos el init que cargaba un bar arbitrario
+    // init { loadFirstGastroBar() }
 
-    private fun loadFirstGastroBar() {
+    fun loadGastroBarAndReviews(gastroBarId: String) {
         viewModelScope.launch {
+            Log.d("DetailVM", "Cargando información del gastrobar con id: $gastroBarId")
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            val result = gastroBarRepository.getGastroBares()
-            result.onSuccess { bars ->
-                val firstBar = bars.firstOrNull()
-                _uiState.update { it.copy(gastroBar = firstBar, isLoading = false) }
-                firstBar?.name?.let { loadReviews(it) } // usamos name para filtrar reviews
-            }.onFailure { throwable ->
-                _uiState.update { it.copy(errorMessage = throwable.toString(), isLoading = false) }
-            }
-        }
-    }
 
-    fun buscarGastro(gastroBarId: Int) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             val result = gastroBarRepository.getGastroBarById(gastroBarId)
             result.onSuccess { gastroBar ->
+                Log.d("DetailVM", "Gastrobar obtenido: ${gastroBar.name}")
                 _uiState.update { it.copy(gastroBar = gastroBar, isLoading = false) }
-                gastroBar.name?.let { loadReviews(it) } // usamos name para filtrar reviews
+
+                gastroBar.name?.let {
+                    Log.d("DetailVM", "Cargando reseñas del gastrobar: $it")
+                    loadReviews(it)
+                } ?: run {
+                    Log.e("DetailVM", "El gastrobar no tiene nombre. No se pueden cargar reseñas.")
+                }
             }.onFailure { throwable ->
+                Log.e("DetailVM", "Error al obtener gastrobar: ${throwable.message}")
                 _uiState.update { it.copy(errorMessage = throwable.toString(), isLoading = false) }
             }
         }
@@ -55,23 +51,37 @@ class DetailGastroBarViewModel @Inject constructor(
     private fun loadReviews(barName: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            fun normalize(s: String?): String {
+                return s?.trim()?.lowercase()?.replace(Regex("\\s+"), " ") ?: ""
+            }
+
+            val target = normalize(barName)
+            Log.d("DetailVM", "Normalizando nombre de bar: '$barName' → '$target'")
+
             try {
                 val reviewsResult = reviewRepository.getReviews()
                 reviewsResult.onSuccess { allReviews ->
+                    Log.d("DetailVM", "Total de reseñas obtenidas: ${allReviews.size}")
 
-                    // Reviews del bar por nombre
-                    val barReviews = allReviews.filter { it.placeName == barName }
+                    val barReviews = allReviews.filter { review ->
+                        val reviewPlace = normalize(review.placeName)
+                        reviewPlace == target ||
+                                reviewPlace.contains(target) ||
+                                (target.contains(reviewPlace) && reviewPlace.length >= 3)
+                    }
 
-                    // 🔧 Convertimos el id (String) a Int de forma segura para ambos usos
-                    val reviewsWithReplies: List<Pair<Int, List<ReviewInfo>>> = barReviews.mapNotNull { review ->
-                        val reviewIdInt = review.id.toIntOrNull()
-                        if (reviewIdInt == null) {
-                            // Si no se puede convertir, lo saltamos (o podrías manejarlo distinto)
-                            null
-                        } else {
-                            val repliesResult = reviewRepository.getReviewsReplies(reviewIdInt)
+                    Log.d("DetailVM", "Reseñas filtradas para '$barName': ${barReviews.size}")
+
+                    val reviewsWithReplies = mutableListOf<Pair<String, List<ReviewInfo>>>()
+                    for (review in barReviews) {
+                        val reviewId = review.id ?: continue
+                        try {
+                            val repliesResult = reviewRepository.getReviewsReplies(reviewId)
                             val replies = repliesResult.getOrElse { emptyList() }
-                            reviewIdInt to replies
+                            reviewsWithReplies.add(reviewId to replies)
+                        } catch (e: Exception) {
+                            Log.e("DetailVM", "Error al cargar respuestas de review $reviewId: ${e.message}")
                         }
                     }
 
@@ -79,17 +89,19 @@ class DetailGastroBarViewModel @Inject constructor(
                         it.copy(
                             reviews = barReviews,
                             reviewsReplies = reviewsWithReplies,
-                            isLoading = false
+                            isLoading = false,
+                            errorMessage = if (barReviews.isEmpty()) "No se encontraron reseñas para $barName" else null
                         )
                     }
 
                 }.onFailure { throwable ->
+                    Log.e("DetailVM", "Error al obtener reseñas: ${throwable.message}")
                     _uiState.update { it.copy(errorMessage = throwable.toString(), isLoading = false) }
                 }
             } catch (e: Exception) {
+                Log.e("DetailVM", "Excepción general al cargar reseñas: ${e.message}")
                 _uiState.update { it.copy(errorMessage = e.toString(), isLoading = false) }
             }
         }
     }
-
 }

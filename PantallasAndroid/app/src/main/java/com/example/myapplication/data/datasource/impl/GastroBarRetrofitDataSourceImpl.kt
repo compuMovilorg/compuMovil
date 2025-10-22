@@ -9,24 +9,26 @@ import javax.inject.Inject
 class GastroBarRetrofitDataSourceImpl @Inject constructor(
     private val service: GastroBarRetrofitService
 ) : GastroBarRemoteDataSource {
-
     override suspend fun getAllGastroBares(): List<GastroBarDto> {
-        return service.getAllGastroBares()
+        TODO("Not yet implemented")
     }
 
-    override suspend fun getGastroBarById(id: Int): GastroBarDto {
-        return service.getGastroBarById(id)
+    override suspend fun getGastroBarById(id: String): GastroBarDto {
+        TODO("Not yet implemented")
     }
 
     override suspend fun createGastroBar(gastrobar: CreateGastroBarDto) {
-        service.createGastroBar(gastrobar)
+        TODO("Not yet implemented")
     }
 
-    override suspend fun updateGastroBar(id: Int, gastrobar: CreateGastroBarDto) {
-        service.updateGastroBar(id, gastrobar)
+    override suspend fun updateGastroBar(
+        id: String,
+        gastrobar: CreateGastroBarDto
+    ) {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun deleteGastroBar(id: Int) {
-        service.deleteGastroBar(id)
+    override suspend fun deleteGastroBar(id: String) {
+        TODO("Not yet implemented")
     }
 }

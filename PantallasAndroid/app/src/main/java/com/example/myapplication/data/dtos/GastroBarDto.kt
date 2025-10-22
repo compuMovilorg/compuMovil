@@ -12,7 +12,7 @@ data class GastroBarDto(
     val hours: String,
     val cuisine: String,
     val description: String,
-    val reviewId: Int?        // FK con Review
+    val reviewId: String?        // FK con Review
 ){
     constructor(): this("", null, "", 0f, 0, "", "", "", "", null)
 }

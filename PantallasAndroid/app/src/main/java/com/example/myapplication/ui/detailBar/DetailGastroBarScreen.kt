@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.detailBar
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -26,32 +27,36 @@ import com.example.myapplication.utils.AppButton
 import com.example.myapplication.utils.StarRating
 
 // -----------------------------------------------------------------------------
-// PANTALLA DELGADA: solo delega al Body
+// PANTALLA PRINCIPAL
 // -----------------------------------------------------------------------------
 @Composable
 fun DetailGastroBarScreen(
-    gastroBarId: Int,
+    gastroBarId: String,
     viewModel: DetailGastroBarViewModel = hiltViewModel(),
-    onViewReviewsClick: (Int, String?) -> Unit // 👈 nuevo callback
+    onViewReviewsClick: (String, String?) -> Unit // ✅ Cambiado a String
 ) {
     DetailGastroBarBody(
-        gastroBarId = gastroBarId.toString(),
+        gastroBarId = gastroBarId,
         viewModel = viewModel,
         onViewReviewsClick = onViewReviewsClick
     )
 }
 
+// -----------------------------------------------------------------------------
+// CUERPO DE LA PANTALLA
+// -----------------------------------------------------------------------------
 @Composable
 fun DetailGastroBarBody(
     gastroBarId: String,
     modifier: Modifier = Modifier,
     viewModel: DetailGastroBarViewModel,
-    onViewReviewsClick: (Int, String?) -> Unit // 👈 pasa al body
+    onViewReviewsClick: (String, String?) -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(gastroBarId) {
-        viewModel.buscarGastro(gastroBarId.toInt())
+        Log.d("DetailScreen", "Entrando a DetailGastroBar con ID: $gastroBarId")
+        viewModel.loadGastroBarAndReviews(gastroBarId) // ✅ Función actualizada
     }
 
     state.gastroBar?.let { gastroBar ->
@@ -74,13 +79,13 @@ fun DetailGastroBarBody(
                 AppButton(
                     texto = "Calificar y Escribir reseña",
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = { /* TODO */ }
+                    onClick = { /* TODO: abrir formulario */ }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = {
-                        // 👇 Navega a BarReviews con id y nombre
-                        onViewReviewsClick(gastroBar.id.toInt(), gastroBar.name)
+                        Log.d("DetailScreen", "Click en Ver Reseñas de ${gastroBar.name}")
+                        onViewReviewsClick(gastroBar.id, gastroBar.name) // ✅ ID como String
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -89,6 +94,7 @@ fun DetailGastroBarBody(
             }
         }
     } ?: run {
+        Log.e("DetailScreen", "GastroBar con id '$gastroBarId' no encontrado")
         Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -99,7 +105,7 @@ fun DetailGastroBarBody(
 }
 
 // -----------------------------------------------------------------------------
-// COMPONENTES DE UI REUTILIZABLES (sin cambios de lógica)
+// COMPONENTES DE UI REUTILIZABLES
 // -----------------------------------------------------------------------------
 @Composable
 fun HeaderImage(imageUrl: String?) {

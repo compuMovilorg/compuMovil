@@ -1,14 +1,13 @@
 package com.example.myapplication.data.repository
 
 import android.util.Log
-import retrofit2.HttpException
 import com.example.myapplication.data.UserInfo
-import com.example.myapplication.data.datasource.impl.UserRetrofitDataSourceImpl
 import com.example.myapplication.data.datasource.impl.firestore.UserFirestoreDataSourceImpl
 import com.example.myapplication.data.dtos.RegisterUserDto
 import com.example.myapplication.data.dtos.UserDtoGeneric
+import com.google.firebase.auth.FirebaseAuth
+import retrofit2.HttpException
 import javax.inject.Inject
-import kotlin.math.log
 
 private const val TAG = "UserRepository"
 
@@ -41,7 +40,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    // 🔹 Buscar por email (mismo patrón de try/catch que el resto)
+    // Buscar por email (mismo patrón de try/catch que el resto)
     suspend fun getUserByEmail(email: String): Result<UserInfo> {
         return try {
             val user = userRemoteDataSource.getUserByEmail(email)
@@ -53,7 +52,7 @@ class UserRepository @Inject constructor(
         }
     }
 
-    // 🔹 Buscar por firebaseUid
+    // Buscar por firebaseUid
     suspend fun getUserByFirebaseUid(firebaseUid: String): Result<UserInfo> {
         return try {
             val user = userRemoteDataSource.getUserByFirebaseUid(firebaseUid)
@@ -78,7 +77,6 @@ class UserRepository @Inject constructor(
     // Crear/actualizar perfil del usuario logueado
     suspend fun updateUserProfile(id: String, profile: UserDtoGeneric): Result<Unit> {
         return try {
-            // Se asume que el data source maneja UserProfileDto igual que UserDto
             userRemoteDataSource.updateUser(id, profile) // revisar
             Result.success(Unit)
         } catch (e: HttpException) {
@@ -99,6 +97,8 @@ class UserRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    // Registro con logging tal como lo tenías
     suspend fun registerUser(
         name: String,
         username: String,
@@ -122,9 +122,36 @@ class UserRepository @Inject constructor(
 
         Log.d(TAG, "registerUser: saved OK at users/$userId")
 
-        // 👇 Fuerza que el bloque retorne Unit (no Int)
         Unit
     }.onFailure { e ->
         Log.e(TAG, "registerUser error: ${e.javaClass.simpleName}: ${e.message}", e)
+    }
+
+    // -------------------- ADICIONES PARA resolver tu error --------------------
+
+    /**
+     * Devuelve el uid del usuario autenticado en FirebaseAuth, o null si no hay sesión.
+     * Lo dejamos como `suspend` para que puedas llamarlo desde coroutines sin cambios.
+     */
+    suspend fun getCurrentUserId(): String? {
+        return try {
+            FirebaseAuth.getInstance().currentUser?.uid
+        } catch (e: Exception) {
+            Log.w(TAG, "getCurrentUserId: error obteniendo FirebaseAuth.currentUser", e)
+            null
+        }
+    }
+
+    /**
+     * Helper: devuelve el UserInfo del usuario autenticado (usando firebase uid)
+     * Resultado: Result.success(UserInfo) o Result.failure(...)
+     */
+    suspend fun getCurrentUser(): Result<UserInfo> {
+        val uid = getCurrentUserId()
+        return if (uid.isNullOrBlank()) {
+            Result.failure(IllegalStateException("No hay usuario autenticado"))
+        } else {
+            getUserByFirebaseUid(uid)
+        }
     }
 }

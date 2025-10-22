@@ -2,12 +2,14 @@ package com.example.myapplication.ui.create
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import com.example.myapplication.R
 import com.example.myapplication.data.repository.ReviewRepository
+import com.example.myapplication.data.repository.GastroBarRepository
+import com.example.myapplication.data.repository.UserRepository
+import com.example.myapplication.data.dtos.CreateReviewDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -15,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
-    private val gastroBarRepository: com.example.myapplication.data.repository.GastroBarRepository // ⬅️ agrega esto
+    private val gastroBarRepository: GastroBarRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateState())
@@ -76,27 +79,82 @@ class CreateViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Crea una review:
+     * - obtiene el userId desde UserRepository (userRepository.getCurrentUserId())
+     * - si no hay userId, setea error en el estado (usuario no autenticado)
+     * - llama a reviewRepository.createReview con userId (String)
+     */
     fun createReview() {
         viewModelScope.launch {
-            val result = reviewRepository.createReview(
-                userId = 1,
-                placeName = uiState.value.placeName,
-                reviewText = uiState.value.reviewText,
-                parentReviewId = null
+            _uiState.update { it.copy(isSubmitting = true, error = null) }
+
+            // 1) Obtener userId desde UserRepository
+            val userId: String? = try {
+                // ADAPTA según tu UserRepository; aquí asumimos que existe:
+                userRepository.getCurrentUserId()
+            } catch (e: Exception) {
+                null
+            }
+
+            if (userId.isNullOrBlank()) {
+                _uiState.update {
+                    it.copy(
+                        isSubmitting = false,
+                        error = "No se encontró usuario autenticado. Inicia sesión para poder crear una reseña."
+                    )
+                }
+                return@launch
+            }
+
+            // 2) Validaciones mínimas
+            val placeName = uiState.value.placeName.ifBlank { null }
+            val reviewText = uiState.value.reviewText.ifBlank { null }
+
+            if (placeName == null || reviewText == null) {
+                _uiState.update {
+                    it.copy(
+                        isSubmitting = false,
+                        error = "Completa el nombre del lugar y el texto de la reseña antes de enviar."
+                    )
+                }
+                return@launch
+            }
+
+            val createReviewDto = CreateReviewDto(
+                userId = userId,
+                placeName = placeName,
+                reviewText = reviewText,
+                placeImage = null,
+                parentReviewId = uiState.value.parentReviewId
             )
 
+            // 4) Llamada al repositorio
+            val result = try {
+                reviewRepository.createReview(
+                    userId = createReviewDto.userId,
+                    placeName = createReviewDto.placeName,
+                    reviewText = createReviewDto.reviewText,
+                    parentReviewId = createReviewDto.parentReviewId
+                )
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isSubmitting = false, error = e.message ?: "Error inesperado") }
+                return@launch
+            }
+
+            // 5) Resultado
             if (result.isSuccess) {
-                _uiState.update { it.copy(navigateBack = true) }
+                _uiState.update { it.copy(isSubmitting = false, navigateBack = true) }
             } else {
-                _uiState.update { it.copy(error = result.exceptionOrNull()?.message) }
+                _uiState.update {
+                    it.copy(isSubmitting = false, error = result.exceptionOrNull()?.message ?: "Error al crear reseña")
+                }
             }
         }
     }
 
-    fun onSelectGastroBar(id: Int, name: String) {
+    // ahora con String para el id del gastrobar
+    fun onSelectGastroBar(id: String, name: String) {
         _uiState.update { it.copy(selectedGastroBarId = id, placeName = name) }
     }
 }
-
-
-

@@ -9,5 +9,5 @@ data class CreateGastroBarDto(
     val hours: String?,
     val cuisine: String?,
     val description: String?,
-    val reviewId: Int?          // relación con una review
+    val reviewId: String?          // relación con una review
 )

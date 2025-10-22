@@ -40,10 +40,9 @@ fun BarReviewsBody(
     modifier: Modifier = Modifier,
     viewModel: BarReviewsViewModel = hiltViewModel()
 ) {
-    // Si tu VM aún recibe Int, convierte aquí:
+    // Llama al viewModel con el id como String (sin casteos)
     LaunchedEffect(gastroBarId, gastroBarName) {
-        val idInt = gastroBarId.toIntOrNull() ?: 0
-        viewModel.load(idInt, gastroBarName)
+        viewModel.load(gastroBarId, gastroBarName)
     }
 
     val state by viewModel.uiState.collectAsState()
@@ -92,4 +91,3 @@ fun BarReviewsBody(
         }
     }
 }
-

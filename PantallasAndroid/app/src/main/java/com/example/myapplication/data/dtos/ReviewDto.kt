@@ -2,7 +2,7 @@ package com.example.myapplication.data.dtos
 
 import com.example.myapplication.data.ReviewInfo
 
-data class userProfileDto(
+data class UserProfileDto(
     val id: String,
     val username: String,
     val name: String,
@@ -20,13 +20,14 @@ data class ReviewDto(
     val reviewText: String,
     val likes: Int = 0,
     val comments: Int = 0,
-    val parentReviewId: Int? = null,
+    val parentReviewId: String? = null,
     val createdAt: String,
     val updatedAt: String,
-    val user: userProfileDto,          // Relación con el usuario
+    val user: UserProfileDto = UserProfileDto(),          // Relación con el usuario
     val gastroBar: GastroBarDto?
 ){
-    constructor(): this("", "", "", null, "", 0, 0, null, "", "", userProfileDto(), null)
+    constructor(): this("", "", "", null, "", 0, 0, null, "", "", UserProfileDto(), null)
+
 }
 
 // Mapper de DTO → Info (para usar en UI)

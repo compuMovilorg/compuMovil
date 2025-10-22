@@ -25,10 +25,10 @@ class UserViewModel @Inject constructor(
     val uiState: StateFlow<UserState> = _uiState
 
     // Guarda el último userId para poder reintentar
-    private var currentUserId: Int? = null
+    private var currentUserId: String? = null
 
     init {
-        val userId: Int? = savedStateHandle["userId"]
+        val userId: String? = savedStateHandle["userId"]
         currentUserId = userId
         if (userId != null) {
             android.util.Log.d("UserVM", "Cargando usuario con ID: $userId")
@@ -47,7 +47,7 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    fun loadUser(userId: Int) {
+    fun loadUser(userId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
@@ -70,7 +70,7 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    fun loadReviews(userId: Int) {
+    fun loadReviews(userId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {

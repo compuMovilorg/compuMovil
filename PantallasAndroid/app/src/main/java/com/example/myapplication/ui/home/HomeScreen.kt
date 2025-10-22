@@ -15,8 +15,8 @@ import com.example.myapplication.utils.ReviewCard
 
 @Composable
 fun HomeScreen(
-    onReviewClick: (Int) -> Unit,
-    onUserClick: (Int) -> Unit,
+    onReviewClick: (String) -> Unit, // ahora String
+    onUserClick: (String) -> Unit,   // ahora String
     modifier: Modifier,
     viewModel: HomeViewModel = viewModel()
 ) {
@@ -50,10 +50,10 @@ fun HomeScreen(
                 ) {
                     items(reviews) { review ->
                         ReviewCard(
-                            onReviewClick = { onReviewClick(review.id.toInt()) },
+                            onReviewClick = { onReviewClick(review.id) },       // pasa String
                             review = review,
                             modifier = Modifier.fillMaxWidth(),
-                            onUserClick = {onUserClick(review.userId.toInt())}
+                            onUserClick = { onUserClick(review.userId) }        // pasa String
                         )
                     }
                 }

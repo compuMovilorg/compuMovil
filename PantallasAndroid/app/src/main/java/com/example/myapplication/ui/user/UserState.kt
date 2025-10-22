@@ -4,8 +4,8 @@ import com.example.myapplication.data.ReviewInfo
 import com.example.myapplication.data.UserInfo
 
 data class UserState(
-    var user: UserInfo? = null,
-    var reviews: List<ReviewInfo> = emptyList(),
-    var isLoading: Boolean = false,
-    var errorMessage: String? = null
+    val user: UserInfo? = null,
+    val reviews: List<ReviewInfo> = emptyList(),
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
 )

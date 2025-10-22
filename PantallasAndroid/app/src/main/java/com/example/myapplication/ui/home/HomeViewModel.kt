@@ -36,13 +36,13 @@ class HomeViewModel @Inject constructor(
             val result = reviewRepository.getReviews()
             result.fold(
                 onSuccess = { reviews ->
-
-                    // Agregar Log para depurar URLs de imágenes
-                    reviews.forEach { review ->
-                        Log.d(
-                            "HomeViewModel",
-                            "Review ID: ${review.id}, PlaceImage: ${review.placeImage}, UserImage: ${review.userImage}"
-                        )
+                    // Logs para depuración
+                    if (reviews.isEmpty()) {
+                        Log.w("HomeViewModel", "getReviews() returned an empty list")
+                    } else {
+                        reviews.forEach { r ->
+                            Log.d("HomeViewModel", "Review loaded: id=${r.id}, placeName=${r.placeName}, placeImage=${r.placeImage}, userId=${r.userId}")
+                        }
                     }
 
                     _uiState.update {
@@ -54,6 +54,8 @@ class HomeViewModel @Inject constructor(
                     }
                 },
                 onFailure = { throwable ->
+                    // Loguea toda la excepción para ver la causa real
+                    Log.e("HomeViewModel", "Error loading reviews", throwable)
                     _uiState.update {
                         it.copy(
                             reviews = emptyList(),
@@ -65,6 +67,7 @@ class HomeViewModel @Inject constructor(
             )
         }
     }
+
 
 
     private fun loadGastrobares() {

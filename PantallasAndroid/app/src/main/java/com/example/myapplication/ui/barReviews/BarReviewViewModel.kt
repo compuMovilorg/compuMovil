@@ -24,34 +24,35 @@ class BarReviewsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(BarReviewsState())
     val uiState: StateFlow<BarReviewsState> = _uiState
 
-    private var currentGastroBarId: Int? = null
+    // ahora manejamos el id como String
+    private var currentGastroBarId: String? = null
 
     init {
-        // Lee como String y convierte
+        // Leemos directamente como String desde los argumentos
         val idStr: String? = savedStateHandle["gastroBarId"]
         val nameArg: String? = savedStateHandle["gastroBarName"]
 
-        val idArg = idStr?.toIntOrNull()
-        if (idArg == null) {
-            Log.e("BarReviewsVM", "Arg gastroBarId inválido: $idStr")
+        if (idStr.isNullOrBlank()) {
+            Log.e("BarReviewsVM", "Arg gastroBarId inválido o no especificado: $idStr")
             _uiState.update { it.copy(errorMessage = "GastroBar no especificado") }
         } else {
-            _uiState.update { it.copy(gastroBarId = idArg, gastroBarName = nameArg) }
-            loadReviewsByBar(idArg)
+            // Actualiza el estado con el id como String
+            _uiState.update { it.copy(gastroBarId = idStr, gastroBarName = nameArg) }
+            loadReviewsByBar(idStr)
         }
     }
 
-    fun setGastroBar(id: Int, name: String? = null) {
+    fun setGastroBar(id: String, name: String? = null) {
         currentGastroBarId = id
         _uiState.update { it.copy(gastroBarId = id, gastroBarName = name ?: it.gastroBarName) }
     }
 
-    fun load(gastroBarId: Int, gastroBarName: String? = null) {
+    fun load(gastroBarId: String, gastroBarName: String? = null) {
         setGastroBar(gastroBarId, gastroBarName)
         loadReviewsByBar(gastroBarId)
     }
 
-    private fun loadReviewsByBar(gastroBarId: Int) {
+    private fun loadReviewsByBar(gastroBarId: String) {
         currentGastroBarId = gastroBarId
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }

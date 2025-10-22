@@ -5,11 +5,11 @@ import com.example.myapplication.data.dtos.ReviewDto
 
 interface ReviewRemoteDataSource {
     suspend fun getAllReviews(): List<ReviewDto>
-    suspend fun getReviewById(id: Int): ReviewDto
+    suspend fun getReviewById(id: String): ReviewDto
     suspend fun createReview(review: CreateReviewDto)
-    suspend fun deleteReview(id: Int)
-    suspend fun updateReview(id: Int, review: CreateReviewDto)
-    suspend fun getReviewsReplies(id: Int): List<ReviewDto>
-    suspend fun getReviewsByUser(userId: Int): List<ReviewDto>
-    suspend fun getReviewsByGastroBar(gastroBarId: Int): List<ReviewDto>
+    suspend fun deleteReview(id: String)
+    suspend fun updateReview(id: String, review: CreateReviewDto)
+    suspend fun getReviewsReplies(id: String): List<ReviewDto>
+    suspend fun getReviewsByUser(userId: String): List<ReviewDto>
+    suspend fun getReviewsByGastroBar(gastroBarId: String): List<ReviewDto>
 }
