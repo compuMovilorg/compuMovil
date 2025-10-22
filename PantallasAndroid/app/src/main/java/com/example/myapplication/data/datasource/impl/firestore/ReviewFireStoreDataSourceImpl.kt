@@ -221,24 +221,46 @@ class ReviewFireStoreDataSourceImpl @Inject constructor(
 
     override suspend fun getReviewsByGastroBar(gastroBarId: String): List<ReviewDto> {
         val list = mutableListOf<ReviewDto>()
-        // try common field names
-        val fieldCandidates = listOf("gastroBarId", "gastrobarId", "gastro_bar_id")
-        for (field in fieldCandidates) {
-            val snapshot = db.collection(collectionName)
-                .whereEqualTo(field, gastroBarId)
-                .get()
-                .await()
-            for (doc in snapshot.documents) {
-                try {
-                    val data = doc.data ?: emptyMap<String, Any?>()
+
+        Log.d(TAG, "getReviewsByGastroBar -> inicio con id='$gastroBarId'")
+
+        // Consulta principal filtrando por gastroBarId
+        val querySnapshot = db.collection(collectionName)
+            .whereEqualTo("gastroBarId", gastroBarId)
+            .get()
+            .await()
+
+        Log.d(TAG, "getReviewsByGastroBar -> consulta devolvió ${querySnapshot.size()} documentos")
+
+        for (doc in querySnapshot.documents) {
+            try {
+                val data = doc.data ?: emptyMap<String, Any?>()
+                val actualGastroBarId = data["gastroBarId"]
+                Log.d(TAG, "getReviewsByGastroBar -> doc '${doc.id}' tiene gastroBarId='$actualGastroBarId'")
+
+                // Solo añade si coincide exactamente
+                if (actualGastroBarId == gastroBarId) {
                     @Suppress("UNCHECKED_CAST")
-                    list.add(mapDocToReviewDto(doc.id, data as Map<String, Any?>))
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error parsing review doc ${doc.id}", e)
+                    val reviewDto = mapDocToReviewDto(doc.id, data as Map<String, Any?>)
+                    list.add(reviewDto)
+                    Log.d(TAG, "getReviewsByGastroBar -> documento '${doc.id}' añadido correctamente.")
+                } else {
+                    Log.w(TAG, "getReviewsByGastroBar -> documento '${doc.id}' ignorado: gastroBarId='$actualGastroBarId' no coincide.")
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error al parsear review doc ${doc.id}", e)
             }
-            if (list.isNotEmpty()) break
         }
+
+        if (list.isEmpty()) {
+            Log.w(TAG, "getReviewsByGastroBar -> no se encontraron reseñas para id='$gastroBarId'")
+        } else {
+            Log.d(TAG, "getReviewsByGastroBar -> total final=${list.size} reseñas para id='$gastroBarId'")
+        }
+
         return list
     }
+
+
+
 }

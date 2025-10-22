@@ -114,7 +114,7 @@ object LocalGastroBarProvider {
             address = "Carrera 11 #84-09",
             hours = "Viernes y Sábado de 7:00 pm a 3:00 am",
             cuisine = "Internacional Moderna",
-            description = "Un gastrobar elegante con DJs en vivo y cocina internacional de autor, ideal para noches largas en la ciudad."
+            description = "Un gastrobar ideal para noches largas en la ciudad."
         )
     )
 }

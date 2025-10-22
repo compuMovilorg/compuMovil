@@ -51,7 +51,7 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val userResult = userRepository.getUserById(userId.toString())
+                val userResult = userRepository.getUserById(userId)
                 userResult.fold(
                     onSuccess = { user ->
                         _uiState.update { it.copy(user = user) }

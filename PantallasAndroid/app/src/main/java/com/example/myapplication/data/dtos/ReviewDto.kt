@@ -23,10 +23,11 @@ data class ReviewDto(
     val parentReviewId: String? = null,
     val createdAt: String,
     val updatedAt: String,
-    val user: UserProfileDto = UserProfileDto(),          // Relación con el usuario
+    val user: UserProfileDto = UserProfileDto(), // Relación con el usuario
+    val gastroBarId: String? = null,
     val gastroBar: GastroBarDto?
 ){
-    constructor(): this("", "", "", null, "", 0, 0, null, "", "", UserProfileDto(), null)
+    constructor(): this("", "", "", null, "", 0, 0, null, "", "", UserProfileDto(),null, null)
 
 }
 
@@ -41,7 +42,8 @@ fun ReviewDto.toReviewInfo(): ReviewInfo {
         placeName = gastroBar?.name ?: placeName,
         reviewText = reviewText,
         likes = likes,
-        comments = comments
+        comments = comments,
+        gastroBarId = this.gastroBarId ?: gastroBar?.id ?: null
     )
 }
 
