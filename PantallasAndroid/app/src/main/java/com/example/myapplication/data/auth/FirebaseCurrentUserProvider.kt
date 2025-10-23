@@ -11,8 +11,24 @@ class FirebaseCurrentUserProvider @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository
 ) : CurrentUserProvider {
+
     override suspend fun currentUserId(): String? {
-        TODO("Not yet implemented")
+        return try {
+            // Preferimos el id mapeado en el backend (si existe)
+            val backendId = currentBackendUserId()
+            if (!backendId.isNullOrBlank()) {
+                Log.d(TAG, "currentUserId -> usando backendId=$backendId")
+                return backendId
+            }
+
+            // Si no hay mapping, devolvemos el uid de Firebase como fallback
+            val firebaseUid = currentFirebaseUid()
+            Log.d(TAG, "currentUserId -> backendId null, fallback firebaseUid=$firebaseUid")
+            firebaseUid
+        } catch (e: Exception) {
+            Log.e(TAG, "Error obteniendo currentUserId", e)
+            null
+        }
     }
 
     override suspend fun currentFirebaseUid(): String? {

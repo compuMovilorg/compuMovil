@@ -61,6 +61,7 @@ sealed class Screen(val route: String) {
     object User : Screen("user/{userId}") {
         fun createRoute(userId: String) = "user/$userId"
     }
+    object MainUser : Screen("mainUser")
 
     object Profile : Screen("profile")
     object EditProfile : Screen("editProfile")
@@ -208,6 +209,19 @@ fun AppNavigation(
             )
         }
 
+        // MAIN USER (pantalla del usuario autenticado)
+        composable(route = Screen.MainUser.route) {
+            val mainUserViewModel: com.example.myapplication.ui.mainuser.MainUserViewModel = hiltViewModel()
+            com.example.myapplication.ui.mainuser.MainUserScreen(
+                viewModel = mainUserViewModel,
+                onNavigateToProfile = {
+                    navController.navigate(Screen.Profile.route)
+                }
+            )
+        }
+
+
+
         composable(Screen.Profile.route) {
             val profileViewModel: ProfileViewModel = hiltViewModel()
             ProfileScreen(
@@ -327,5 +341,6 @@ val bottomNavItems = listOf(
     BottomNavItem(Icons.Filled.Search, Icons.Outlined.Search, Screen.Search.route),
     BottomNavItem(Icons.Filled.AddCircle, Icons.Outlined.AddCircle, Screen.Create.route),
     BottomNavItem(Icons.Filled.Notifications, Icons.Outlined.Notifications, Screen.Events.route),
-    BottomNavItem(Icons.Filled.Person, Icons.Outlined.Person, Screen.Profile.route)
+   // BottomNavItem(Icons.Filled.Person, Icons.Outlined.Person, Screen.Profile.route)
+    BottomNavItem(Icons.Filled.Person, Icons.Outlined.Person, Screen.MainUser.route)
 )

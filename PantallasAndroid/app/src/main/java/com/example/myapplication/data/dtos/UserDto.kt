@@ -16,6 +16,14 @@ abstract class UserDtoGeneric {
     abstract fun toUserInfo(): UserInfo
 }
 
+// 4) DTO para actualizar perfil (solo campos editables)
+data class UpdateUserDto(
+    val username: String? = null,
+    val name: String? = null,
+    val birthdate: String? = null,
+    val email: String? = null,
+    val profileImage: String? = null
+)
 
 data class UserFirestoreDto(
     override val id: String,

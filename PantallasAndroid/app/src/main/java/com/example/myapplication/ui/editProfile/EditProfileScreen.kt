@@ -21,9 +21,10 @@ fun EditProfileScreen(
     modifier: Modifier = Modifier,
     viewModel: EditProfileViewModel = hiltViewModel(),
 ) {
+    // Estado del ViewModel
     val state by viewModel.uiState.collectAsState()
 
-
+    // Launcher para seleccionar imagen
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -42,7 +43,7 @@ fun EditProfileScreen(
     ) {
 
         ProfileAsyncImage(
-            profileImage = state.profilePicUrl.toString(),
+            profileImage = state.profilePicUrl.orEmpty(),
             size = 120
         )
 
@@ -82,7 +83,7 @@ fun EditProfileScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         CustomTextField(
-            value = state.fechaNacimiento,
+            value = state.birthdate,
             onValueChange = { viewModel.updateFechaNacimiento(it) },
             label = "Fecha de nacimiento",
             modifier = Modifier.fillMaxWidth()
@@ -99,13 +100,17 @@ fun EditProfileScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Mostrar texto de loading si el estado lo indica.
+        val isLoading = state.isLoading
+
         AppButton(
-            texto = "Guardar cambios",
+            texto = if (isLoading) "Guardando..." else "Guardar cambios",
             modifier = Modifier.fillMaxWidth(),
             onClick = {
+                // No mostramos Snackbar aquí — el Scaffold superior debe observar viewModel.uiState
                 viewModel.saveProfile(
-                    onSuccess = {},
-                    onError = { error -> }
+                    onSuccess = { /* El contenedor superior puede reaccionar a uiState.isLoading / errorMessage */ },
+                    onError = { /* El contenedor superior mostrará el error desde uiState.errorMessage */ }
                 )
             },
             height = 60.dp,
@@ -113,4 +118,3 @@ fun EditProfileScreen(
         )
     }
 }
-

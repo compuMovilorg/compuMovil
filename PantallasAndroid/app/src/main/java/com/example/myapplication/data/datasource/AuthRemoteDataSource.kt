@@ -3,7 +3,7 @@ package com.example.myapplication.data.datasource
 import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.auth.userProfileChangeRequest
 import javax.inject.Inject
 import kotlinx.coroutines.tasks.await
 
@@ -30,12 +30,23 @@ class AuthRemoteDataSource @Inject constructor(
 
     suspend fun updateProfileImage(photoUrl: String) {
         val uri = Uri.parse(photoUrl)
-        // usa SIEMPRE el getter dinámico
         val user = currentUser ?: error("No hay usuario autenticado")
-        user.updateProfile(
-            UserProfileChangeRequest.Builder()
-                .setPhotoUri(uri)
-                .build()
-        ).await()
+        // Usamos userProfileChangeRequest builder por claridad
+        val profileUpdates = userProfileChangeRequest {
+            this.photoUri = uri
+        }
+        user.updateProfile(profileUpdates).await()
+    }
+
+    suspend fun updateDisplayName(name: String) {
+        val user = currentUser ?: throw IllegalStateException("No user logged in")
+        val profileUpdates = userProfileChangeRequest {
+            displayName = name
+        }
+        user.updateProfile(profileUpdates).await()
+    }
+
+    suspend fun reloadCurrentUser() {
+        auth.currentUser?.reload()?.await()
     }
 }

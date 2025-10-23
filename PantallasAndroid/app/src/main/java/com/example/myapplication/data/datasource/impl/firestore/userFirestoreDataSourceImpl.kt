@@ -30,10 +30,8 @@ class UserFirestoreDataSourceImpl @Inject constructor(
             Log.d(TAG, "User -> id=${doc.id}, data=${doc.data}")
         }
 
-        // ⚠️ OJO: UserDtoGeneric es abstracta; asegúrate de mapear a una clase concreta.
-        // Si tienes un UserFirestoreDto que implementa UserDtoGeneric, usa ese.
-        // Aquí dejamos el toObject() como lo tenías, pero considera cambiarlo a tu DTO concreto.
-        return snaps.documents.mapNotNull { it.toObject(UserDtoGeneric::class.java) }
+        // Mapear a UserFirestoreDto (concreta) y devolver como lista de UserDtoGeneric
+        return snaps.documents.mapNotNull { it.toObject(UserFirestoreDto::class.java) }
     }
 
     // 🔹 Obtener usuario por ID
@@ -53,11 +51,10 @@ class UserFirestoreDataSourceImpl @Inject constructor(
     }
 
     // 🔹 Obtener usuario por correo
-    override suspend fun getUserByEmail(email: String): UserDtoGeneric {
+    override suspend fun getUserByEmail(email: String): UserFirestoreDto {
         Log.d(TAG, "Buscando usuario por email: $email")
 
-        // ⚠️ WARNING: RegisterUserDto no guarda 'email';
-        // si nunca guardas ese campo en 'users/{uid}', esta query NO encontrará resultados.
+        // Nota: asegúrate de que guardas 'email' en el documento users/{uid}
         val q = users().whereEqualTo("email", email).limit(1).get(Source.SERVER).await()
         val doc = q.documents.firstOrNull()
 
@@ -67,13 +64,14 @@ class UserFirestoreDataSourceImpl @Inject constructor(
             Log.w(TAG, "No existe usuario con email=$email (SERVER)")
         }
 
-        return doc?.toObject(UserDtoGeneric::class.java)
+        return doc?.toObject(UserFirestoreDto::class.java)
             ?: throw NoSuchElementException("User not found email=$email")
     }
 
-    // 🔹 Obtener usuario por UID de Firebase
+    // 🔹 Obtener usuario por UID de Firebase (asume doc id == firebaseUid)
     override suspend fun getUserByFirebaseUid(firebaseUid: String): UserDtoGeneric {
         Log.d(TAG, "Buscando usuario por UID de Firebase: $firebaseUid")
+        // Si tu colección usa uid como id, devolvemos getUserById
         return getUserById(firebaseUid)
     }
 
@@ -125,11 +123,11 @@ class UserFirestoreDataSourceImpl @Inject constructor(
     override suspend fun registerUser(registerUserDto: RegisterUserDto, userId: String) {
         try {
             Log.d(TAG, "WRITE(registerUser) -> users/$userId dto=$registerUserDto")
-           val docRef = db.collection("users").document(userId)
+            val docRef = db.collection("users").document(userId)
             docRef.set(registerUserDto).await()
 
             // Leer desde servidor para verificar
-            val snap = users().document(userId).get(com.google.firebase.firestore.Source.SERVER).await()
+            val snap = users().document(userId).get(Source.SERVER).await()
             if (!snap.exists()) error("Post-write readback FAILED (registerUser) for users/$userId")
             Log.d(TAG, "READBACK OK (registerUser) <- ${snap.id} data=${snap.data}")
         } catch (e: Exception) {
@@ -138,6 +136,26 @@ class UserFirestoreDataSourceImpl @Inject constructor(
         }
     }
 
+    // 🔹 Actualizar solo la URL de la imagen de perfil
+    override suspend fun updateProfileImage(id: String, profileImageUrl: String) {
+        try {
+            Log.d(TAG, "UPDATE PROFILE IMAGE -> users/$id url=$profileImageUrl")
+            // Usamos update() para cambiar solo el campo profileImage
+            users().document(id).update("profileImage", profileImageUrl).await()
+
+            // Verificación read-back desde SERVER
+            val snap = users().document(id).get(Source.SERVER).await()
+            if (!snap.exists()) error("Post-write readback FAILED (updateProfileImage) for users/$id")
+            val stored = snap.getString("profileImage")
+            if (stored != profileImageUrl) {
+                error("Profile image mismatch after update (expected='$profileImageUrl' got='$stored')")
+            }
+            Log.d(TAG, "READBACK OK (updateProfileImage) <- ${snap.id} profileImage=$stored")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating profile image for users/$id: ${e.message}", e)
+            throw e
+        }
+    }
 
     // Intenta extraer 'uid' por reflexión si tu DTO lo tiene.
     private fun extractUid(user: UserDtoGeneric): String? {

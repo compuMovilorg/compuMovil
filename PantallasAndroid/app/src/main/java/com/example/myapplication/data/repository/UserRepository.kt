@@ -4,7 +4,7 @@ import android.util.Log
 import com.example.myapplication.data.UserInfo
 import com.example.myapplication.data.datasource.impl.firestore.UserFirestoreDataSourceImpl
 import com.example.myapplication.data.dtos.RegisterUserDto
-import com.example.myapplication.data.dtos.UserDtoGeneric
+import com.example.myapplication.data.dtos.UserFirestoreDto
 import com.google.firebase.auth.FirebaseAuth
 import retrofit2.HttpException
 import javax.inject.Inject
@@ -65,23 +65,59 @@ class UserRepository @Inject constructor(
     }
 
     // Crear un usuario general
-    suspend fun createUser(user: UserDtoGeneric): Result<Unit> {
+    suspend fun createUser(user: RegisterUserDto, userId: String): Result<Unit> {
         return try {
-            userRemoteDataSource.createUser(user)
+            userRemoteDataSource.registerUser(user, userId)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    // Crear/actualizar perfil del usuario logueado
-    suspend fun updateUserProfile(id: String, profile: UserDtoGeneric): Result<Unit> {
+    // --------------------- Actualización de usuario ---------------------
+    /**
+     * Actualiza el usuario en backend usando un UserInfo. Convertimos a DTO de Firestore
+     * para que el data source reciba lo que espera.
+     */
+    suspend fun updateUser(user: UserInfo): Result<Unit> {
         return try {
-            userRemoteDataSource.updateUser(id, profile) // revisar
+            // Construimos UserFirestoreDto con valores por defecto para followers/following si no los tienes
+            val dto = UserFirestoreDto(
+                id = user.id,
+                username = user.username ?: "",
+                email = user.email ?: "",
+                password = "", // si no aplicable, dejar vacío; backend no debería usarlo para actualización
+                name = user.name ?: "",
+                birthdate = user.birthdate ?: "",
+                followersCount = user.followersCount ?: 0,
+                followingCount = user.followingCount ?: 0,
+                profileImage = user.profileImage
+            )
+
+            userRemoteDataSource.updateUser(user.id, dto)
             Result.success(Unit)
         } catch (e: HttpException) {
+            Log.w(TAG, "updateUser http error: ${e.message}")
             Result.failure(e)
         } catch (e: Exception) {
+            Log.w(TAG, "updateUser error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Actualiza únicamente la URL de la imagen de perfil para el usuario `id`.
+     * Tu ViewModel llama a userRepository.updateProfileImage(id, url) — lo soportamos aquí.
+     */
+    suspend fun updateProfileImage(id: String, profileImageUrl: String): Result<Unit> {
+        return try {
+            userRemoteDataSource.updateProfileImage(id, profileImageUrl)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Log.w(TAG, "updateProfileImage http error: ${e.message}")
+            Result.failure(e)
+        } catch (e: Exception) {
+            Log.w(TAG, "updateProfileImage error: ${e.message}", e)
             Result.failure(e)
         }
     }
