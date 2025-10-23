@@ -28,7 +28,7 @@ class ReviewFireStoreDataSourceImpl @Inject constructor(
     // Mapear DocumentSnapshot -> ReviewDto de forma segura
     private fun mapDocToReviewDto(docId: String, data: Map<String, Any?>): ReviewDto {
         val userId = data["userId"].asStringOrNull()
-            ?: data["uid"].asStringOrNull() // alternativa si lo guardaron con otro nombre
+            ?: data["uid"].asStringOrNull()
 
         val placeName = data["placeName"].asStringOrNull()
             ?: data["place_name"].asStringOrNull()
@@ -44,7 +44,6 @@ class ReviewFireStoreDataSourceImpl @Inject constructor(
         val likes = (data["likes"] as? Number)?.toInt() ?: 0
         val comments = (data["comments"] as? Number)?.toInt() ?: 0
 
-        // parent id might be stored under different names (parentReviewId, replyToId, parent_id...)
         val parentReviewId = data["parentReviewId"].asStringOrNull()
             ?: data["replyToId"].asStringOrNull()
             ?: data["parent_id"].asStringOrNull()
@@ -52,7 +51,11 @@ class ReviewFireStoreDataSourceImpl @Inject constructor(
         val createdAt = data["createdAt"].asStringOrNull() ?: data["created_at"].asStringOrNull() ?: ""
         val updatedAt = data["updatedAt"].asStringOrNull() ?: data["updated_at"].asStringOrNull() ?: ""
 
-        // user profile may be embedded or absent — try to map minimal user profile
+        // ✅ Leer explícitamente el gastroBarId
+        val gastroBarId = data["gastroBarId"].asStringOrNull()
+            ?: data["gastro_bar_id"].asStringOrNull()
+
+        // user mapping
         val userMap = data["user"] as? Map<*, *>
         val userProfile = if (userMap != null) {
             val uid = (userMap["id"] ?: userMap["uid"] ?: userMap["userId"]).asStringOrNull()
@@ -65,16 +68,11 @@ class ReviewFireStoreDataSourceImpl @Inject constructor(
                 name = name,
                 profileImage = profileImage
             )
-        } else {
-            // empty profile so mapper doesn't crash; your toReviewInfo uses user?.profileImage etc.
-            UserProfileDto()
-        }
+        } else UserProfileDto()
 
-        // gastroBar embedded map (optional)
         val gastroBarMap = data["gastroBar"] as? Map<*, *>
         val gastroBarDto = if (gastroBarMap != null) {
-            // you can map a minimal GastroBarDto if needed; returning null here to keep it simple
-            null
+            null // podrías mapearlo si quisieras
         } else null
 
         return ReviewDto(
@@ -89,9 +87,11 @@ class ReviewFireStoreDataSourceImpl @Inject constructor(
             createdAt = createdAt,
             updatedAt = updatedAt,
             user = userProfile,
+            gastroBarId = gastroBarId, // ✅ AHORA se incluye
             gastroBar = gastroBarDto
         )
     }
+
 
     override suspend fun getAllReviews(): List<ReviewDto> {
         val snapshot = db.collection(collectionName).get().await()

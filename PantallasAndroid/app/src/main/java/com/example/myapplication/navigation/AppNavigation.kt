@@ -68,10 +68,12 @@ sealed class Screen(val route: String) {
     object SettingsRoute : Screen("settings")
     object Notification : Screen("notification")
     // BarReviews already encoded to accept strings — keep it that way
-    object BarReviews : Screen("barReviews/{gastroBarId}?gastroBarName={gastroBarName}") {
-        fun createRoute(gastroBarId: String, gastroBarName: String? = null) =
-            "barReviews/$gastroBarId?gastroBarName=${gastroBarName ?: ""}"
+    object BarReviews : Screen("barReviews/{gastroBarId}/{gastroBarName}") {
+        fun createRoute(gastroBarId: String, gastroBarName: String? = ""): String {
+            return "barReviews/$gastroBarId/${gastroBarName ?: ""}"
+        }
     }
+
     object Splash : Screen("splash")
 }
 
@@ -142,15 +144,16 @@ fun AppNavigation(
                 viewModel = homeViewModel,
                 // now pass reviewId as String
                 onReviewClick = { reviewIdStr ->
-                    // find by string id
                     val review = uiState.reviews.find { it.id == reviewIdStr }
-                    val gastroBar = review?.placeName?.let { placeName ->
-                        LocalGastroBarProvider.gastroBars.find { it.name == placeName }
-                    }
+                    val gastroBarId = review?.gastroBarId
+
                     Log.d("HomeScreen", "Review ID (string): $reviewIdStr")
-                    Log.d("HomeScreen", "GastroBar encontrado: ${gastroBar?.id}")
-                    gastroBar?.let {
-                        navController.navigate("detail/${it.id}")
+                    Log.d("HomeScreen", "GastroBarId obtenido desde Bar: $gastroBarId")
+
+                    if (gastroBarId != null) {
+                        navController.navigate("detail/$gastroBarId")
+                    } else {
+                        Log.e("HomeScreen", "❌ No se encontró gastroBarId en la review seleccionada")
                     }
                 },
                 onUserClick = { userId ->
@@ -272,22 +275,29 @@ fun AppNavigation(
             Log.d("NavDebug", "Navigating to detail with gastroBarId='$gastroBarIdStr'")
 
             val detailViewModel: DetailGastroBarViewModel = hiltViewModel()
+
             DetailGastroBarScreen(
                 viewModel = detailViewModel,
                 gastroBarId = gastroBarIdStr,
                 // pass Strings forward
                 onViewReviewsClick = { idStr, name ->
-                    Log.d("NavDebug", "onViewReviewsClick -> id='$idStr', name='$name'")
-                    navController.navigate(Screen.BarReviews.createRoute(idStr, name))
+                    if (idStr.isNotBlank()) {
+                        navController.navigate(Screen.BarReviews.createRoute(idStr, name))
+                    } else {
+                        Log.e("NavDebug", "❌ gastroBarId vacío, no se puede navegar a BarReviews")
+                    }
                 }
             )
         }
 
-        // BAR REVIEWS (accept gastroBarId as String)
+        // BAR REVIEWS (acepta gastroBarId como String)
         composable(
             route = Screen.BarReviews.route,
             arguments = listOf(
-                navArgument("gastroBarId") { type = NavType.StringType },
+                navArgument("gastroBarId") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
                 navArgument("gastroBarName") {
                     type = NavType.StringType
                     defaultValue = ""
@@ -299,18 +309,18 @@ fun AppNavigation(
             val gastroBarIdStr = backStackEntry.arguments?.getString("gastroBarId") ?: ""
             val gastroBarName = backStackEntry.arguments?.getString("gastroBarName") ?: ""
 
-            val state by barReviewsVM.uiState.collectAsState()
+            Log.d("NavDebug", "BarReviews -> gastroBarId='$gastroBarIdStr', gastroBarName='$gastroBarName'")
 
-            // Pass gastroBarIdStr as String to screen/viewmodel (update BarReviewsScreen signature if needed)
             BarReviewsScreen(
                 gastroBarId = gastroBarIdStr,
                 gastroBarName = gastroBarName,
-                onReviewClick = { /* ... */ },
+                onReviewClick = { /* no implementado aún */ },
                 onUserClick = { userIdStr ->
                     navController.navigate(Screen.User.createRoute(userIdStr))
                 }
             )
         }
+
 
         composable(
             route = "user/{userId}",

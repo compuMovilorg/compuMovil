@@ -1,5 +1,8 @@
 package com.example.myapplication.ui.create
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,10 +15,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.utils.AppButton
 import com.example.myapplication.utils.StarRating
 import com.example.myapplication.ui.components.GastroBarPicker
@@ -38,11 +42,10 @@ fun CreateScreen(
     CreateScreenBody(
         state = state,
         onPlaceNameChange = viewModel::onPlaceNameChanged,
-        // ahora el callback acepta (id: String, name: String)
         onSelectGastroBar = viewModel::onSelectGastroBar,
         onReviewTextChange = viewModel::onReviewTextChanged,
         onRatingChange = viewModel::onRatingChanged,
-        onAddImage = { viewModel.onAddImage() },
+        onSelectImage = viewModel::onSelectImage,
         onToggleTag = viewModel::onToggleTag,
         onSaveClick = { viewModel.createReview() },
         modifier = modifier
@@ -53,14 +56,20 @@ fun CreateScreen(
 fun CreateScreenBody(
     state: CreateState,
     onPlaceNameChange: (String) -> Unit,
-    onSelectGastroBar: (String, String) -> Unit, // <-- String, String
+    onSelectGastroBar: (String, String) -> Unit,
     onReviewTextChange: (String) -> Unit,
     onRatingChange: (Float) -> Unit,
-    onAddImage: () -> Unit,
+    onSelectImage: (Uri) -> Unit,
     onToggleTag: (String) -> Unit,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { onSelectImage(it) }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -68,15 +77,11 @@ fun CreateScreenBody(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Top
     ) {
-
-        // Nombre del lugar -> AUTOCOMPLETE con Picker
         GastroBarPicker(
-            items = state.gastrobares,                  // List<GastroBar>
+            items = state.gastrobares,
             value = state.placeName,
             onValueChange = onPlaceNameChange,
             onSelect = { selected ->
-                // Llamamos al VM con (id: String, name: String).
-                // Asegúrate que selected.id es String en tu modelo GastroBar.
                 onSelectGastroBar(selected.id, selected.name ?: "")
             },
             isLoading = state.isLoadingGastrobares,
@@ -88,56 +93,51 @@ fun CreateScreenBody(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(text = "Calificar", style = MaterialTheme.typography.bodyMedium)
-        StarRating(
-            rating = state.rating,
-            onRatingChanged = { onRatingChange(it.toFloat()) }
-        )
+        StarRating(rating = state.rating, onRatingChanged = { onRatingChange(it.toFloat()) })
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Fotos
-        Text(text = "Fotos")
-
+        Text(text = "Foto del lugar")
         Spacer(modifier = Modifier.height(10.dp))
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             item {
                 Box(
                     modifier = Modifier
-                        .size(64.dp)
+                        .size(90.dp)
                         .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                        .clickable { onAddImage() },
+                        .clickable { imagePicker.launch("image/*") },
                     contentAlignment = Alignment.Center
                 ) {
                     Text("+")
                 }
             }
-            items(state.selectedImages.size) { index ->
-                Image(
-                    painter = painterResource(id = state.selectedImages[index]),
-                    contentDescription = "Imagen seleccionada",
-                    modifier = Modifier
-                        .size(64.dp)
-                        .background(Color.LightGray, RoundedCornerShape(8.dp))
-                )
+
+            state.selectedImageUri?.let { uri ->
+                item {
+                    Image(
+                        painter = rememberAsyncImagePainter(uri),
+                        contentDescription = "Imagen seleccionada",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(90.dp)
+                            .background(Color.LightGray, RoundedCornerShape(8.dp))
+                    )
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Reseña
         OutlinedTextField(
             value = state.reviewText,
             onValueChange = onReviewTextChange,
             label = { Text("Escribe tu reseña") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
+            modifier = Modifier.fillMaxWidth().height(120.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Etiquetas
         Text(text = "Etiquetas")
         Spacer(modifier = Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -156,12 +156,9 @@ fun CreateScreenBody(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Botón publicar
         AppButton(
-            texto = "Publicar reseña",
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .align(Alignment.CenterHorizontally),
+            texto = if (state.isSubmitting) "Publicando..." else "Publicar reseña",
+            modifier = Modifier.fillMaxWidth(0.9f).align(Alignment.CenterHorizontally),
             onClick = onSaveClick,
             height = 70.dp,
             fontSize = 20.sp

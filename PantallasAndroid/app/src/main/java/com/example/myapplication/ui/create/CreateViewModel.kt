@@ -1,16 +1,18 @@
 package com.example.myapplication.ui.create
 
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.dtos.CreateReviewDto
+import com.example.myapplication.data.repository.GastroBarRepository
+import com.example.myapplication.data.repository.ReviewRepository
+import com.example.myapplication.data.repository.StorageRepository
+import com.example.myapplication.data.repository.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import com.example.myapplication.R
-import com.example.myapplication.data.repository.ReviewRepository
-import com.example.myapplication.data.repository.GastroBarRepository
-import com.example.myapplication.data.repository.UserRepository
-import com.example.myapplication.data.dtos.CreateReviewDto
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,7 +20,8 @@ import javax.inject.Inject
 class CreateViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
     private val gastroBarRepository: GastroBarRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val storageRepository: StorageRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateState())
@@ -65,8 +68,8 @@ class CreateViewModel @Inject constructor(
         _uiState.update { it.copy(rating = input) }
     }
 
-    fun onAddImage(imageRes: Int = R.drawable.gastrobarimg1) {
-        _uiState.update { it.copy(selectedImages = it.selectedImages + imageRes) }
+    fun onSelectImage(uri: Uri) {
+        _uiState.update { it.copy(selectedImageUri = uri) }
     }
 
     fun onToggleTag(tag: String) {
@@ -79,19 +82,21 @@ class CreateViewModel @Inject constructor(
         }
     }
 
+    fun onSelectGastroBar(id: String, name: String) {
+        _uiState.update { it.copy(selectedGastroBarId = id, placeName = name) }
+    }
+
     /**
-     * Crea una review:
-     * - obtiene el userId desde UserRepository (userRepository.getCurrentUserId())
-     * - si no hay userId, setea error en el estado (usuario no autenticado)
-     * - llama a reviewRepository.createReview con userId (String)
+     * Crea una reseña:
+     * - obtiene el userId desde UserRepository
+     * - sube la imagen a Firebase Storage si existe
+     * - llama a ReviewRepository para guardar todo en Firestore
      */
     fun createReview() {
         viewModelScope.launch {
             _uiState.update { it.copy(isSubmitting = true, error = null) }
 
-            // 1) Obtener userId desde UserRepository
-            val userId: String? = try {
-                // ADAPTA según tu UserRepository; aquí asumimos que existe:
+            val userId = try {
                 userRepository.getCurrentUserId()
             } catch (e: Exception) {
                 null
@@ -107,7 +112,6 @@ class CreateViewModel @Inject constructor(
                 return@launch
             }
 
-            // 2) Validaciones mínimas
             val placeName = uiState.value.placeName.ifBlank { null }
             val reviewText = uiState.value.reviewText.ifBlank { null }
 
@@ -121,40 +125,49 @@ class CreateViewModel @Inject constructor(
                 return@launch
             }
 
+
+            var imageUrl: String? = null
+            uiState.value.selectedImageUri?.let { uri ->
+                val uploadResult = storageRepository.uploadImage(uri)
+                uploadResult.fold(
+                    onSuccess = { url ->
+                        imageUrl = url
+                        Log.d("CreateVM", "✅ Imagen subida correctamente: $url")
+                    },
+                    onFailure = { e ->
+                        Log.e("CreateVM", "❌ Error subiendo imagen: ${e.message}")
+                    }
+                )
+            }
+
+            // 🔹 Crear DTO con todos los datos
             val createReviewDto = CreateReviewDto(
                 userId = userId,
                 placeName = placeName,
                 reviewText = reviewText,
-                placeImage = null,
-                parentReviewId = uiState.value.parentReviewId
+                placeImage = imageUrl,
+                parentReviewId = uiState.value.parentReviewId,
+                gastroBarId = uiState.value.selectedGastroBarId
             )
 
-            // 4) Llamada al repositorio
+            // 🔹 Enviar DTO completo al repositorio
             val result = try {
-                reviewRepository.createReview(
-                    userId = createReviewDto.userId,
-                    placeName = createReviewDto.placeName,
-                    reviewText = createReviewDto.reviewText,
-                    parentReviewId = createReviewDto.parentReviewId
-                )
+                reviewRepository.createReview(createReviewDto)
             } catch (e: Exception) {
                 _uiState.update { it.copy(isSubmitting = false, error = e.message ?: "Error inesperado") }
                 return@launch
             }
 
-            // 5) Resultado
             if (result.isSuccess) {
                 _uiState.update { it.copy(isSubmitting = false, navigateBack = true) }
             } else {
                 _uiState.update {
-                    it.copy(isSubmitting = false, error = result.exceptionOrNull()?.message ?: "Error al crear reseña")
+                    it.copy(
+                        isSubmitting = false,
+                        error = result.exceptionOrNull()?.message ?: "Error al crear reseña"
+                    )
                 }
             }
         }
-    }
-
-    // ahora con String para el id del gastrobar
-    fun onSelectGastroBar(id: String, name: String) {
-        _uiState.update { it.copy(selectedGastroBarId = id, placeName = name) }
     }
 }

@@ -85,35 +85,29 @@ class ReviewRepository @Inject constructor(
         }
     }
 
-    suspend fun createReview(
-        userId: String,
-        placeName: String,
-        reviewText: String,
-        parentReviewId: String? = null
-    ): Result<Unit> {
+    suspend fun createReview(createReviewDto: CreateReviewDto): Result<Unit> {
         return try {
-            // Llamada a la instancia (no a la interfaz)
-            val userDto: UserDtoGeneric = userRemoteDataSource.getUserById(userId)
+            // Si el DTO ya trae user (UserProfileDto), lo usamos; si no, lo consultamos.
+            val dtoWithUser = if (createReviewDto.user != null) {
+                createReviewDto
+            } else {
+                // obtén data del usuario (puede lanzar excepción si no existe)
+                val userDto = userRemoteDataSource.getUserById(createReviewDto.userId)
+                val userProfile = UserProfileDto(
+                    id = userDto.id,
+                    username = userDto.username,
+                    name = userDto.name,
+                    profileImage = userDto.profileImage
+                )
+                createReviewDto.copy(user = userProfile)
+            }
 
-            // Mapea al DTO que espera CreateReviewDto (UserProfileDto)
-            val userProfile = UserProfileDto(
-                id = userDto.id,
-                username = userDto.username,
-                name = userDto.name,
-                profileImage = userDto.profileImage
-            )
+            // Llamamos al data source con el DTO completo (incluyendo placeImage si existe)
+            reviewRemoteDataSource.createReview(dtoWithUser)
 
-            val createReviewDto = CreateReviewDto(
-                userId = userId,
-                placeName = placeName,
-                reviewText = reviewText,
-                parentReviewId = parentReviewId,
-                placeImage = null,
-                user = userProfile
-            )
-
-            reviewRemoteDataSource.createReview(createReviewDto)
             Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(e)
         } catch (e: Exception) {
             Result.failure(e)
         }
