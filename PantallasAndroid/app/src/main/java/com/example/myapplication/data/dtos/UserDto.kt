@@ -1,6 +1,7 @@
 package com.example.myapplication.data.dtos
 
 import com.example.myapplication.data.UserInfo
+import com.google.firebase.firestore.DocumentSnapshot
 
 abstract class UserDtoGeneric {
     abstract val id: String
@@ -13,9 +14,20 @@ abstract class UserDtoGeneric {
     abstract val followingCount: Int
     abstract val profileImage: String?
 
+    abstract val followed: Boolean
+
     abstract fun toUserInfo(): UserInfo
 }
 
+
+// 4) DTO para actualizar perfil (solo campos editables)
+data class UpdateUserDto(
+    val username: String? = null,
+    val name: String? = null,
+    val birthdate: String? = null,
+    val email: String? = null,
+    val profileImage: String? = null
+)
 
 data class UserFirestoreDto(
     override val id: String,
@@ -26,9 +38,10 @@ data class UserFirestoreDto(
     override val birthdate: String,
     override val followersCount: Int = 0,
     override val followingCount: Int = 0,
-    override val profileImage: String?
+    override val profileImage: String?,
+    override var followed: Boolean = false
 ) : UserDtoGeneric() {
-    constructor() : this("", "", "", "", "", "", 0, 0, null)
+    constructor() : this("", "", "", "", "", "", 0, 0, null, false)
 
     override fun toUserInfo(): UserInfo {
         return UserInfo(
@@ -39,7 +52,8 @@ data class UserFirestoreDto(
             birthdate = birthdate,
             followersCount = followersCount,
             followingCount = followingCount,
-            profileImage = profileImage
+            profileImage = profileImage,
+            followed = followed
         )
     }
 }
@@ -53,9 +67,10 @@ data class UserRetrofitDto(
     override val birthdate: String,
     override val followersCount: Int = 0,
     override val followingCount: Int = 0,
-    override val profileImage: String?
+    override val profileImage: String?,
+    override val followed: Boolean = false
 ) : UserDtoGeneric() {
-    constructor() : this("", "", "", "", "", "", 0, 0, null)
+    constructor() : this("", "", "", "", "", "", 0, 0, null, false)
 
     override fun toUserInfo(): UserInfo {
         return UserInfo(
@@ -66,7 +81,8 @@ data class UserRetrofitDto(
             birthdate = birthdate,
             followersCount = followersCount,
             followingCount = followingCount,
-            profileImage = profileImage
+            profileImage = profileImage,
+            followed = followed
         )
     }
 }

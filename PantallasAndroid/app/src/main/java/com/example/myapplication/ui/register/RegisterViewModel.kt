@@ -127,7 +127,8 @@ class RegisterViewModel @Inject constructor(
                     name = name,
                     username = user,
                     birthdate = birth,
-                    userId = uid
+                    userId = uid,
+                    FCMToken = ""
                 )
 
                 if (saveRes.isFailure) {

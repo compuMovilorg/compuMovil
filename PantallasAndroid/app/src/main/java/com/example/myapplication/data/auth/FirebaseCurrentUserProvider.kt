@@ -11,8 +11,16 @@ class FirebaseCurrentUserProvider @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository
 ) : CurrentUserProvider {
+
     override suspend fun currentUserId(): String? {
-        TODO("Not yet implemented")
+        return try {
+            val firebaseUid = currentFirebaseUid()
+            Log.d(TAG, "currentUserId -> usando firebaseUid=$firebaseUid")
+            firebaseUid
+        } catch (e: Exception) {
+            Log.e(TAG, "Error obteniendo currentUserId", e)
+            null
+        }
     }
 
     override suspend fun currentFirebaseUid(): String? {
@@ -20,28 +28,30 @@ class FirebaseCurrentUserProvider @Inject constructor(
         Log.d(TAG, "currentFirebaseUid -> $uid")
         return uid
     }
-
-    override suspend fun currentBackendUserId(): String? {
-        val fbUser = authRepository.currentUser ?: return null
-        val uid = fbUser.uid
-        val email = fbUser.email
-
-        // 1) Buscar por UID
-        userRepository.getUserByFirebaseUid(uid).fold(
-            onSuccess = { return it.id },
-            onFailure = { Log.d(TAG, "No mapeado por uid=$uid: ${it.message}") }
-        )
-
-        // 2) Fallback por email
-        if (!email.isNullOrBlank()) {
-            userRepository.getUserByEmail(email).fold(
-                onSuccess = { return it.id },
-                onFailure = { Log.d(TAG, "No mapeado por email=$email: ${it.message}") }
-            )
-        }
-
-        // 3) No reventar la app; simplemente no está mapeado
-        Log.w(TAG, "Firebase autenticado pero sin mapping backend (uid=$uid, email=$email)")
-        return null
-    }
 }
+
+
+//    override suspend fun currentBackendUserId(): String? {
+//        val fbUser = authRepository.currentUser ?: return null
+//        val uid = fbUser.uid
+//        val email = fbUser.email
+//
+//        // 1) Buscar por UID
+//        userRepository.getUserByFirebaseUid(uid).fold(
+//            onSuccess = { return it.id },
+//            onFailure = { Log.d(TAG, "No mapeado por uid=$uid: ${it.message}") }
+//        )
+//
+//        // 2) Fallback por email
+//        if (!email.isNullOrBlank()) {
+//            userRepository.getUserByEmail(email).fold(
+//                onSuccess = { return it.id },
+//                onFailure = { Log.d(TAG, "No mapeado por email=$email: ${it.message}") }
+//            )
+//        }
+//
+//        // 3) No reventar la app; simplemente no está mapeado
+//        Log.w(TAG, "Firebase autenticado pero sin mapping backend (uid=$uid, email=$email)")
+//        return null
+//    }
+//}

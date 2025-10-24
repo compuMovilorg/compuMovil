@@ -14,7 +14,7 @@ class UserRetrofitDataSourceImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getUserById(id: String): UserDtoGeneric {
+    override suspend fun getUserById(id: String,currentUserId: String): UserDtoGeneric {
         TODO("Not yet implemented")
     }
 
@@ -22,9 +22,9 @@ class UserRetrofitDataSourceImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getUserByFirebaseUid(firebaseUid: String): UserDtoGeneric {
-        TODO("Not yet implemented")
-    }
+//    override suspend fun getUserByFirebaseUid(firebaseUid: String): UserDtoGeneric {
+//        TODO("Not yet implemented")
+//    }
 
     override suspend fun createUser(user: UserDtoGeneric) {
         TODO("Not yet implemented")
@@ -47,5 +47,17 @@ class UserRetrofitDataSourceImpl @Inject constructor(
     ) {
         TODO("Not yet implemented")
     }
+
+    override suspend fun updateProfileImage(id: String, profileImageUrl: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun followOrUnfollowUser(
+        currentUserId: String,
+        targetUserId: String
+    ): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
 
 }

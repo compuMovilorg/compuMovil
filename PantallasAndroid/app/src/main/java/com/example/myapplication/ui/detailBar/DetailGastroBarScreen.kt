@@ -56,7 +56,7 @@ fun DetailGastroBarBody(
 
     LaunchedEffect(gastroBarId) {
         Log.d("DetailScreen", "Entrando a DetailGastroBar con ID: $gastroBarId")
-        viewModel.loadGastroBarAndReviews(gastroBarId) // ✅ Función actualizada
+        viewModel.buscarGastro(gastroBarId) // ✅ Función actualizada
     }
 
     state.gastroBar?.let { gastroBar ->

@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.user
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,28 +18,25 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.data.ReviewInfo
 import com.example.myapplication.utils.ProfileAsyncImage
 
-// -----------------------------------------------------------------------------
-// PANTALLA PRINCIPAL
-// -----------------------------------------------------------------------------
 @Composable
 fun UserScreen(
     viewModel: UserViewModel = hiltViewModel()
 ) {
+    Log.d("UserScreen", "UserScreen Composable inicializado")
     val state by viewModel.uiState.collectAsState()
 
     UserScreenBody(
         state = state,
         onRetry = { viewModel.reload() },
-        modifier = Modifier
+        modifier = Modifier,
+        viewModel = viewModel
     )
 }
 
-// -----------------------------------------------------------------------------
-// BODY PRINCIPAL CON TODA LA UI
-// -----------------------------------------------------------------------------
 @Composable
 fun UserScreenBody(
     state: UserState,
+    viewModel: UserViewModel,
     onRetry: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
@@ -63,22 +61,20 @@ fun UserScreenBody(
 
         state.user != null -> {
             val user = state.user!!
+            Log.d("UserScreen", "Renderizando perfil de usuario: ${user.username}")
+
             LazyColumn(
                 modifier = modifier
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                // -----------------------------------------------------------------
-                // ENCABEZADO DEL PERFIL (imagen izquierda, nombre/username y contadores en fila)
-                // -----------------------------------------------------------------
                 item {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 100.dp) // deja tu offset si así lo quieres
+                            .padding(top = 100.dp)
                     ) {
-                        // Imagen de perfil
                         ProfileAsyncImage(
                             profileImage = user.profileImage ?: "",
                             size = 90
@@ -86,30 +82,50 @@ fun UserScreenBody(
 
                         Spacer(modifier = Modifier.width(16.dp))
 
-                        // Información del usuario
                         Column(
                             verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.Start,
                             modifier = Modifier.weight(1f)
                         ) {
-                            // Username (grande y en negrita)
-                            Text(
-                                text = user.username,
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column {
+                                    Text(
+                                        text = user.username,
+                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                                    )
 
-                            val displayName = user.name ?: ""
-                            if (displayName.isNotBlank()) {
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = displayName,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
+                                    val displayName = user.name ?: ""
+                                    if (displayName.isNotBlank()) {
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = displayName,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+
+                                // Botón "Seguir"
+                                Button(
+                                    onClick = {
+                                        Log.d("UserScreen", "CLICK detectado en boton Seguir para userId=${user.id}")
+                                        if (!user.id.isNullOrBlank()) {
+                                            viewModel.followOrUnfollowUser(user.id)
+                                        } else {
+                                            Log.e("UserScreen", "user.id está vacío, no se puede seguir")
+                                        }
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                                    modifier = Modifier.height(36.dp)
+                                ) {
+                                    Text("Seguir", style = MaterialTheme.typography.bodyMedium)
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            // Contadores en una sola fila
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text(
                                     text = "Seguidores: ${user.followersCount ?: 0}",
@@ -129,9 +145,6 @@ fun UserScreenBody(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                // -----------------------------------------------------------------
-                // LISTA DE REVIEWS DEL USUARIO
-                // -----------------------------------------------------------------
                 if (state.reviews.isEmpty()) {
                     item {
                         Box(
@@ -146,7 +159,7 @@ fun UserScreenBody(
                 } else {
                     items(
                         items = state.reviews,
-                        key = { it.id } // clave estable para mejor rendimiento
+                        key = { it.id }
                     ) { review ->
                         ReviewItem(review)
                     }
@@ -162,9 +175,6 @@ fun UserScreenBody(
     }
 }
 
-// -----------------------------------------------------------------------------
-// ITEM INDIVIDUAL DE RESEÑA
-// -----------------------------------------------------------------------------
 @Composable
 fun ReviewItem(review: ReviewInfo) {
     Column(

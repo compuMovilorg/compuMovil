@@ -12,18 +12,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.myapplication.utils.AppButton
 import com.example.myapplication.utils.ProfileAsyncImage
 import com.example.myapplication.utils.CustomTextField
+import kotlinx.coroutines.launch
 
 @Composable
 fun EditProfileScreen(
+    navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: EditProfileViewModel = hiltViewModel(),
 ) {
+    // Estado del ViewModel
     val state by viewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
 
-
+    // Launcher para seleccionar imagen
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -42,7 +47,7 @@ fun EditProfileScreen(
     ) {
 
         ProfileAsyncImage(
-            profileImage = state.profilePicUrl.toString(),
+            profileImage = state.profilePicUrl.orEmpty(),
             size = 120
         )
 
@@ -82,7 +87,7 @@ fun EditProfileScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         CustomTextField(
-            value = state.fechaNacimiento,
+            value = state.birthdate,
             onValueChange = { viewModel.updateFechaNacimiento(it) },
             label = "Fecha de nacimiento",
             modifier = Modifier.fillMaxWidth()
@@ -99,13 +104,22 @@ fun EditProfileScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        val isLoading = state.isLoading
+
         AppButton(
-            texto = "Guardar cambios",
+            texto = if (isLoading) "Guardando..." else "Guardar cambios",
             modifier = Modifier.fillMaxWidth(),
             onClick = {
                 viewModel.saveProfile(
-                    onSuccess = {},
-                    onError = { error -> }
+                    onSuccess = {
+                        scope.launch {
+                            // Navegar a Profile después de guardar
+                            navController.popBackStack()
+                        }
+                    },
+                    onError = { error ->
+                        Log.d("EditProfile", "Error al guardar perfil: $error")
+                    }
                 )
             },
             height = 60.dp,
@@ -113,4 +127,3 @@ fun EditProfileScreen(
         )
     }
 }
-

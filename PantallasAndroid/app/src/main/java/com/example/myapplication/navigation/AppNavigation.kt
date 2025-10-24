@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -62,16 +61,19 @@ sealed class Screen(val route: String) {
     object User : Screen("user/{userId}") {
         fun createRoute(userId: String) = "user/$userId"
     }
+    object MainUser : Screen("mainUser")
 
     object Profile : Screen("profile")
     object EditProfile : Screen("editProfile")
     object SettingsRoute : Screen("settings")
     object Notification : Screen("notification")
     // BarReviews already encoded to accept strings — keep it that way
-    object BarReviews : Screen("barReviews/{gastroBarId}?gastroBarName={gastroBarName}") {
-        fun createRoute(gastroBarId: String, gastroBarName: String? = null) =
-            "barReviews/$gastroBarId?gastroBarName=${gastroBarName ?: ""}"
+    object BarReviews : Screen("barReviews/{gastroBarId}/{gastroBarName}") {
+        fun createRoute(gastroBarId: String, gastroBarName: String? = ""): String {
+            return "barReviews/$gastroBarId/${gastroBarName ?: ""}"
+        }
     }
+
     object Splash : Screen("splash")
 }
 
@@ -142,15 +144,16 @@ fun AppNavigation(
                 viewModel = homeViewModel,
                 // now pass reviewId as String
                 onReviewClick = { reviewIdStr ->
-                    // find by string id
                     val review = uiState.reviews.find { it.id == reviewIdStr }
-                    val gastroBar = review?.placeName?.let { placeName ->
-                        LocalGastroBarProvider.gastroBars.find { it.name == placeName }
-                    }
+                    val gastroBarId = review?.gastroBarId
+
                     Log.d("HomeScreen", "Review ID (string): $reviewIdStr")
-                    Log.d("HomeScreen", "GastroBar encontrado: ${gastroBar?.id}")
-                    gastroBar?.let {
-                        navController.navigate("detail/${it.id}")
+                    Log.d("HomeScreen", "GastroBarId obtenido desde Bar: $gastroBarId")
+
+                    if (gastroBarId != null) {
+                        navController.navigate("detail/$gastroBarId")
+                    } else {
+                        Log.e("HomeScreen", "❌ No se encontró gastroBarId en la review seleccionada")
                     }
                 },
                 onUserClick = { userId ->
@@ -209,6 +212,19 @@ fun AppNavigation(
             )
         }
 
+        // MAIN USER (pantalla del usuario autenticado)
+        composable(route = Screen.MainUser.route) {
+            val mainUserViewModel: com.example.myapplication.ui.mainuser.MainUserViewModel = hiltViewModel()
+            com.example.myapplication.ui.mainuser.MainUserScreen(
+                viewModel = mainUserViewModel,
+                onNavigateToProfile = {
+                    navController.navigate(Screen.Profile.route)
+                }
+            )
+        }
+
+
+
         composable(Screen.Profile.route) {
             val profileViewModel: ProfileViewModel = hiltViewModel()
             ProfileScreen(
@@ -225,10 +241,12 @@ fun AppNavigation(
         composable(Screen.EditProfile.route) {
             val editProfileViewModel: EditProfileViewModel = hiltViewModel()
             EditProfileScreen(
+                navController = navController,
                 modifier = modifier,
                 viewModel = editProfileViewModel
             )
         }
+
 
         composable(Screen.Notification.route) {
             val notificationViewModel: NotificationViewModel = hiltViewModel()
@@ -259,22 +277,29 @@ fun AppNavigation(
             Log.d("NavDebug", "Navigating to detail with gastroBarId='$gastroBarIdStr'")
 
             val detailViewModel: DetailGastroBarViewModel = hiltViewModel()
+
             DetailGastroBarScreen(
                 viewModel = detailViewModel,
                 gastroBarId = gastroBarIdStr,
                 // pass Strings forward
                 onViewReviewsClick = { idStr, name ->
-                    Log.d("NavDebug", "onViewReviewsClick -> id='$idStr', name='$name'")
-                    navController.navigate(Screen.BarReviews.createRoute(idStr, name))
+                    if (idStr.isNotBlank()) {
+                        navController.navigate(Screen.BarReviews.createRoute(idStr, name))
+                    } else {
+                        Log.e("NavDebug", "❌ gastroBarId vacío, no se puede navegar a BarReviews")
+                    }
                 }
             )
         }
 
-        // BAR REVIEWS (accept gastroBarId as String)
+        // BAR REVIEWS (acepta gastroBarId como String)
         composable(
             route = Screen.BarReviews.route,
             arguments = listOf(
-                navArgument("gastroBarId") { type = NavType.StringType },
+                navArgument("gastroBarId") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
                 navArgument("gastroBarName") {
                     type = NavType.StringType
                     defaultValue = ""
@@ -284,25 +309,20 @@ fun AppNavigation(
         ) { backStackEntry ->
             val barReviewsVM: BarReviewsViewModel = hiltViewModel(backStackEntry)
             val gastroBarIdStr = backStackEntry.arguments?.getString("gastroBarId") ?: ""
-            val gastroBarName = backStackEntry.arguments?.getString("gastroBarName")?.takeIf { it.isNotBlank() }
+            val gastroBarName = backStackEntry.arguments?.getString("gastroBarName") ?: ""
 
-            LaunchedEffect(gastroBarIdStr, gastroBarName) {
-                barReviewsVM.load(gastroBarIdStr, gastroBarName)
-            }
+            Log.d("NavDebug", "BarReviews -> gastroBarId='$gastroBarIdStr', gastroBarName='$gastroBarName'")
 
-            val state by barReviewsVM.uiState.collectAsState()
-            val reviews = remember(state.searchQuery, state.reviews) { barReviewsVM.filteredReviews }
-
-            // Pass gastroBarIdStr as String to screen/viewmodel (update BarReviewsScreen signature if needed)
             BarReviewsScreen(
-                state = state,
-                reviews = reviews,
-                onReviewClick = { /* ... */ },
+                gastroBarId = gastroBarIdStr,
+                gastroBarName = gastroBarName,
+                onReviewClick = { /* no implementado aún */ },
                 onUserClick = { userIdStr ->
                     navController.navigate(Screen.User.createRoute(userIdStr))
                 }
             )
         }
+
 
         composable(
             route = "user/{userId}",
@@ -333,5 +353,6 @@ val bottomNavItems = listOf(
     BottomNavItem(Icons.Filled.Search, Icons.Outlined.Search, Screen.Search.route),
     BottomNavItem(Icons.Filled.AddCircle, Icons.Outlined.AddCircle, Screen.Create.route),
     BottomNavItem(Icons.Filled.Notifications, Icons.Outlined.Notifications, Screen.Events.route),
-    BottomNavItem(Icons.Filled.Person, Icons.Outlined.Person, Screen.Profile.route)
+   // BottomNavItem(Icons.Filled.Person, Icons.Outlined.Person, Screen.Profile.route)
+    BottomNavItem(Icons.Filled.Person, Icons.Outlined.Person, Screen.MainUser.route)
 )

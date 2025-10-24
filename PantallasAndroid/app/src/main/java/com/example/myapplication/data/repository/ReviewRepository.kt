@@ -3,6 +3,7 @@ package com.example.myapplication.data.repository
 import android.util.Log
 import retrofit2.HttpException
 import com.example.myapplication.data.ReviewInfo
+import com.example.myapplication.data.datasource.AuthRemoteDataSource
 import com.example.myapplication.data.datasource.UserRemoteDataSource
 import com.example.myapplication.data.datasource.impl.firestore.ReviewFireStoreDataSourceImpl
 import com.example.myapplication.data.datasource.impl.firestore.UserFirestoreDataSourceImpl
@@ -11,11 +12,14 @@ import com.example.myapplication.data.dtos.CreateReviewUserDto
 import com.example.myapplication.data.dtos.UserDtoGeneric
 import com.example.myapplication.data.dtos.UserProfileDto
 import com.example.myapplication.data.dtos.toReviewInfo
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class ReviewRepository @Inject constructor(
     private val reviewRemoteDataSource: ReviewFireStoreDataSourceImpl,
     private val userRemoteDataSource: UserFirestoreDataSourceImpl,
+    private val authRemoteDataSource: AuthRemoteDataSource
 ) {
 
     suspend fun getReviews(): Result<List<ReviewInfo>> {
@@ -31,8 +35,10 @@ class ReviewRepository @Inject constructor(
     }
 
     suspend fun getReviewById(id: String): Result<ReviewInfo> {
+        val currentUserId = authRemoteDataSource.currentUser?.uid ?: ""
+
         return try {
-            val review = reviewRemoteDataSource.getReviewById(id)
+            val review = reviewRemoteDataSource.getReviewById(id,currentUserId)
             Result.success(review.toReviewInfo())
         } catch (e: HttpException) {
             Result.failure(e)
@@ -85,35 +91,31 @@ class ReviewRepository @Inject constructor(
         }
     }
 
-    suspend fun createReview(
-        userId: String,
-        placeName: String,
-        reviewText: String,
-        parentReviewId: String? = null
-    ): Result<Unit> {
+    suspend fun createReview(createReviewDto: CreateReviewDto): Result<Unit> {
+        val currentUserId = authRemoteDataSource.currentUser?.uid ?: ""
+
         return try {
-            // Llamada a la instancia (no a la interfaz)
-            val userDto: UserDtoGeneric = userRemoteDataSource.getUserById(userId)
+            // Si el DTO ya trae user (UserProfileDto), lo usamos; si no, lo consultamos.
+            val dtoWithUser = if (createReviewDto.user != null) {
+                createReviewDto
+            } else {
+                // obtén data del usuario (puede lanzar excepción si no existe)
+                val userDto = userRemoteDataSource.getUserById(createReviewDto.userId,currentUserId)
+                val userProfile = UserProfileDto(
+                    id = userDto.id,
+                    username = userDto.username,
+                    name = userDto.name,
+                    profileImage = userDto.profileImage
+                )
+                createReviewDto.copy(user = userProfile)
+            }
 
-            // Mapea al DTO que espera CreateReviewDto (UserProfileDto)
-            val userProfile = UserProfileDto(
-                id = userDto.id,
-                username = userDto.username,
-                name = userDto.name,
-                profileImage = userDto.profileImage
-            )
+            // Llamamos al data source con el DTO completo (incluyendo placeImage si existe)
+            reviewRemoteDataSource.createReview(dtoWithUser)
 
-            val createReviewDto = CreateReviewDto(
-                userId = userId,
-                placeName = placeName,
-                reviewText = reviewText,
-                parentReviewId = parentReviewId,
-                placeImage = null,
-                user = userProfile
-            )
-
-            reviewRemoteDataSource.createReview(createReviewDto)
             Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(e)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -140,6 +142,23 @@ class ReviewRepository @Inject constructor(
             Result.failure(e)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    suspend fun sendOrDeleteReviewLike(reviewId: String, userId: String): Result<Unit> {
+        return try {
+            reviewRemoteDataSource.sendOrDeleteReviewLike(reviewId, userId)
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getReviewsLive(): Flow<List<ReviewInfo>> {
+        return reviewRemoteDataSource.listenAllReviews().map { reviews ->
+            reviews.map { it.toReviewInfo() }
         }
     }
 }

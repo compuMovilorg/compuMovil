@@ -1,4 +1,3 @@
-// ui/barReviews/BarReviewsScreen.kt
 package com.example.myapplication.ui.barReviews
 
 import androidx.compose.foundation.layout.*
@@ -6,43 +5,44 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.myapplication.data.ReviewInfo
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.utils.ReviewCard
 
-// -----------------------------------------------------------------------------
-// PANTALLA DELGADA: solo delega al Body
-// -----------------------------------------------------------------------------
 @Composable
 fun BarReviewsScreen(
-    state: BarReviewsState,
-    reviews: List<ReviewInfo>,
-    onReviewClick: (String) -> Unit,          // ← String
-    onUserClick: (String) -> Unit,            // ← String
-    modifier: Modifier = Modifier
+    gastroBarId: String,
+    gastroBarName: String? = null,
+    onReviewClick: (String) -> Unit,
+    onUserClick: (String) -> Unit
 ) {
     BarReviewsBody(
-        state = state,
-        reviews = reviews,
+        gastroBarId = gastroBarId,
+        gastroBarName = gastroBarName,
         onReviewClick = onReviewClick,
-        onUserClick = onUserClick,
-        modifier = modifier
+        onUserClick = onUserClick
     )
 }
 
 @Composable
 fun BarReviewsBody(
-    state: BarReviewsState,
-    reviews: List<ReviewInfo>,
-    onReviewClick: (String) -> Unit,          // ← String
-    onUserClick: (String) -> Unit,            // ← String
+    gastroBarId: String,
+    gastroBarName: String? = null,
+    onReviewClick: (String) -> Unit,
+    onUserClick: (String) -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: BarReviewsViewModel = hiltViewModel()
 ) {
+    // Carga inicial de reseñas
+    LaunchedEffect(gastroBarId, gastroBarName) {
+        viewModel.load(gastroBarId, gastroBarName)
+    }
 
+    val state by viewModel.uiState.collectAsState()
+    val reviews = remember(state.searchQuery, state.reviews) { viewModel.filteredReviews }
 
     Box(
         modifier = modifier
@@ -75,45 +75,15 @@ fun BarReviewsBody(
                         ReviewCard(
                             review = review,
                             modifier = Modifier.fillMaxWidth(),
-                            onReviewClick = { onReviewClick(review.id) },
-                            onUserClick = { onUserClick(review.userId) }
+                            onReviewClick = { onReviewClick(it) }, // 'it' es reviewId
+                            onLikeClick = { reviewId, userId ->
+                                viewModel.sendOrDeleteReviewLike(reviewId, userId)
+                            },
+                            onUserClick = { onUserClick(review.userId) } // userId no nullable
                         )
                     }
                 }
             }
         }
     }
-}
-
-
-// -----------------------------------------------------------------------------
-// PREVIEW
-// -----------------------------------------------------------------------------
-@Preview
-@Composable
-fun PreviewBarReviewsScreen() {
-    val sampleReview = ReviewInfo(
-        userImage = null,
-        placeImage = null,
-        userId = "user-1",
-        id = "review-1",
-        name = "Carlos",
-        placeName = "Santa Juana Gastrobar",
-        reviewText = "Excelente ambiente y cocteles deliciosos.",
-        likes = 12,
-        comments = 3
-    )
-
-    val sampleState = BarReviewsState(
-        gastroBarId = "1",
-        gastroBarName = "Santa Juana Gastrobar",
-        reviews = listOf(sampleReview)
-    )
-
-    BarReviewsScreen(
-        state = sampleState,
-        reviews = sampleState.reviews,
-        onReviewClick = {},
-        onUserClick = {}
-    )
 }

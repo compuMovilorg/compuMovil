@@ -40,17 +40,16 @@ class StorageRepository @Inject constructor(
             Result.failure(Exception(message))
         }
     }
-    suspend fun uploadGastrobares(uri: Uri, gastrobarId: String): Result<String> {
+    suspend fun uploadImage(uri: Uri): Result<String> {
         return try {
-            val userId = auth.currentUser?.uid
-                ?: return Result.failure(Exception("Ningún usuario logeado"))
-
-            val path = "gastrobares/$userId/$gastrobarId.jpg"
-            val url = storage.uploadImage(path, uri)
+            // Crea un nombre único basado en la hora para evitar colisiones
+            val fileName = "images/${System.currentTimeMillis()}.jpg"
+            val url = storage.uploadImage(fileName, uri)
 
             Result.success(url)
         } catch (e: Exception) {
-            Log.d("Error_app", e.toString())
+            Log.e("UPLOAD_IMAGE", "Error al subir imagen: ${e.message}", e)
+
             val message = when (e) {
                 is StorageException -> when (e.errorCode) {
                     StorageException.ERROR_OBJECT_NOT_FOUND -> "El archivo no existe en el servidor."
@@ -61,9 +60,11 @@ class StorageRepository @Inject constructor(
                 }
                 else -> e.message ?: "Error desconocido al subir la imagen."
             }
+
             Result.failure(Exception(message))
         }
     }
+
 
 
 }

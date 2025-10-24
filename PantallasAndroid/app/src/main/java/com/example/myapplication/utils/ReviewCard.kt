@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.myapplication.data.ReviewInfo
@@ -21,18 +20,18 @@ import android.util.Log
 
 @Composable
 fun ReviewCard(
-    onReviewClick: (String) -> Unit, // ahora recibe String
-    onUserClick: (String) -> Unit,   // ahora recibe String (userId)
     review: ReviewInfo,
+    onReviewClick: (String) -> Unit,
+    onUserClick: (String) -> Unit,
+    onLikeClick: (String, String) -> Unit, // reviewId, userId
     modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .clickable {
-                val id = review.id
-                if (!id.isNullOrBlank()) {
-                    onReviewClick(id)
+                if (review.id.isNotBlank()) {
+                    onReviewClick(review.id)
                 } else {
                     Log.w("ReviewCard", "Review id vacío o nulo, click ignorado")
                 }
@@ -46,27 +45,26 @@ fun ReviewCard(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // 1️⃣ Header: perfil
+            // Header: perfil
             ReviewCardHeader(
                 userImage = review.userImage,
                 userName = review.name,
                 onUserClick = {
-                    val userId = review.userId
-                    if (!userId.isNullOrBlank()) {
-                        onUserClick(userId)
+                    if (review.userId.isNotBlank()) {
+                        onUserClick(review.userId)
                     } else {
                         Log.w("ReviewCard", "User id vacío o nulo, click ignorado")
                     }
                 }
             )
 
-            // 2️⃣ Nombre del lugar arriba de la imagen
+            // Nombre del lugar
             Text(
-                text = review.placeName ?: "",
+                text = review.placeName,
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
             )
 
-            // 3️⃣ Imagen del lugar
+            // Imagen del lugar
             AsyncImage(
                 model = review.placeImage ?: "",
                 contentDescription = "Imagen del lugar",
@@ -77,16 +75,16 @@ fun ReviewCard(
                     .clip(MaterialTheme.shapes.medium)
             )
 
-            // 4️⃣ Texto de la reseña
-            ReviewCardBody(review.reviewText ?: "")
+            // Texto de la reseña
+            ReviewCardBody(review.reviewText)
 
-            // 5️⃣ Footer
+            // Footer
             ReviewCardFooter(
                 likes = review.likes,
                 comments = review.comments,
-                onLikeClick = { },
-                onCommentClick = { },
-                onShareClick = { }
+                onLikeClick = { onLikeClick(review.id, review.userId) },
+                onCommentClick = { /* TODO: acción comentar */ },
+                onShareClick = { /* TODO: acción compartir */ }
             )
         }
     }
@@ -102,7 +100,7 @@ fun ReviewCardHeader(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onUserClick() } // acción de clic
+            .clickable { onUserClick() }
             .padding(vertical = 4.dp)
     ) {
         ProfileAsyncImage(
@@ -156,28 +154,3 @@ fun ReviewCardFooter(
         }
     }
 }
-
-/*
-Previews (actualiza ReviewInfo según tu modelo real si lo usas)
-@Preview(showBackground = true)
-@Composable
-fun PreviewReviewCard() {
-    val review = ReviewInfo(
-        id = "abc123",
-        userId = "user123",
-        userImage = "",
-        placeImage = "",
-        name = "Carlos Perez",
-        placeName = "Café del Parque",
-        reviewText = "Un lugar muy acogedor con excelente café y atención al cliente.",
-        likes = 120,
-        comments = 45
-    )
-    ReviewCard(
-        review = review,
-        onReviewClick = {},
-        onUserClick = {},
-        modifier = Modifier.padding(8.dp)
-    )
-}
-*/

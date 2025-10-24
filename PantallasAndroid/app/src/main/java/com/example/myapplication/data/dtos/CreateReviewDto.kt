@@ -12,5 +12,6 @@ data class CreateReviewDto (
     val parentReviewId: String?,
     val placeImage: String?,
 
-    val user: UserProfileDto? = null
+    val user: UserProfileDto? = null,
+    val gastroBarId: String? = null
 )

@@ -17,14 +17,14 @@ import com.example.myapplication.utils.ReviewCard
 fun HomeScreen(
     onReviewClick: (String) -> Unit, // ahora String
     onUserClick: (String) -> Unit,   // ahora String
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val reviews = remember(state.searchQuery, state.reviews) { viewModel.filteredReviews }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp)
             .padding(top = 100.dp)
@@ -43,17 +43,27 @@ fun HomeScreen(
                 )
             }
 
+            reviews.isEmpty() -> {
+                Text(
+                    text = "Aún no hay reseñas",
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
             else -> {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(reviews) { review ->
+                    items(reviews, key = { it.id }) { review ->
                         ReviewCard(
-                            onReviewClick = { onReviewClick(review.id) },       // pasa String
                             review = review,
                             modifier = Modifier.fillMaxWidth(),
-                            onUserClick = { onUserClick(review.userId) }        // pasa String
+                            onReviewClick = { onReviewClick(review.id) },
+                            onUserClick = { onUserClick(review.userId) },
+                            onLikeClick = { reviewId, userId ->
+                                viewModel.sendOrDeleteReviewLike(reviewId, userId)
+                            }
                         )
                     }
                 }
@@ -61,6 +71,7 @@ fun HomeScreen(
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
