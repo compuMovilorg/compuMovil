@@ -241,10 +241,12 @@ fun AppNavigation(
         composable(Screen.EditProfile.route) {
             val editProfileViewModel: EditProfileViewModel = hiltViewModel()
             EditProfileScreen(
+                navController = navController,
                 modifier = modifier,
                 viewModel = editProfileViewModel
             )
         }
+
 
         composable(Screen.Notification.route) {
             val notificationViewModel: NotificationViewModel = hiltViewModel()

@@ -1,4 +1,3 @@
-// ui/barReviews/BarReviewsScreen.kt
 package com.example.myapplication.ui.barReviews
 
 import androidx.compose.foundation.layout.*
@@ -13,15 +12,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.utils.ReviewCard
 
-// -----------------------------------------------------------------------------
-// PANTALLA DELGADA: solo delega al Body
-// -----------------------------------------------------------------------------
 @Composable
 fun BarReviewsScreen(
-    gastroBarId: String,                      // ← String
+    gastroBarId: String,
     gastroBarName: String? = null,
-    onReviewClick: (String) -> Unit,          // ← String
-    onUserClick: (String) -> Unit             // ← String
+    onReviewClick: (String) -> Unit,
+    onUserClick: (String) -> Unit
 ) {
     BarReviewsBody(
         gastroBarId = gastroBarId,
@@ -33,14 +29,14 @@ fun BarReviewsScreen(
 
 @Composable
 fun BarReviewsBody(
-    gastroBarId: String,                      // ← String
+    gastroBarId: String,
     gastroBarName: String? = null,
-    onReviewClick: (String) -> Unit,          // ← String
-    onUserClick: (String) -> Unit,            // ← String
+    onReviewClick: (String) -> Unit,
+    onUserClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: BarReviewsViewModel = hiltViewModel()
 ) {
-    // Llama al viewModel con el id como String (sin casteos)
+    // Carga inicial de reseñas
     LaunchedEffect(gastroBarId, gastroBarName) {
         viewModel.load(gastroBarId, gastroBarName)
     }
@@ -79,11 +75,11 @@ fun BarReviewsBody(
                         ReviewCard(
                             review = review,
                             modifier = Modifier.fillMaxWidth(),
-                            onReviewClick = { onReviewClick(review.id) },
-                            onUserClick = {
-                                // Navega solo si tenemos authorId
-                                review.userId?.let { onUserClick(it) }
-                            }
+                            onReviewClick = { onReviewClick(it) }, // 'it' es reviewId
+                            onLikeClick = { reviewId, userId ->
+                                viewModel.sendOrDeleteReviewLike(reviewId, userId)
+                            },
+                            onUserClick = { onUserClick(review.userId) } // userId no nullable
                         )
                     }
                 }

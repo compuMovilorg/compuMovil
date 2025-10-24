@@ -25,7 +25,8 @@ data class ReviewDto(
     val updatedAt: String,
     val user: UserProfileDto = UserProfileDto(), // Relación con el usuario
     val gastroBarId: String? = null,
-    val gastroBar: GastroBarDto?
+    val gastroBar: GastroBarDto?,
+    var liked: Boolean = false
 ){
     constructor(): this("", "", "", null, "", 0, 0, null, "", "", UserProfileDto(),null, null)
 
@@ -43,6 +44,7 @@ fun ReviewDto.toReviewInfo(): ReviewInfo {
         reviewText = reviewText,
         likes = likes,
         comments = comments,
+        liked = liked,
         gastroBarId = this.gastroBarId ?: gastroBar?.id ?: null
     )
 }

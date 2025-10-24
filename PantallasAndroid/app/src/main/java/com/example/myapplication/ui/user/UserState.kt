@@ -7,5 +7,8 @@ data class UserState(
     val user: UserInfo? = null,
     val reviews: List<ReviewInfo> = emptyList(),
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val userId: String? = null,
+    val currentUserId: String? = null
 )
+

@@ -1,18 +1,23 @@
 package com.example.myapplication.data.repository
 
 import android.util.Log
+import com.example.myapplication.data.ReviewInfo
 import com.example.myapplication.data.UserInfo
+import com.example.myapplication.data.datasource.AuthRemoteDataSource
 import com.example.myapplication.data.datasource.impl.firestore.UserFirestoreDataSourceImpl
 import com.example.myapplication.data.dtos.RegisterUserDto
+import com.example.myapplication.data.dtos.ReviewDto
 import com.example.myapplication.data.dtos.UserFirestoreDto
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.Flow
 import retrofit2.HttpException
 import javax.inject.Inject
 
 private const val TAG = "UserRepository"
 
 class UserRepository @Inject constructor(
-    private val userRemoteDataSource: UserFirestoreDataSourceImpl
+    private val userRemoteDataSource: UserFirestoreDataSourceImpl,
+    private val authRemoteDataSource: AuthRemoteDataSource
 ) {
 
     // Obtener todos los usuarios (lista general)
@@ -29,16 +34,28 @@ class UserRepository @Inject constructor(
     }
 
     // Obtener un usuario por ID
-    suspend fun getUserById(id: String): Result<UserInfo> {
+    // -----------------------------------------------------------------------------
+// Obtener un usuario por ID (con logs detallados)
+// -----------------------------------------------------------------------------
+    suspend fun getUserById(id: String, currentUserId: String?): Result<UserInfo> {
+        val resolvedCurrentUserId = authRemoteDataSource.currentUser?.uid ?: ""
+        Log.d(TAG, "getUserById: inicio -> solicitando usuarioId='$id' (currentUserId='$resolvedCurrentUserId')")
+
         return try {
-            val user = userRemoteDataSource.getUserById(id)
+            val user = userRemoteDataSource.getUserById(id, resolvedCurrentUserId)
+            Log.d(TAG, "getUserById: usuario encontrado -> ${user.username ?: "sin username"} (${user.id})")
             Result.success(user.toUserInfo())
         } catch (e: HttpException) {
+            Log.e(TAG, "getUserById: HttpException (${e.code()}) -> ${e.message()}", e)
             Result.failure(e)
         } catch (e: Exception) {
+            Log.e(TAG, "getUserById: error inesperado -> ${e.message}", e)
             Result.failure(e)
+        }.also {
+            Log.d(TAG, "getUserById: fin -> resultado=${if (it.isSuccess) "OK" else "FAIL"}")
         }
     }
+
 
     // Buscar por email (mismo patrón de try/catch que el resto)
     suspend fun getUserByEmail(email: String): Result<UserInfo> {
@@ -53,16 +70,16 @@ class UserRepository @Inject constructor(
     }
 
     // Buscar por firebaseUid
-    suspend fun getUserByFirebaseUid(firebaseUid: String): Result<UserInfo> {
-        return try {
-            val user = userRemoteDataSource.getUserByFirebaseUid(firebaseUid)
-            Result.success(user.toUserInfo())
-        } catch (e: HttpException) {
-            Result.failure(e)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+//    suspend fun getUserByFirebaseUid(firebaseUid: String): Result<UserInfo> {
+//        return try {
+//            val user = userRemoteDataSource.getUserByFirebaseUid(firebaseUid)
+//            Result.success(user.toUserInfo())
+//        } catch (e: HttpException) {
+//            Result.failure(e)
+//        } catch (e: Exception) {
+//            Result.failure(e)
+//        }
+//    }
 
     // Crear un usuario general
     suspend fun createUser(user: RegisterUserDto, userId: String): Result<Unit> {
@@ -134,22 +151,27 @@ class UserRepository @Inject constructor(
         }
     }
 
-    // Registro con logging tal como lo tenías
+
     suspend fun registerUser(
         name: String,
         username: String,
         birthdate: String,
-        userId: String
+        userId: String,
+        FCMToken: String
     ): Result<Unit> = runCatching {
-        Log.d(TAG, "registerUser(params) -> name='$name', username='$username', birthdate='$birthdate', uid='$userId'")
+        Log.d(
+            TAG,
+            "registerUser(params) -> name='$name', username='$username', birthdate='$birthdate', uid='$userId', FCMToken='$FCMToken'"
+        )
 
-        require(userId.isNotBlank()) { "UID de Firebase vacío" }
-        require(!userId.contains("@")) { "UID inválido (parece un email): $userId" }
+        require(userId.isNotBlank()) { "UID de Firebase vacio" }
+        require(!userId.contains("@")) { "UID invalido (parece un email): $userId" }
 
         val dto = RegisterUserDto(
             name = name.trim(),
             username = username.trim(),
-            birthdate = birthdate.trim()
+            birthdate = birthdate.trim(),
+            FCMToken = FCMToken.trim()
         )
 
         Log.d(TAG, "registerUser(dto) -> $dto")
@@ -162,6 +184,7 @@ class UserRepository @Inject constructor(
     }.onFailure { e ->
         Log.e(TAG, "registerUser error: ${e.javaClass.simpleName}: ${e.message}", e)
     }
+
 
     // -------------------- ADICIONES PARA resolver tu error --------------------
 
@@ -178,16 +201,32 @@ class UserRepository @Inject constructor(
         }
     }
 
-    /**
-     * Helper: devuelve el UserInfo del usuario autenticado (usando firebase uid)
-     * Resultado: Result.success(UserInfo) o Result.failure(...)
-     */
-    suspend fun getCurrentUser(): Result<UserInfo> {
-        val uid = getCurrentUserId()
-        return if (uid.isNullOrBlank()) {
-            Result.failure(IllegalStateException("No hay usuario autenticado"))
-        } else {
-            getUserByFirebaseUid(uid)
+    // -----------------------------------------------------------------------------
+// Seguir o dejar de seguir un usuario (con logs detallados)
+// -----------------------------------------------------------------------------
+    suspend fun followOrUnfollowUser(currentUserId: String, targetUserId: String): Result<Unit> {
+        Log.d(TAG, "followOrUnfollowUser: inicio -> currentUserId='$currentUserId', targetUserId='$targetUserId'")
+
+        return try {
+            if (currentUserId.isBlank() || targetUserId.isBlank()) {
+                Log.e(TAG, "followOrUnfollowUser: ids invalidos -> currentUserId='$currentUserId', targetUserId='$targetUserId'")
+                return Result.failure(IllegalArgumentException("IDs inválidos"))
+            }
+
+            userRemoteDataSource.followOrUnfollowUser(currentUserId, targetUserId)
+            Log.d(TAG, "followOrUnfollowUser: operacion completada correctamente (seguimiento actualizado)")
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Log.e(TAG, "followOrUnfollowUser: HttpException (${e.code()}) -> ${e.message()}", e)
+            Result.failure(e)
+        } catch (e: Exception) {
+            Log.e(TAG, "followOrUnfollowUser: error inesperado -> ${e.message}", e)
+            Result.failure(e)
+        }.also {
+            Log.d(TAG, "followOrUnfollowUser: fin -> resultado=${if (it.isSuccess) "OK" else "FAIL"}")
         }
     }
+
+
+
 }

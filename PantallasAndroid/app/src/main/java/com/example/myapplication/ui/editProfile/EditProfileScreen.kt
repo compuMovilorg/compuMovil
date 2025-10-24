@@ -12,17 +12,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.myapplication.utils.AppButton
 import com.example.myapplication.utils.ProfileAsyncImage
 import com.example.myapplication.utils.CustomTextField
+import kotlinx.coroutines.launch
 
 @Composable
 fun EditProfileScreen(
+    navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: EditProfileViewModel = hiltViewModel(),
 ) {
     // Estado del ViewModel
     val state by viewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
 
     // Launcher para seleccionar imagen
     val launcher = rememberLauncherForActivityResult(
@@ -100,17 +104,22 @@ fun EditProfileScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Mostrar texto de loading si el estado lo indica.
         val isLoading = state.isLoading
 
         AppButton(
             texto = if (isLoading) "Guardando..." else "Guardar cambios",
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                // No mostramos Snackbar aquí — el Scaffold superior debe observar viewModel.uiState
                 viewModel.saveProfile(
-                    onSuccess = { /* El contenedor superior puede reaccionar a uiState.isLoading / errorMessage */ },
-                    onError = { /* El contenedor superior mostrará el error desde uiState.errorMessage */ }
+                    onSuccess = {
+                        scope.launch {
+                            // Navegar a Profile después de guardar
+                            navController.popBackStack()
+                        }
+                    },
+                    onError = { error ->
+                        Log.d("EditProfile", "Error al guardar perfil: $error")
+                    }
                 )
             },
             height = 60.dp,

@@ -3,9 +3,14 @@ package com.example.myapplication.data.datasource.impl.firestore
 import android.util.Log
 import com.example.myapplication.data.datasource.ReviewRemoteDataSource
 import com.example.myapplication.data.dtos.CreateReviewDto
+import com.example.myapplication.data.dtos.GastroBarDto
 import com.example.myapplication.data.dtos.ReviewDto
 import com.example.myapplication.data.dtos.UserProfileDto
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -111,12 +116,25 @@ class ReviewFireStoreDataSourceImpl @Inject constructor(
         return list
     }
 
-    override suspend fun getReviewById(id: String): ReviewDto {
-        val docSnapshot = db.collection(collectionName).document(id).get().await()
-        if (!docSnapshot.exists()) throw NoSuchElementException("Review con id $id no encontrada")
-        val data = docSnapshot.data ?: emptyMap<String, Any?>()
-        @Suppress("UNCHECKED_CAST")
-        return mapDocToReviewDto(docSnapshot.id, data as Map<String, Any?>)
+    override suspend fun getReviewById(id: String, currentUserId: String): ReviewDto {
+
+      val reviewRef = db.collection("reviews").document(id)
+        val reviewSnapshot = reviewRef.get().await()
+        val review = reviewSnapshot.toObject(ReviewDto::class.java) ?: throw NoSuchElementException("Review con id $id no encontrada")
+
+        if(currentUserId.isNotEmpty()){
+            val likeSnapshot = reviewRef.collection("likes").document(currentUserId).get().await()
+            val hasLiked = likeSnapshot.exists()
+
+            if(hasLiked){
+                review.liked = true
+            }
+            return review
+        }else{
+            return review
+
+        }
+
     }
 
     override suspend fun createReview(review: CreateReviewDto) {
@@ -259,6 +277,130 @@ class ReviewFireStoreDataSourceImpl @Inject constructor(
         }
 
         return list
+    }
+
+    override suspend fun sendOrDeleteReviewLike(reviewId: String, userId: String) {
+        val reviewRef = db.collection("reviews").document(reviewId)
+        val likeRef = reviewRef.collection("likes").document(userId)
+
+        db.runTransaction { transaction ->
+
+            val likeDoc = transaction.get(likeRef)
+            if (likeDoc.exists()) {
+                transaction.delete(likeRef)
+                transaction.update(reviewRef, "likes", FieldValue.increment(-1))
+            } else {
+                transaction.set(likeRef, mapOf("timestamp" to FieldValue.serverTimestamp()))
+                transaction.update(reviewRef, "likes", FieldValue.increment(1))
+            }
+
+        }
+    }
+
+    override suspend fun listenAllReviews(): Flow<List<ReviewDto>> = callbackFlow {
+        val listener = db.collection("reviews").addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                Log.e(TAG, "Error al escuchar cambios en reviews", error)
+                close(error)
+                return@addSnapshotListener
+            }
+
+            if (snapshot == null) {
+                Log.w(TAG, "Snapshot nulo en listenAllReviews()")
+                trySend(emptyList())
+                return@addSnapshotListener
+            }
+
+            try {
+                val reviews = snapshot.documents.mapNotNull { doc ->
+                    val docId = doc.id
+                    val userId = doc.getString("userId") ?: ""
+                    val placeName = doc.getString("placeName") ?: ""
+                    val reviewText = doc.getString("reviewText") ?: ""
+
+                    if (userId.isBlank() || placeName.isBlank()) {
+                        Log.e(TAG, "Documento invalido reviews/$docId: falta userId o placeName. Se descarta.")
+                        return@mapNotNull null
+                    }
+
+                    val likes = (doc.getLong("likes") ?: 0).toInt()
+                    val comments = (doc.getLong("comments") ?: 0).toInt()
+                    val parentReviewId = doc.getString("parentReviewId")
+                    val createdAt = doc.getString("createdAt") ?: ""
+                    val updatedAt = doc.getString("updatedAt") ?: ""
+                    val liked = doc.getBoolean("liked") ?: false
+
+                    // Imagen: desde imagePlace o gastroBar
+                    val imagePlace = doc.getString("imagePlace") ?: run {
+                        val gastroBarMap = doc.get("gastroBar") as? Map<*, *>
+                        gastroBarMap?.get("imagePlace") as? String
+                    }
+
+                    // Parsear campo user
+                    val userDto = try {
+                        doc.get("user")?.let {
+                            val map = it as? Map<*, *>
+                            UserProfileDto(
+                                id = map?.get("id") as? String ?: "",
+                                username = map?.get("username") as? String ?: "",
+                                name = map?.get("name") as? String ?: "",
+                                profileImage = map?.get("profileImage") as? String
+                            )
+                        } ?: UserProfileDto()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error al parsear campo user en review ${doc.id}", e)
+                        UserProfileDto()
+                    }
+
+                    // Parsear campo gastroBar (si existe)
+                    val gastroBarDto = try {
+                        doc.get("gastroBar")?.let {
+                            val map = it as? Map<*, *>
+                            GastroBarDto(
+                                id = map?.get("id") as? String ?: "",
+                                imagePlace = map?.get("imagePlace") as? String,
+                                name = map?.get("name") as? String ?: "",
+                                rating = (map?.get("rating") as? Number)?.toFloat() ?: 0f,
+                                reviewCount = (map?.get("reviewCount") as? Number)?.toInt() ?: 0,
+                                address = map?.get("address") as? String ?: "",
+                                hours = map?.get("hours") as? String ?: "",
+                                cuisine = map?.get("cuisine") as? String ?: "",
+                                description = map?.get("description") as? String ?: "",
+                                reviewId = map?.get("reviewId") as? String
+                            )
+                        } ?: GastroBarDto()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error al parsear campo gastroBar en review ${doc.id}", e)
+                        GastroBarDto()
+                    }
+
+                    // Construir ReviewDto completo
+                    ReviewDto(
+                        id = docId,
+                        userId = userId,
+                        placeName = placeName,
+                        imagePlace = imagePlace,
+                        reviewText = reviewText,
+                        likes = likes,
+                        comments = comments,
+                        parentReviewId = parentReviewId,
+                        createdAt = createdAt,
+                        updatedAt = updatedAt,
+                        user = userDto,
+                        gastroBarId = doc.getString("gastroBarId"),
+                        gastroBar = gastroBarDto,
+                        liked = liked
+                    )
+                }
+
+                trySend(reviews).isSuccess
+            } catch (e: Exception) {
+                Log.e(TAG, "Error procesando snapshot de reviews", e)
+                close(e)
+            }
+        }
+
+        awaitClose { listener.remove() }
     }
 
 

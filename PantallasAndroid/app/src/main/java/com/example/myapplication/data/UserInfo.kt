@@ -8,5 +8,6 @@ data class UserInfo(
     val birthdate: String,
     val followersCount: Int,
     val followingCount: Int,
-    val profileImage: String?
+    val profileImage: String?,
+    val followed: Boolean = false
 )

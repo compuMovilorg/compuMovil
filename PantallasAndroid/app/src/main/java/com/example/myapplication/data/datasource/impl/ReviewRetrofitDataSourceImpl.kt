@@ -4,6 +4,7 @@ import com.example.myapplication.data.datasource.ReviewRemoteDataSource
 import com.example.myapplication.data.datasource.services.ReviewRetrofitService
 import com.example.myapplication.data.dtos.CreateReviewDto
 import com.example.myapplication.data.dtos.ReviewDto
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ReviewRetrofitDataSourceImpl @Inject constructor(
@@ -14,9 +15,13 @@ class ReviewRetrofitDataSourceImpl @Inject constructor(
         return service.getAllReviews()
     }
 
-    override suspend fun getReviewById(id: String): ReviewDto {
-        return service.getReviewById(id)
+    override suspend fun getReviewById(
+        id: String,
+        currentUserId: String
+    ): ReviewDto {
+        TODO("Not yet implemented")
     }
+
 
     override suspend fun createReview(review: CreateReviewDto) {
         service.createReview(review)
@@ -43,5 +48,13 @@ class ReviewRetrofitDataSourceImpl @Inject constructor(
 
     override suspend fun getReviewsByGastroBar(gastroBarId: String): List<ReviewDto> {
         return service.getReviewsByGastroBar(gastroBarId)
+    }
+
+    override suspend fun sendOrDeleteReviewLike(reviewId: String, userId: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun listenAllReviews(): Flow<List<ReviewDto>> {
+        TODO("Not yet implemented")
     }
 }

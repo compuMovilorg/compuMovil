@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.ui)
     implementation(libs.runtime)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.room.ktx)
 
 
     val nav_version = "2.7.2"
@@ -108,4 +109,8 @@ dependencies {
 
     // Para usar 'await()' en Tasks de Firebase:
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
+
+    //messaging
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-messaging")
 }

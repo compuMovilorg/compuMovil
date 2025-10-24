@@ -122,4 +122,21 @@ class BarReviewsViewModel @Inject constructor(
                         review.reviewText.contains(q, ignoreCase = true)
             }
         }
+    fun sendOrDeleteReviewLike(reviewId: String, userId: String) {
+        viewModelScope.launch {
+            val result = reviewRepository.sendOrDeleteReviewLike(reviewId, userId)
+            if (result.isSuccess) {
+                _uiState.update { state ->
+                    state.copy(
+                        reviews = state.reviews.map { review ->
+                            if (review.id == reviewId) {
+                                review.copy(likes = review.likes + 1)
+                            } else review
+                        }
+                    )
+                }
+            }
+        }
+    }
+
 }

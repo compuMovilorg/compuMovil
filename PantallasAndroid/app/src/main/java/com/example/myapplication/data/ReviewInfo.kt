@@ -12,8 +12,10 @@ data class ReviewInfo(
     val reviewText: String,
     val likes: Int,
     val comments: Int,
-    val gastroBarId: String? = null
+    val gastroBarId: String? = null,
+    val liked: Boolean = false
+)
+
 //    val placeId: Int,                  // equivalente a gastroBarId
 //    val parentReviewId: Int? = null,   // null si es review principal
 //    val replies: List<ReviewInfo> = emptyList()  // para respuestas
-)

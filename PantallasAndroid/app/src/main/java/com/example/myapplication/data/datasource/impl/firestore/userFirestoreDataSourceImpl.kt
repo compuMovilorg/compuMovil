@@ -5,6 +5,7 @@ import com.example.myapplication.data.datasource.UserRemoteDataSource
 import com.example.myapplication.data.dtos.RegisterUserDto
 import com.example.myapplication.data.dtos.UserDtoGeneric
 import com.example.myapplication.data.dtos.UserFirestoreDto
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.Source
@@ -35,19 +36,18 @@ class UserFirestoreDataSourceImpl @Inject constructor(
     }
 
     // 🔹 Obtener usuario por ID
-    override suspend fun getUserById(id: String): UserFirestoreDto {
+    override suspend fun getUserById(id: String, currentUserId: String): UserFirestoreDto {
         Log.d(TAG, "Buscando usuario por ID: $id")
+        val docRef = db.collection("users").document(id)
+        val respuesta = docRef.get(Source.SERVER).await()
+        val user = respuesta.toObject(UserFirestoreDto::class.java) ?: throw NoSuchElementException("User not found id=$id")
 
-        val snap = users().document(id).get(Source.SERVER).await()
+        val followerDoc = db.collection("users").document(id).collection("followers").document(currentUserId).get().await()
 
-        if (snap.exists()) {
-            Log.d(TAG, "Usuario encontrado: ${snap.data}")
-        } else {
-            Log.w(TAG, "No se encontró el usuario con ID=$id (SERVER)")
-        }
+        val exist = followerDoc.exists()
+        user.followed = exist
 
-        return snap.toObject(UserFirestoreDto::class.java)
-            ?: throw NoSuchElementException("User not found id=$id")
+        return user
     }
 
     // 🔹 Obtener usuario por correo
@@ -69,11 +69,11 @@ class UserFirestoreDataSourceImpl @Inject constructor(
     }
 
     // 🔹 Obtener usuario por UID de Firebase (asume doc id == firebaseUid)
-    override suspend fun getUserByFirebaseUid(firebaseUid: String): UserDtoGeneric {
-        Log.d(TAG, "Buscando usuario por UID de Firebase: $firebaseUid")
-        // Si tu colección usa uid como id, devolvemos getUserById
-        return getUserById(firebaseUid)
-    }
+//    override suspend fun getUserByFirebaseUid(firebaseUid: String): UserDtoGeneric {
+//        Log.d(TAG, "Buscando usuario por UID de Firebase: $firebaseUid")
+//        // Si tu colección usa uid como id, devolvemos getUserById
+//        return getUserById(firebaseUid, currentUserId)
+//    }
 
     // 🔹 Crear usuario
     override suspend fun createUser(user: UserDtoGeneric) {
@@ -156,6 +156,37 @@ class UserFirestoreDataSourceImpl @Inject constructor(
             throw e
         }
     }
+
+    override suspend fun followOrUnfollowUser(
+        currentUserId: String,
+        targetUserId: String
+    ) = try {
+        db.runTransaction { transaction ->
+            val currentUserRef = db.collection("users").document(currentUserId)
+            val targetUserRef = db.collection("users").document(targetUserId)
+
+            val followingsRef = currentUserRef.collection("followings").document(targetUserId)
+            val followersRef = targetUserRef.collection("followers").document(currentUserId)
+
+            val followingDoc = transaction.get(followingsRef)
+            if (followingDoc.exists()) {
+                transaction.delete(followingsRef)
+                transaction.delete(followersRef)
+                transaction.update(currentUserRef, "followingCount", FieldValue.increment(-1))
+                transaction.update(targetUserRef, "followersCount", FieldValue.increment(-1))
+            } else {
+                transaction.set(followingsRef, mapOf("timestamp" to FieldValue.serverTimestamp()))
+                transaction.set(followersRef, mapOf("timestamp" to FieldValue.serverTimestamp()))
+                transaction.update(currentUserRef, "followingCount", FieldValue.increment(1))
+                transaction.update(targetUserRef, "followersCount", FieldValue.increment(1))
+            }
+        }.await()  // <-- espera a que la transacción termine
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Log.e("UserRepo", "Error follow/unfollow", e)
+        Result.failure(e)
+    }
+
 
     // Intenta extraer 'uid' por reflexión si tu DTO lo tiene.
     private fun extractUid(user: UserDtoGeneric): String? {
