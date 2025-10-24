@@ -48,6 +48,21 @@ class BarReviewsViewModel @Inject constructor(
     }
 
     fun load(gastroBarId: String, gastroBarName: String? = null) {
+        if (gastroBarId.isBlank()) {
+            Log.e(
+                "BarReviewsVM",
+                "load() recibió un gastroBarId vacío. No se puede cargar la lista de reseñas"
+            )
+            _uiState.update {
+                it.copy(
+                    gastroBarId = null,
+                    gastroBarName = gastroBarName ?: it.gastroBarName,
+                    isLoading = false,
+                    errorMessage = "GastroBar no especificado"
+                )
+            }
+            return
+        }
         setGastroBar(gastroBarId, gastroBarName)
         loadReviewsByBar(gastroBarId)
     }

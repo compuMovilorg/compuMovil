@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -283,14 +284,19 @@ fun AppNavigation(
         ) { backStackEntry ->
             val barReviewsVM: BarReviewsViewModel = hiltViewModel(backStackEntry)
             val gastroBarIdStr = backStackEntry.arguments?.getString("gastroBarId") ?: ""
-            val gastroBarName = backStackEntry.arguments?.getString("gastroBarName") ?: ""
+            val gastroBarName = backStackEntry.arguments?.getString("gastroBarName")?.takeIf { it.isNotBlank() }
+
+            LaunchedEffect(gastroBarIdStr, gastroBarName) {
+                barReviewsVM.load(gastroBarIdStr, gastroBarName)
+            }
 
             val state by barReviewsVM.uiState.collectAsState()
+            val reviews = remember(state.searchQuery, state.reviews) { barReviewsVM.filteredReviews }
 
             // Pass gastroBarIdStr as String to screen/viewmodel (update BarReviewsScreen signature if needed)
             BarReviewsScreen(
-                gastroBarId = gastroBarIdStr,
-                gastroBarName = gastroBarName,
+                state = state,
+                reviews = reviews,
                 onReviewClick = { /* ... */ },
                 onUserClick = { userIdStr ->
                     navController.navigate(Screen.User.createRoute(userIdStr))
