@@ -37,13 +37,15 @@ class UserRepository @Inject constructor(
     // -----------------------------------------------------------------------------
 // Obtener un usuario por ID (con logs detallados)
 // -----------------------------------------------------------------------------
-    suspend fun getUserById(id: String, currentUserId: String?): Result<UserInfo> {
+    suspend fun getUserById(id: String): Result<UserInfo> {
         val resolvedCurrentUserId = authRemoteDataSource.currentUser?.uid ?: ""
         Log.d(TAG, "getUserById: inicio -> solicitando usuarioId='$id' (currentUserId='$resolvedCurrentUserId')")
 
         return try {
             val user = userRemoteDataSource.getUserById(id, resolvedCurrentUserId)
-            if(user == null) return Result.failure(Exception("User not found"))
+            if (user == null) {
+                return Result.failure(Exception("User with id $id not found"))
+            }
             Log.d(TAG, "getUserById: usuario encontrado -> ${user.username ?: "sin username"} (${user.id})")
             Result.success(user.toUserInfo())
         } catch (e: HttpException) {

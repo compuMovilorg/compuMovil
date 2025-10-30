@@ -1,1 +1,4 @@
 .DS_Store
+
+# creds
+SeedData/serviceAccountKey.json

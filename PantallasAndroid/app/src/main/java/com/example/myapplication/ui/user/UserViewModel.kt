@@ -56,7 +56,7 @@ class UserViewModel @Inject constructor(
             Log.d("UserVM", "Llamando loadUser con id=$userId")
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val userResult = userRepository.getUserById(userId, authenticatedUserId)
+                val userResult = userRepository.getUserById(userId)
                 userResult.fold(
                     onSuccess = { user ->
                         Log.d("UserVM", "Usuario obtenido correctamente: ${user.username}")

@@ -44,7 +44,7 @@ class MainUserViewModel @Inject constructor(
                 }
 
                 // Traer usuario (para cabecera) y sus reviews
-                val userResult = userRepository.getUserById(userId, userId)
+                val userResult = userRepository.getUserById(userId)
                 val reviewsResult = reviewRepository.getReviewsByUser(userId)
 
                 val user = userResult.getOrThrow()

@@ -44,7 +44,7 @@ class EditProfileViewModel @Inject constructor(
                 val id = currentUserProvider.currentUserId()
                 if (!id.isNullOrBlank()) {
                     // Intentamos cargar el usuario desde el backend
-                    userRepository.getUserById(id, null).fold(
+                    userRepository.getUserById(id).fold(
                         onSuccess = { user ->
                             applyUserToState(user)
                             Log.d(TAG, "Cargado perfil desde backend id=$id")

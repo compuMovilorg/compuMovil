@@ -3,7 +3,8 @@ import serviceAccount from "./serviceAccountKey.json" with {type: "json"}
 import {fa, faker, tr} from "@faker-js/faker"
 
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    projectId: "nocta-95b8c"
+    //credential: admin.credential.cert(serviceAccount),
 });
 
 const db = admin.firestore();
@@ -42,7 +43,7 @@ function buildUser(i){
 function buildReview(user, i){
    const nowIso = new Date().toISOString();
     const hasGastro = faker.datatype.boolean();
-    
+
     return {
         userImage: user?.profileImage ?? faker.image.urlPicsumPhotos({
       width: 150,
