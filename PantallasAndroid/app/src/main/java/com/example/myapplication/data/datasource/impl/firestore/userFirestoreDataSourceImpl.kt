@@ -36,19 +36,68 @@ class UserFirestoreDataSourceImpl @Inject constructor(
     }
 
     // 🔹 Obtener usuario por ID
-    override suspend fun getUserById(id: String, currentUserId: String): UserFirestoreDto {
-        Log.d(TAG, "Buscando usuario por ID: $id")
-        val docRef = db.collection("users").document(id)
-        val respuesta = docRef.get(Source.SERVER).await()
-        val user = respuesta.toObject(UserFirestoreDto::class.java) ?: throw NoSuchElementException("User not found id=$id")
+//    override suspend fun getUserById(id: String, currentUserId: String): UserFirestoreDto {
+//        Log.d(TAG, "Buscando usuario por ID: $id")
+//        val docRef = db.collection("users").document(id)
+//        val respuesta = docRef.get(Source.SERVER).await()
+//        val user = respuesta.toObject(UserFirestoreDto::class.java) ?: throw NoSuchElementException("User not found id=$id")
+//
+//        val followerDoc = db.collection("users").document(id).collection("followers").document(currentUserId).get().await()
+//
+//        val exist = followerDoc.exists()
+//        user.followed = exist
+//
+//        return user
+//    }
+    override suspend fun getUserById(id: String, currentUserId: String): UserFirestoreDto? {
+        Log.d(TAG, "Buscando usuario por ID: $id, currentUserId: $currentUserId")
 
-        val followerDoc = db.collection("users").document(id).collection("followers").document(currentUserId).get().await()
+        // Validaciones básicas para evitar pasar rutas con '/'
+        require(id.isNotBlank()) { "user id no puede ser vacío" }
+        require(!id.contains('/')) { "user id no debe contener '/' (recibido: $id)" }
+        if (currentUserId.isBlank()) {
+            Log.w(TAG, "currentUserId vacío; se asumirá que no sigue al usuario $id")
+        }
+        if (currentUserId.contains('/')) {
+            Log.w(TAG, "currentUserId contiene '/' (recibido: $currentUserId). Se limpiará antes de usar.")
+        }
 
-        val exist = followerDoc.exists()
-        user.followed = exist
+        try {
+            val docRef = db.collection("users").document(id)
+            val respuesta = docRef.get(Source.SERVER).await()
+            var user = respuesta.toObject(UserFirestoreDto::class.java) ?: return null
 
-        return user
+            user = user.copy(id = id)
+
+            // Si currentUserId está vacío o inválido, no preguntamos por follower (asumimos false)
+            val safeCurrentUserId = currentUserId.trim().takeIf { it.isNotEmpty() && !it.contains('/') }
+            if (safeCurrentUserId == null) {
+                user.followed = false
+                return user
+            }
+
+            // Construcción segura de la referencia a subcolección
+            val followerRef = db.collection("users")
+                .document(id)
+                .collection("followers")
+                .document(safeCurrentUserId)
+
+            Log.d(TAG, "Checking follower path: ${followerRef.path}") // -> debe ser users/{id}/followers/{currentUserId}
+
+            val followerSnap = followerRef.get().await()
+            user.followed = followerSnap.exists()
+
+            return user
+        } catch (iae: IllegalArgumentException) {
+            // Capturamos el IllegalArgumentException que Firestore lanza al recibir rutas inválidas
+            Log.e(TAG, "Ruta inválida al construir referencia: ${iae.message}")
+            throw iae // opcional: puedes mapearlo a tu excepción de dominio
+        } catch (e: Exception) {
+            Log.e(TAG, "Error al obtener usuario $id: ${e.message}", e)
+            throw e
+        }
     }
+
 
     // 🔹 Obtener usuario por correo
     override suspend fun getUserByEmail(email: String): UserFirestoreDto {
@@ -180,7 +229,7 @@ class UserFirestoreDataSourceImpl @Inject constructor(
                 transaction.update(currentUserRef, "followingCount", FieldValue.increment(1))
                 transaction.update(targetUserRef, "followersCount", FieldValue.increment(1))
             }
-        }.await()  // <-- espera a que la transacción termine
+        }.await()
         Result.success(Unit)
     } catch (e: Exception) {
         Log.e("UserRepo", "Error follow/unfollow", e)

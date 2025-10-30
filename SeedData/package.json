@@ -1,0 +1,17 @@
+{
+  "name": "seeddata",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@faker-js/faker": "^10.1.0",
+    "firebase-admin": "^13.5.0"
+  }
+}

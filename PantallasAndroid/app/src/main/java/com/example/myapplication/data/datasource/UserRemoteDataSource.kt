@@ -7,7 +7,7 @@ interface UserRemoteDataSource {
 
     suspend fun getAllUsers(): List<UserDtoGeneric>
 
-    suspend fun getUserById(id: String,currentUserId: String): UserDtoGeneric
+    suspend fun getUserById(id: String,currentUserId: String): UserDtoGeneric?
 
     suspend fun getUserByEmail(email: String): UserDtoGeneric
 

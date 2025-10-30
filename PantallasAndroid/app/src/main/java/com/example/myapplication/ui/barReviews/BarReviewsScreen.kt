@@ -19,9 +19,19 @@ fun BarReviewsScreen(
     onReviewClick: (String) -> Unit,
     onUserClick: (String) -> Unit
 ) {
+    // Pasamos los parámetros al ViewModel usando hiltViewModel()
+    val viewModel: BarReviewsViewModel = hiltViewModel()
+
+    // Efecto para actualizar el estado si cambian los datos
+    LaunchedEffect(gastroBarId, gastroBarName) {
+        // Si el ViewModel aún no tiene ese gastroBar cargado, lo actualiza
+        if (viewModel.uiState.value.gastroBarId != gastroBarId) {
+            viewModel.reload()
+        }
+    }
+
     BarReviewsBody(
-        gastroBarId = gastroBarId,
-        gastroBarName = gastroBarName,
+        viewModel = viewModel,
         onReviewClick = onReviewClick,
         onUserClick = onUserClick
     )
@@ -29,18 +39,11 @@ fun BarReviewsScreen(
 
 @Composable
 fun BarReviewsBody(
-    gastroBarId: String,
-    gastroBarName: String? = null,
+    viewModel: BarReviewsViewModel,
     onReviewClick: (String) -> Unit,
     onUserClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: BarReviewsViewModel = hiltViewModel()
+    modifier: Modifier = Modifier
 ) {
-    // Carga inicial de reseñas
-    LaunchedEffect(gastroBarId, gastroBarName) {
-        viewModel.load(gastroBarId, gastroBarName)
-    }
-
     val state by viewModel.uiState.collectAsState()
     val reviews = remember(state.searchQuery, state.reviews) { viewModel.filteredReviews }
 
@@ -54,18 +57,21 @@ fun BarReviewsBody(
             state.isLoading -> {
                 CircularProgressIndicator(Modifier.align(Alignment.Center))
             }
+
             state.errorMessage != null -> {
                 Text(
                     text = state.errorMessage ?: "Error desconocido",
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
+
             state.reviews.isEmpty() -> {
                 Text(
                     text = "Aún no hay reseñas para este lugar",
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
+
             else -> {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -75,11 +81,11 @@ fun BarReviewsBody(
                         ReviewCard(
                             review = review,
                             modifier = Modifier.fillMaxWidth(),
-                            onReviewClick = { onReviewClick(it) }, // 'it' es reviewId
+                            onReviewClick = { onReviewClick(it) },
                             onLikeClick = { reviewId, userId ->
                                 viewModel.sendOrDeleteReviewLike(reviewId, userId)
                             },
-                            onUserClick = { onUserClick(review.userId) } // userId no nullable
+                            onUserClick = { onUserClick(review.userId) }
                         )
                     }
                 }

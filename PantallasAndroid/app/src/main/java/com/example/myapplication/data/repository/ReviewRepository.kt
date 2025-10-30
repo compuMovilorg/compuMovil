@@ -101,6 +101,7 @@ class ReviewRepository @Inject constructor(
             } else {
                 // obtén data del usuario (puede lanzar excepción si no existe)
                 val userDto = userRemoteDataSource.getUserById(createReviewDto.userId,currentUserId)
+                if(userDto == null) return Result.failure(Exception("User not found"))
                 val userProfile = UserProfileDto(
                     id = userDto.id,
                     username = userDto.username,
