@@ -3,6 +3,7 @@ package com.example.myapplication.ui.register
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.injection.BlockingDispatcher
 import com.example.myapplication.data.injection.IoDispatcher
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.UserRepository
@@ -23,11 +24,9 @@ private const val TAG = "RegisterVM"
 class RegisterViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    @BlockingDispatcher private val blockingDispatcher: CoroutineDispatcher
 ) : ViewModel() {
-
-    // 🔸 Dispatcher “real” para evitar tiempo virtual en tests
-    private val blockingDispatcher = Dispatchers.Default.limitedParallelism(1)
 
     private val _uiState = MutableStateFlow(RegisterState())
     val uiState: StateFlow<RegisterState> = _uiState
@@ -72,6 +71,8 @@ class RegisterViewModel @Inject constructor(
         if (name.isEmpty()) return "El nombre es obligatorio."
         if (username.isEmpty()) return "El usuario es obligatorio."
         if (birth.isEmpty()) return "La fecha de nacimiento es obligatoria."
+        if (email.isEmpty()) return "El correo es obligatorio."
+        if (pass.isEmpty()) return "La contraseña es obligatoria."
         if (!email.contains("@") || !email.contains(".")) return "Correo inválido."
         if (pass.length < 6) return "La contraseña debe tener al menos 6 caracteres."
         return null
@@ -80,14 +81,14 @@ class RegisterViewModel @Inject constructor(
     // --------- Registro ---------
     fun register(onSuccess: () -> Unit, onError: (String) -> Unit) {
         if (_uiState.value.isLoading) {
-            Log.w(TAG, "Registro ignorado: ya hay una operación en curso")
+            Log.d(TAG, "Registro ignorado: ya hay una operación en curso")
             return
         }
 
         logState("ANTES_DE_VALIDAR")
 
         validate()?.let { msg ->
-            Log.w(TAG, "Formulario inválido -> $msg")
+            Log.d(TAG, "Formulario inválido -> $msg")
             _uiState.update { it.copy(errorMessage = msg, navigate = false) }
             onError(msg)
             return
@@ -121,11 +122,16 @@ class RegisterViewModel @Inject constructor(
 
                 if (authRes.isFailure) {
                     val ex = authRes.exceptionOrNull()
-                    // 🔸 Mensaje amigable garantizado
                     val friendly = firebaseFriendlyMessage(ex) ?: "Error al registrar usuario"
                     Log.e(TAG, "Auth falló: ${ex?.javaClass?.simpleName}: ${ex?.message}", ex)
-                    _uiState.update { it.copy(isLoading = false, errorMessage = friendly, navigate = false) }
-                    onError(friendly)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = friendly,
+                            navigate = false
+                        )
+                    }
+                    withContext(Dispatchers.Main) { onError(friendly) }
                     return@launch
                 }
 
@@ -134,7 +140,7 @@ class RegisterViewModel @Inject constructor(
                     val msg = "Auth OK pero UID es nulo."
                     Log.e(TAG, msg)
                     _uiState.update { it.copy(isLoading = false, errorMessage = msg, navigate = false) }
-                    onError(msg)
+                    withContext(Dispatchers.Main) { onError(msg) }
                     return@launch
                 }
 
@@ -157,14 +163,16 @@ class RegisterViewModel @Inject constructor(
                     val friendly = ex?.message ?: "Error guardando el perfil en Firestore"
                     Log.e(TAG, "Firestore falló: ${ex?.javaClass?.simpleName}: ${ex?.message}", ex)
                     _uiState.update { it.copy(isLoading = false, errorMessage = friendly, navigate = false) }
-                    onError(friendly)
+                    withContext(Dispatchers.Main) { onError(friendly) }   // ⬅️ Main
                     return@launch
                 }
 
                 Log.i(TAG, "Registro completo: perfil guardado en users/$uid")
                 clearForm()
                 _uiState.update { it.copy(isLoading = false, navigate = true, errorMessage = "") }
-                onSuccess()
+                withContext(Dispatchers.Main) {
+                    onSuccess()
+                }
 
             } catch (e: Exception) {
                 val friendly = firebaseFriendlyMessage(e) ?: (e.message ?: "Error desconocido")

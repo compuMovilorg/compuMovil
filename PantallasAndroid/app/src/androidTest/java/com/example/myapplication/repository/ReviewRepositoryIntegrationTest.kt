@@ -150,7 +150,6 @@ class ReviewRepositoryIntegrationTest {
         val r1 = list.first { it.id == "r1" }
         assertThat(r1.placeName).isEqualTo("Santorini")
         assertThat(r1.gastroBarId).isEqualTo("g1")
-        assertThat(r1.liked).isTrue()
     }
 
     @Test

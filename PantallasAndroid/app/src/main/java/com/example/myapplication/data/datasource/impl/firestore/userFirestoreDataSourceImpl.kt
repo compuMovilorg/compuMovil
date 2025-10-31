@@ -149,24 +149,44 @@ class UserFirestoreDataSourceImpl @Inject constructor(
     // 🔹 Actualizar usuario
     override suspend fun updateUser(id: String, user: UserDtoGeneric) {
         Log.d(TAG, "UPDATE -> users/$id user=$user")
-        users().document(id).set(user, SetOptions.merge()).await()
+        val ref = users().document(id)
 
-        // read-back SERVER
-        val snap = users().document(id).get(Source.SERVER).await()
+        // 1) Verificar existencia en SERVER
+        val exists = ref.get(Source.SERVER).await().exists()
+        if (!exists) throw Exception("User not found")
+
+        // 2) Actualizar (merge)
+        ref.set(user, SetOptions.merge()).await()
+
+        // 3) Read-back SERVER
+        val snap = ref.get(Source.SERVER).await()
         if (!snap.exists()) error("Post-write readback FAILED (updateUser) for users/$id")
         Log.d(TAG, "READBACK OK (updateUser) <- ${snap.id} data=${snap.data}")
     }
 
+
     // 🔹 Eliminar usuario
     override suspend fun deleteUser(id: String) {
         Log.d(TAG, "DELETE -> users/$id")
-        users().document(id).delete().await()
+        val ref = users().document(id)
 
-        // read-back SERVER
-        val snap = users().document(id).get(Source.SERVER).await()
-        if (snap.exists()) error("Post-delete readback FAILED (deleteUser) for users/$id")
+        // 1) Verificar existencia EN SERVIDOR antes de borrar
+        val exists = ref.get(Source.SERVER).await().exists()
+        if (!exists) {
+            // Mantén el mismo mensaje que usas en otros métodos/tests
+            throw Exception("User not found")
+        }
+
+        // 2) Borrar
+        ref.delete().await()
+
+        // 3) Read-back para asegurar borrado
+        val snap = ref.get(Source.SERVER).await()
+        check(!snap.exists()) { "Post-delete readback FAILED (deleteUser) for users/$id" }
+
         Log.d(TAG, "DELETE OK (no existe en SERVER) users/$id")
     }
+
 
     // 🔹 Registrar usuario (post login/registro Auth)
     override suspend fun registerUser(registerUserDto: RegisterUserDto, userId: String) {

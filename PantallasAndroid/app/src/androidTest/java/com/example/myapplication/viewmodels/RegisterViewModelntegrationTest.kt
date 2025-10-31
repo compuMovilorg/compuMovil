@@ -74,6 +74,8 @@ class RegisterViewModelntegrationTest {
         // Arrange: crea la cuenta existente en el emulador
         authRepository.register("test@test.com", "123456")
 
+        Firebase.auth.signOut()
+
         viewModel.updateEmail("test@test.com")
         viewModel.updatePassword("123456")
         viewModel.updateName("Juan")

@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,7 +33,8 @@ fun MainUserScreen(
         onEditTextChange = { viewModel.updateEditingText(it) },
         onCancelEdit = { viewModel.cancelEdit() },
         onConfirmEdit = { viewModel.confirmEdit() },
-        onNavigateToProfile = onNavigateToProfile
+        onNavigateToProfile = onNavigateToProfile,
+        modifier = Modifier.testTag("main_user_screen")
     )
 }
 
@@ -100,7 +102,7 @@ private fun MainUserBody(
                                 Spacer(modifier = Modifier.width(6.dp))
                                 IconButton(
                                     onClick = onNavigateToProfile,
-                                    modifier = Modifier.size(24.dp)
+                                    modifier = Modifier.size(24.dp).testTag("btn_profile_settings")
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Settings,

@@ -4,11 +4,11 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.UserInfo
 import com.example.myapplication.data.auth.CurrentUserProvider
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.StorageRepository
 import com.example.myapplication.data.repository.UserRepository
-import com.example.myapplication.data.UserInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,39 +29,42 @@ class EditProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(
         EditProfileState(
             email = "",
-            profilePicUrl = ""
+            profilePicUrl = "",
+            isLoading = false,
+            errorMessage = null,
+            successMessage = null,
+            saved = false
         )
     )
     val uiState: StateFlow<EditProfileState> = _uiState
 
-    init {
-        loadProfile()
-    }
+    init { loadProfile() }
 
-    private fun loadProfile() {
+    /** Public para poder re-invocarlo desde la UI si hace falta. */
+    fun loadProfile() {
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null, successMessage = null, saved = false) }
             try {
                 val id = currentUserProvider.currentUserId()
-                if (!id.isNullOrBlank()) {
-                    // Intentamos cargar el usuario desde el backend
+                if (id.isNullOrBlank()) {
+                    applyAuthFallback()
+                } else {
                     userRepository.getUserById(id).fold(
                         onSuccess = { user ->
                             applyUserToState(user)
-                            Log.d(TAG, "Cargado perfil desde backend id=$id")
+                            Log.d(TAG, "Perfil cargado (id=$id)")
                         },
-                        onFailure = {
-                            // Si falla, fallback a auth (email/photo) y dejamos los demás campos vacíos
-                            Log.w(TAG, "No se pudo cargar user backend id=$id: ${it.message}")
+                        onFailure = { ex ->
+                            Log.w(TAG, "Falló cargar user id=$id: ${ex.message}")
                             applyAuthFallback()
                         }
                     )
-                } else {
-                    // Sin id — usar datos de auth como fallback
-                    applyAuthFallback()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error cargando perfil", e)
                 applyAuthFallback()
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
@@ -69,11 +72,14 @@ class EditProfileViewModel @Inject constructor(
     private fun applyUserToState(user: UserInfo) {
         _uiState.update {
             it.copy(
-                name = user.name ?: "",
-                usuario = user.username ?: "",
-                birthdate = user.birthdate ?: "",
-                email = user.email ?: "",
-                profilePicUrl = user.profileImage ?: ""
+                name = user.name?.trim().orEmpty(),
+                usuario = user.username?.trim().orEmpty(),
+                birthdate = user.birthdate?.trim().orEmpty(),
+                email = user.email?.trim().orEmpty(),
+                profilePicUrl = user.profileImage?.trim().orEmpty(),
+                followersCount = user.followersCount,
+                followingCount = user.followingCount,
+                errorMessage = null
             )
         }
     }
@@ -82,140 +88,136 @@ class EditProfileViewModel @Inject constructor(
         val authUser = authRepository.currentUser
         _uiState.update {
             it.copy(
-                email = authUser?.email ?: "",
-                profilePicUrl = authUser?.photoUrl?.toString() ?: ""
+                email = authUser?.email?.trim().orEmpty(),
+                profilePicUrl = authUser?.photoUrl?.toString().orEmpty(),
+                errorMessage = null
             )
         }
     }
 
-    fun updateName(input: String) {
-        _uiState.update { it.copy(name = input) }
+    fun updateName(input: String)     { _uiState.update { it.copy(name = input) } }
+    fun updateUsuario(input: String)  { _uiState.update { it.copy(usuario = input) } }
+    fun updateFechaNacimiento(input: String) { _uiState.update { it.copy(birthdate = input) } }
+    fun updateEmail(input: String)    { _uiState.update { it.copy(email = input) } }
+    fun updateProfilePic(url: String) { _uiState.update { it.copy(profilePicUrl = url) } }
+
+    fun acknowledgeSaved() {
+        _uiState.update { it.copy(saved = false, successMessage = null) }
+    }
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 
-    fun updateUsuario(input: String) {
-        _uiState.update { it.copy(usuario = input) }
-    }
-
-    fun updateFechaNacimiento(input: String) {
-        _uiState.update { it.copy(birthdate = input) }
-    }
-
-    fun updateEmail(input: String) {
-        _uiState.update { it.copy(email = input) }
-    }
-
-    fun updateProfilePic(url: String) {
-        _uiState.update { it.copy(profilePicUrl = url) }
-    }
-
-    /**
-     * Guarda cambios en el backend (UserRepository). No cambia FirebaseAuth.email aquí;
-     * si quieres sincronizar email con FirebaseAuth, hazlo explícitamente (requiere reauth).
-     */
     fun saveProfile(onSuccess: () -> Unit, onError: (String) -> Unit) {
-        val state = _uiState.value
+        val s = _uiState.value
+        val name = s.name.trim()
+        val username = s.usuario.trim()
+        val birth = s.birthdate.trim()
+        val email = s.email.trim()
 
-        if (state.email.isBlank() || !state.email.contains("@")) {
-            onError("Correo inválido")
+        // Validación básica
+        val err = when {
+            name.isEmpty() -> "El nombre es obligatorio."
+            username.isEmpty() -> "El usuario es obligatorio."
+            email.isEmpty() || !email.contains("@") || !email.contains(".") -> "Correo inválido."
+            else -> null
+        }
+        if (err != null) {
+            _uiState.update { it.copy(errorMessage = err, successMessage = null) }
+            onError(err)
             return
         }
 
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null, successMessage = null, saved = false) }
             try {
                 val id = currentUserProvider.currentUserId()
                 if (id.isNullOrBlank()) {
-                    onError("Usuario no autenticado")
-                    return@launch
+                    val msg = "Usuario no autenticado"
+                    _uiState.update { it.copy(errorMessage = msg, isLoading = false) }
+                    onError(msg); return@launch
                 }
 
-                // Construir objeto o DTO según tu UserRepository.updateUser
                 val updatedUser = UserInfo(
                     id = id,
-                    name = state.name,
-                    username = state.usuario,
-                    birthdate = state.birthdate,
-                    email = state.email,
-                    profileImage = state.profilePicUrl,
-                    followersCount = state.followersCount,
-                    followingCount = state.followingCount
+                    name = name,
+                    username = username,
+                    birthdate = birth,
+                    email = email,
+                    profileImage = s.profilePicUrl,
+                    followersCount = s.followersCount,
+                    followingCount = s.followingCount
                 )
 
                 userRepository.updateUser(updatedUser).fold(
                     onSuccess = {
-                        Log.d(TAG, "User updated successfully in backend for id=$id")
+                        // Actualiza estado local para reflejar lo guardado
+                        _uiState.update {
+                            it.copy(
+                                name = name,
+                                usuario = username,
+                                birthdate = birth,
+                                email = email,
+                                successMessage = "Perfil actualizado",
+                                errorMessage = null,
+                                saved = true
+                            )
+                        }
                         onSuccess()
                     },
                     onFailure = { ex ->
-                        Log.w(TAG, "Error updating user in backend: ${ex.message}")
-                        onError(ex.message ?: "Error actualizando perfil")
+                        val msg = ex.message ?: "Error actualizando perfil"
+                        _uiState.update { it.copy(errorMessage = msg) }
+                        onError(msg)
                     }
                 )
-
             } catch (e: Exception) {
-                Log.e(TAG, "Error inesperado en saveProfile", e)
-                onError(e.message ?: "Error inesperado")
+                val msg = e.message ?: "Error inesperado"
+                _uiState.update { it.copy(errorMessage = msg) }
+                onError(msg)
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
 
-    /**
-     * Sube imagen, actualiza backend y Firebase Auth (si quieres).
-     * storageRepository.uploadProfileImg(uri) -> Result<String?> with URL
-     */
     fun uploadImageToFirebase(uri: Uri) {
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null, successMessage = null) }
             try {
-                // 0) Opcional: podrías notificar loading en el estado aquí
-
-                // 1) Subir imagen al storage
                 val uploadResult = storageRepository.uploadProfileImg(uri)
                 if (!uploadResult.isSuccess) {
-                    Log.w(TAG, "uploadProfileImg failed: ${uploadResult.exceptionOrNull()?.message}")
+                    val msg = uploadResult.exceptionOrNull()?.message ?: "Error subiendo imagen"
+                    _uiState.update { it.copy(errorMessage = msg) }
                     return@launch
                 }
 
                 val url = uploadResult.getOrNull().orEmpty()
                 if (url.isBlank()) {
-                    Log.w(TAG, "uploadProfileImg returned empty URL")
+                    _uiState.update { it.copy(errorMessage = "URL de imagen vacía") }
                     return@launch
                 }
 
-                // 2) Actualizar estado local
                 _uiState.update { it.copy(profilePicUrl = url) }
 
-                // 3) Actualizar imagen en backend (usuario)
-                try {
-                    val id = currentUserProvider.currentUserId()
-                    if (!id.isNullOrBlank()) {
-                        userRepository.updateProfileImage(id, url).fold(
-                            onSuccess = { Log.d(TAG, "Profile image updated in backend for id=$id") },
-                            onFailure = { ex -> Log.w(TAG, "Failed updating profile image in backend: ${ex.message}") }
-                        )
-                    } else {
-                        Log.w(TAG, "Cannot update backend profile image: currentUserId is null/blank")
+                // Backend
+                val id = currentUserProvider.currentUserId()
+                if (!id.isNullOrBlank()) {
+                    userRepository.updateProfileImage(id, url).onFailure { ex ->
+                        Log.w(TAG, "Backend img update failed: ${ex.message}")
                     }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Exception while updating backend profile image", e)
                 }
 
-                // 4) Actualizar FirebaseAuth profileImage (opcional)
-                try {
-                    val authResult = authRepository.updateProfileImage(url)
-                    if (authResult.isSuccess) {
-                        Log.d(TAG, "FirebaseAuth profile image updated")
-                        // opcional: authRepository.reloadCurrentUser() si quieres reflejar cambios inmediatamente
-                        // authRepository.reloadCurrentUser()
-                    } else {
-                        Log.w(TAG, "Failed updating FirebaseAuth profile image: ${authResult.exceptionOrNull()?.message}")
-                    }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Exception while updating FirebaseAuth profile image", e)
+                // FirebaseAuth (opcional)
+                authRepository.updateProfileImage(url).onFailure { ex ->
+                    Log.w(TAG, "Auth img update failed: ${ex.message}")
                 }
 
+                _uiState.update { it.copy(successMessage = "Imagen actualizada", errorMessage = null) }
             } catch (e: Exception) {
-                Log.e(TAG, "Error al subir imagen", e)
+                _uiState.update { it.copy(errorMessage = e.message ?: "Error al subir imagen") }
             } finally {
-                // 0) Opcional: quitar loading si lo manejas en estado
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }

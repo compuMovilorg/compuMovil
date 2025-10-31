@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,7 +31,7 @@ fun ProfileScreen(
     val state by viewModel.uiState.collectAsState()
 
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().testTag("profile_screen"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ProfileHeader(
@@ -103,7 +104,8 @@ fun ProfileDetails(
         Button(
             onClick = onEditProfileClick,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-            shape = CircleShape
+            shape = CircleShape,
+            modifier = Modifier.testTag("btn_edit_profile")
         ) {
             Text(text = "Edit Profile")
         }

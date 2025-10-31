@@ -5,11 +5,12 @@ data class EditProfileState(
     val usuario: String = "",
     val birthdate: String = "",
     val email: String = "",
-    val profilePicUrl: String? = null,
+    val profilePicUrl: String = "",
     val followersCount: Int = 0,
     val followingCount: Int = 0,
-
-    // flags para la UI
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val successMessage: String? = null,
+    val saved: Boolean = false
 )
+

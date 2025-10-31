@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,6 +29,7 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(horizontal = 24.dp)
             .padding(top = 100.dp)
+            .testTag("home_screen")
     ) {
         when {
             state.isLoading -> {

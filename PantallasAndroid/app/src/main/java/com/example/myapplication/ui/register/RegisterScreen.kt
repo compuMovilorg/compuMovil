@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -112,9 +113,21 @@ private fun BodyRegisterScreen(
 
         Spacer(Modifier.height(12.dp))
 
+        if (!state.errorMessage.isNullOrBlank()) {
+            Text(
+                text = state.errorMessage!!,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                    .testTag("register_error_text")
+            )
+        }
+
         AppButton(
             texto = stringResource(R.string.crear_cuenta),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("btn_create_account"),
             onClick = {
                 // Log de verificación ANTES de enviar a Firestore
                 Log.d(
@@ -168,7 +181,7 @@ private fun FormularioRegistro(
             value = state.name,
             onValueChange = onNameChange,
             label = "Nombre",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().testTag("name_field")
         )
 
         // Usuario
@@ -176,14 +189,14 @@ private fun FormularioRegistro(
             value = state.username,
             onValueChange = onUsuarioChange,
             label = "Usuario",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().testTag("username_field")
         )
 
         // Fecha de nacimiento (con tu componente)
         DateBirthField(
             value = state.fechaNacimiento,
             onValueChange = onFechaNacimientoChange,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().testTag("birthdate_field")
         )
 
         // Correo
@@ -191,14 +204,14 @@ private fun FormularioRegistro(
             value = state.email,
             onValueChange = onEmailChange,
             label = "Correo electrónico",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().testTag("email_field")
         )
 
         // Contraseña (usa tu PasswordField para mantener estilo)
         PasswordField(
             value = state.password,
             onValueChange = onPasswordChange,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().testTag("password_field")
         )
     }
 }

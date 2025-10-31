@@ -5,4 +5,5 @@ data class RegisterUserDto(
     val username: String,
     val birthdate: String,
     val FCMToken: String,
+    val email: String = ""
 )

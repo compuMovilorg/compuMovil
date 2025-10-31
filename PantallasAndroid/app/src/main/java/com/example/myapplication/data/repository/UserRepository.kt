@@ -170,11 +170,14 @@ class UserRepository @Inject constructor(
         require(userId.isNotBlank()) { "UID de Firebase vacio" }
         require(!userId.contains("@")) { "UID invalido (parece un email): $userId" }
 
+        val authEmail = authRemoteDataSource.currentUser?.email.orEmpty()
+
         val dto = RegisterUserDto(
             name = name.trim(),
             username = username.trim(),
             birthdate = birthdate.trim(),
-            FCMToken = FCMToken.trim()
+            FCMToken = FCMToken.trim(),
+            email = authEmail
         )
 
         Log.d(TAG, "registerUser(dto) -> $dto")

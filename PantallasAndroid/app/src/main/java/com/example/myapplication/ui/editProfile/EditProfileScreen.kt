@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -72,35 +73,38 @@ fun EditProfileScreen(
             value = state.name,
             onValueChange = { viewModel.updateName(it) },
             label = "Nombre",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("edit_name_field")
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         CustomTextField(
             value = state.usuario,
             onValueChange = { viewModel.updateUsuario(it) },
             label = "Usuario",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("edit_username_field")
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         CustomTextField(
             value = state.birthdate,
             onValueChange = { viewModel.updateFechaNacimiento(it) },
             label = "Fecha de nacimiento",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("edit_birthdate_field")
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         CustomTextField(
             value = state.email,
             onValueChange = { viewModel.updateEmail(it) },
             label = "Email",
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("edit_email_field")
         )
+
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -108,7 +112,7 @@ fun EditProfileScreen(
 
         AppButton(
             texto = if (isLoading) "Guardando..." else "Guardar cambios",
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("btn_save"),
             onClick = {
                 viewModel.saveProfile(
                     onSuccess = {

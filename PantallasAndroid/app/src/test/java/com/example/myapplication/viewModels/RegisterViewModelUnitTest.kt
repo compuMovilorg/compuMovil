@@ -5,12 +5,15 @@ import android.util.Log
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.UserRepository
 import com.example.myapplication.ui.register.RegisterViewModel
+import com.google.common.base.Verify.verify
 import com.google.common.truth.Truth.assertThat
+import io.mockk.Called
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -46,7 +49,12 @@ fun setup(){
 
     authRepository = mockk()
     userRepository = mockk()
-    viewModel = RegisterViewModel(authRepository, userRepository,testDispatcher)
+    viewModel = RegisterViewModel(
+        authRepository = authRepository,
+        userRepository = userRepository,
+        ioDispatcher = testDispatcher,
+        blockingDispatcher = testDispatcher
+    )
     }
 
     @Test
@@ -81,15 +89,33 @@ fun setup(){
         viewModel.updateBirthdate("1990/01/01")
 
         coEvery { authRepository.register(any(), any()) } returns
-                Result.failure(Exception("Ya existe una cuenta con ese correo"))
+                Result.failure(Exception("Ya existe una cuenta con ese correo."))
 
-        viewModel.register(onSuccess = {}, onError = { })
+        viewModel.register(onSuccess = {}, onError = {})
         advanceUntilIdle()
 
-        val finalState = viewModel.uiState.value
+        val finalState = viewModel.uiState.first { !it.isLoading || it.errorMessage?.isNotEmpty() == true }
         assertThat(finalState.navigate).isFalse()
         assertThat(finalState.errorMessage).isNotEmpty()
         assertThat(finalState.errorMessage).isEqualTo("Ya existe una cuenta con ese correo.")
+    }
+
+    @Test
+    fun register_nameEmpty_showsError() = runTest(testDispatcher) {
+        // Arrange
+        viewModel.updateName("")
+        viewModel.updateUsername("usuarioOK")
+        viewModel.updateBirthdate("1990/01/01")
+        viewModel.updateEmail("ok@example.com")
+        viewModel.updatePassword("123456")
+
+        // Act
+        viewModel.register(onSuccess = {}, onError = {})
+
+        // Assert (validación es inmediata)
+        val state = viewModel.uiState.value
+        assertThat(state.navigate).isFalse()
+        assertThat(state.errorMessage).isEqualTo("El nombre es obligatorio.")
     }
 
 

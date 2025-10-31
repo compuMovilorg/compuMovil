@@ -37,12 +37,14 @@ class UserRepositoryIntegrationTest {
         username: String,
         name: String,
         birthdate: String = "1990/01/01",
-        FCMToken: String = "token-123"
+        FCMToken: String = "token-123",
+        email: String
     ) = RegisterUserDto(
         username = username,
         name = name,
         birthdate = birthdate,
-        FCMToken = FCMToken
+        FCMToken = FCMToken,
+        email = email
     )
 
     @Before
@@ -99,10 +101,12 @@ class UserRepositoryIntegrationTest {
     @Test
     fun createUser_success_persistsDocument() = runTest {
         val userId = "user_100"
+        val expectedEmail = "email100@example.com"
         val dto = registerDto(
             username = "username100",
             birthdate = "1990/01/01",
-            name = "Name 100"
+            name = "Name 100",
+            email = expectedEmail
         )
 
         val createResult = userRepository.createUser(dto, userId)
@@ -111,11 +115,13 @@ class UserRepositoryIntegrationTest {
         val snap = db.collection("users").document(userId).get().await()
         Truth.assertThat(snap.exists()).isTrue()
         Truth.assertThat(snap.getString("name")).isEqualTo("Name 100")
+        Truth.assertThat(snap.getString("email")).isEqualTo(expectedEmail)
 
         val read = userRepository.getUserById(userId)
         Truth.assertThat(read.isSuccess).isTrue()
-        Truth.assertThat(read.getOrNull()?.email).isEqualTo("email100@example.com")
+        Truth.assertThat(read.getOrNull()?.email).isEqualTo(expectedEmail)
     }
+
 
     @Test
     fun createUser_invalidId_returnsFailure() = runTest {
@@ -123,7 +129,8 @@ class UserRepositoryIntegrationTest {
         val dto = registerDto(
             username = "nouser",
             birthdate = "1990/01/01",
-            name = "No Name"
+            name = "No Name",
+            email = "nouser@example.com"
         )
 
         val result = userRepository.createUser(dto, invalidUserId)

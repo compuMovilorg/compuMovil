@@ -1,47 +1,44 @@
 package com.example.myapplication.utils
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-
-//@Composable
-//fun DateBirthField(
-//    value: String = "",
-//    modifier: Modifier = Modifier,
-//    onValueChange: (String) -> Unit
-//) {
-//    var text by remember { mutableStateOf(value) }
-//
-//    OutlinedTextField(
-//        value = text,
-//        onValueChange = { input ->
-//            val filtered = input.filter { it.isDigit() || it == '/' }
-//            text = filtered
-//            onValueChange(filtered)
-//        },
-//        label = { Text("Date of Birth (DD/MM/YYYY)") },
-//        modifier = modifier.fillMaxWidth(),
-//        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-//    )
-//}
 
 @Composable
 fun DateBirthField(
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    label: String = "Fecha de nacimiento (AAAA/MM/DD)",
+    imeAction: ImeAction = ImeAction.Next,
+    onImeAction: (() -> Unit)? = null
 ) {
     OutlinedTextField(
         value = value,
-        onValueChange = { onValueChange(it) }, // mientras tanto, texto libre
-        label = { Text("Date of birth (DD/MM/YYYY)") },
-        modifier = modifier,
+        onValueChange = { input ->
+            // Permite escribir con o sin '/'. Auto-formatea a AAAA/MM/DD
+            val digits = input.filter { it.isDigit() }.take(8)
+            val formatted = when {
+                digits.length <= 4 -> digits
+                digits.length <= 6 -> digits.substring(0, 4) + "/" + digits.substring(4)
+                else -> digits.substring(0, 4) + "/" + digits.substring(4, 6) + "/" + digits.substring(6)
+            }
+            onValueChange(formatted)
+        },
+        label = { Text(label) },
+        modifier = modifier,               // ← aquí se respeta el testTag externo
         singleLine = true,
-        readOnly = false // ¡no lo dejes en true!
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = imeAction
+        ),
+        keyboardActions = KeyboardActions(
+            onAny = { onImeAction?.invoke() }
+        )
     )
 }
-

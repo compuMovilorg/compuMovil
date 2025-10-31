@@ -1,13 +1,13 @@
-package com.example.myapplication
+package com.example.myapplication.datasource
 
 import com.example.myapplication.data.datasource.impl.firestore.ReviewFireStoreDataSourceImpl
-import com.google.firebase.Firebase
 import com.example.myapplication.data.datasource.impl.firestore.UserFirestoreDataSourceImpl
 import com.example.myapplication.data.dtos.CreateReviewDto
 import com.example.myapplication.data.dtos.RegisterUserDto
 import com.example.myapplication.data.dtos.UserFirestoreDto
 import com.example.myapplication.data.dtos.UserProfileDto
 import com.google.common.truth.Truth
+import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
@@ -38,7 +38,7 @@ class FirebaseUserDataSourceTest {
     fun setUp() = runTest {
         try {
             db.useEmulator("10.0.2.2", 8080)
-        }catch (e: Exception){
+        } catch (e: Exception) {
 
         }
         dataSource = UserFirestoreDataSourceImpl(db)
@@ -100,7 +100,6 @@ class FirebaseUserDataSourceTest {
         Truth.assertThat(result).isNotNull()
         Truth.assertThat(result?.name).isEqualTo("name")
         Truth.assertThat(result?.id).isEqualTo("999")
-
 
 
     }
@@ -191,11 +190,10 @@ class FirebaseUserDataSourceTest {
             gastroBarId = "gastro123"
         )
         reviewDataSource.createReview(createReviewDto)
-        
+
         val reviews = reviewDataSource.getReviewsByUser(user.id)
         Truth.assertThat(reviews).isNotEmpty()
         Truth.assertThat(reviews.first().reviewText).isEqualTo(createReviewDto.reviewText)
-
 
 
     }
@@ -204,13 +202,13 @@ class FirebaseUserDataSourceTest {
     fun tearDown() = runTest {
         val users = db.collection("users").get().await()
 
-        for(userDoc in users){
+        for (userDoc in users) {
             val followers = userDoc.reference.collection("followers").get().await()
-            for(follower in followers){
+            for (follower in followers) {
                 follower.reference.delete().await()
             }
             val following = userDoc.reference.collection("following").get().await()
-            for(following in following){
+            for (following in following) {
                 following.reference.delete().await()
             }
         }
@@ -219,4 +217,3 @@ class FirebaseUserDataSourceTest {
         }
     }
 }
-

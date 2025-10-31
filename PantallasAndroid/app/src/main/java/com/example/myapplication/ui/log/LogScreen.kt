@@ -23,6 +23,7 @@ import com.example.myapplication.utils.CustomTextField
 import com.example.myapplication.utils.AppButton
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun LoginBody(
@@ -114,7 +115,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onForgotPasswordClick: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().testTag("login_screen")) {
         Image(
             painter = painterResource(id = R.drawable.fondolog),
             contentDescription = "Fondo log",
