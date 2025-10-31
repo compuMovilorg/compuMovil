@@ -3,9 +3,14 @@ package com.example.myapplication.ui.register
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.injection.IoDispatcher
 import com.example.myapplication.data.repository.AuthRepository
 import com.example.myapplication.data.repository.UserRepository
+import com.google.firebase.auth.FirebaseAuthException
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,28 +22,40 @@ private const val TAG = "RegisterVM"
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
+
+    // 🔸 Dispatcher “real” para evitar tiempo virtual en tests
+    private val blockingDispatcher = Dispatchers.Default.limitedParallelism(1)
 
     private val _uiState = MutableStateFlow(RegisterState())
     val uiState: StateFlow<RegisterState> = _uiState
 
-    // --------- Setters (con trim + logs) ---------
+    fun onRegisterSucces() {
+        _uiState.update { it.copy(navigate = true, errorMessage = "") }
+    }
+
+    // --------- Setters ---------
     fun updateName(input: String) {
         Log.d(TAG, "updateName -> '$input'")
         _uiState.update { it.copy(name = input) }
     }
-    fun updateUsuario(input: String) {
+
+    fun updateUsername(input: String) {
         Log.d(TAG, "updateUsuario -> '$input'")
-        _uiState.update { it.copy(usuario = input) }
+        _uiState.update { it.copy(username = input) }
     }
-    fun updateFechaNacimiento(input: String) {
+
+    fun updateBirthdate(input: String) {
         Log.d(TAG, "updateFechaNacimiento -> '$input'")
         _uiState.update { it.copy(fechaNacimiento = input) }
     }
+
     fun updateEmail(input: String) {
         _uiState.update { it.copy(email = input) }
     }
+
     fun updatePassword(input: String) {
         _uiState.update { it.copy(password = input) }
     }
@@ -47,13 +64,13 @@ class RegisterViewModel @Inject constructor(
     private fun validate(): String? {
         val s = _uiState.value
         val name = s.name.trim()
-        val user = s.usuario.trim()
+        val username = s.username.trim()
         val birth = s.fechaNacimiento.trim()
         val email = s.email.trim()
         val pass = s.password
 
         if (name.isEmpty()) return "El nombre es obligatorio."
-        if (user.isEmpty()) return "El usuario es obligatorio."
+        if (username.isEmpty()) return "El usuario es obligatorio."
         if (birth.isEmpty()) return "La fecha de nacimiento es obligatoria."
         if (!email.contains("@") || !email.contains(".")) return "Correo inválido."
         if (pass.length < 6) return "La contraseña debe tener al menos 6 caracteres."
@@ -67,35 +84,36 @@ class RegisterViewModel @Inject constructor(
             return
         }
 
-        // 1) Antes de validar (lo que hay escrito en el formulario)
         logState("ANTES_DE_VALIDAR")
 
         validate()?.let { msg ->
             Log.w(TAG, "Formulario inválido -> $msg")
-            _uiState.update { it.copy(errorMessage = msg) }
+            _uiState.update { it.copy(errorMessage = msg, navigate = false) }
             onError(msg)
             return
         }
 
-        // Snapshot con trim
         val s = _uiState.value
         val name = s.name.trim()
-        val user = s.usuario.trim()
+        val username = s.username.trim()
         val birth = s.fechaNacimiento.trim()
         val email = s.email.trim()
         val pass = s.password
 
-        viewModelScope.launch {
+        // 🔸 Lanzamos en IO (o el que inyectes), pero las llamadas a Firebase/Firestore
+        //     se envuelven con withContext(blockingDispatcher) para usar tiempo real.
+        viewModelScope.launch(ioDispatcher) {
             try {
-                _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+                _uiState.update { it.copy(isLoading = true, errorMessage = "", navigate = false) }
 
-                // 2) Justo antes de Auth, con snapshot trimmed (lo que realmente se usará)
                 Log.i(TAG, "Registro: iniciando Auth con email=$email")
                 logState("ANTES_DE_AUTH_TRIMMED")
 
-                val authRes = authRepository.register(email, pass)
+                // 🔸 Ejecuta Auth en tiempo real (evita timeout virtual)
+                val authRes = withContext(blockingDispatcher) {
+                    authRepository.register(email, pass)
+                }
 
-                // 3) Apenas retorna Auth (éxito o error)
                 Log.i(
                     TAG,
                     "DESPUES_DE_AUTH -> isSuccess=${authRes.isSuccess}, ex=${authRes.exceptionOrNull()?.javaClass?.simpleName}:${authRes.exceptionOrNull()?.message}"
@@ -103,9 +121,10 @@ class RegisterViewModel @Inject constructor(
 
                 if (authRes.isFailure) {
                     val ex = authRes.exceptionOrNull()
+                    // 🔸 Mensaje amigable garantizado
                     val friendly = firebaseFriendlyMessage(ex) ?: "Error al registrar usuario"
                     Log.e(TAG, "Auth falló: ${ex?.javaClass?.simpleName}: ${ex?.message}", ex)
-                    _uiState.update { it.copy(isLoading = false, errorMessage = friendly) }
+                    _uiState.update { it.copy(isLoading = false, errorMessage = friendly, navigate = false) }
                     onError(friendly)
                     return@launch
                 }
@@ -114,46 +133,47 @@ class RegisterViewModel @Inject constructor(
                 if (uid.isNullOrBlank()) {
                     val msg = "Auth OK pero UID es nulo."
                     Log.e(TAG, msg)
-                    _uiState.update { it.copy(isLoading = false, errorMessage = msg) }
+                    _uiState.update { it.copy(isLoading = false, errorMessage = msg, navigate = false) }
                     onError(msg)
                     return@launch
                 }
 
-                // 4) Justo antes de enviar a Firestore (valores finales que se guardarán)
-                Log.i(TAG, "Guardando perfil -> uid=$uid, name='$name', user='$user', birth='$birth'")
+                Log.i(TAG, "Guardando perfil -> uid=$uid, name='$name', user='$username', birth='$birth'")
                 logState("ANTES_DE_FIRESTORE_TRIMMED")
 
-                val saveRes = userRepository.registerUser(
-                    name = name,
-                    username = user,
-                    birthdate = birth,
-                    userId = uid,
-                    FCMToken = ""
-                )
+                // 🔸 Ejecuta Firestore en tiempo real (evita timeout virtual)
+                val saveRes = withContext(blockingDispatcher) {
+                    userRepository.registerUser(
+                        name = name,
+                        username = username,
+                        birthdate = birth,
+                        userId = uid,
+                        FCMToken = ""
+                    )
+                }
 
                 if (saveRes.isFailure) {
                     val ex = saveRes.exceptionOrNull()
                     val friendly = ex?.message ?: "Error guardando el perfil en Firestore"
                     Log.e(TAG, "Firestore falló: ${ex?.javaClass?.simpleName}: ${ex?.message}", ex)
-                    _uiState.update { it.copy(isLoading = false, errorMessage = friendly) }
+                    _uiState.update { it.copy(isLoading = false, errorMessage = friendly, navigate = false) }
                     onError(friendly)
                     return@launch
                 }
 
                 Log.i(TAG, "Registro completo: perfil guardado en users/$uid")
                 clearForm()
-                _uiState.update { it.copy(isLoading = false) }
+                _uiState.update { it.copy(isLoading = false, navigate = true, errorMessage = "") }
                 onSuccess()
 
             } catch (e: Exception) {
                 val friendly = firebaseFriendlyMessage(e) ?: (e.message ?: "Error desconocido")
                 Log.e(TAG, "Registro: excepción no controlada -> $friendly", e)
-                _uiState.update { it.copy(isLoading = false, errorMessage = friendly) }
+                _uiState.update { it.copy(isLoading = false, errorMessage = friendly, navigate = false) }
                 onError(friendly)
             }
         }
     }
-
 
     private fun clearForm() {
         _uiState.value = RegisterState()
@@ -161,6 +181,15 @@ class RegisterViewModel @Inject constructor(
 
     // --------- Mapeo de errores comunes de Firebase ---------
     private fun firebaseFriendlyMessage(e: Throwable?): String? {
+        // 🔹 Normaliza el mensaje para detectar códigos genéricos sin depender de Firebase
+        val rawMsg = e?.message.orEmpty()
+
+        if (rawMsg.contains("EMAIL_ALREADY_IN_USE", ignoreCase = true) ||
+            rawMsg.contains("already in use", ignoreCase = true) ||
+            rawMsg.contains("USER_COLLISION", ignoreCase = true)) {
+            return "Ya existe una cuenta con ese correo."
+        }
+
         return when (e) {
             is com.google.firebase.auth.FirebaseAuthWeakPasswordException ->
                 "La contraseña es demasiado débil."
@@ -170,18 +199,24 @@ class RegisterViewModel @Inject constructor(
                 "Ya existe una cuenta con ese correo."
             is com.google.firebase.FirebaseNetworkException ->
                 "Problema de conexión. Intenta de nuevo."
+            is FirebaseAuthException -> when (e.errorCode) {
+                "ERROR_EMAIL_ALREADY_IN_USE" -> "Ya existe una cuenta con ese correo."
+                "ERROR_INVALID_EMAIL" -> "Correo inválido."
+                "ERROR_WEAK_PASSWORD" -> "La contraseña es demasiado débil."
+                else -> e.message
+            }
             else -> e?.message
         }
     }
+
 
     private fun logState(label: String) {
         val s = _uiState.value
         Log.i(
             TAG,
             "$label | state = { " +
-                    "name='${s.name}', user='${s.usuario}', birth='${s.fechaNacimiento}', " +
+                    "name='${s.name}', user='${s.username}', birth='${s.fechaNacimiento}', " +
                     "email='${s.email}', passLen=${s.password.length}, isLoading=${s.isLoading} }"
         )
     }
-
 }

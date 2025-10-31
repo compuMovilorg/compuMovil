@@ -103,8 +103,8 @@ private fun BodyRegisterScreen(
         FormularioRegistro(
             state = state,
             onNameChange = registerViewModel::updateName,
-            onUsuarioChange = registerViewModel::updateUsuario,
-            onFechaNacimientoChange = registerViewModel::updateFechaNacimiento,
+            onUsuarioChange = registerViewModel::updateUsername,
+            onFechaNacimientoChange = registerViewModel::updateBirthdate,
             onEmailChange = registerViewModel::updateEmail,
             onPasswordChange = registerViewModel::updatePassword,
             modifier = Modifier.fillMaxWidth()
@@ -119,11 +119,11 @@ private fun BodyRegisterScreen(
                 // Log de verificación ANTES de enviar a Firestore
                 Log.d(
                     "Register",
-                    "DATA -> name='${state.name}', user='${state.usuario}', birth='${state.fechaNacimiento}', email='${state.email}'"
+                    "DATA -> name='${state.name}', user='${state.username}', birth='${state.fechaNacimiento}', email='${state.email}'"
                 )
                 registerViewModel.register(
                     onSuccess = {
-                        Log.d("Register", "Usuario registrado: ${state.email} / ${state.usuario}")
+                        Log.d("Register", "Usuario registrado: ${state.email} / ${state.username}")
                         onRegisterSuccess()
                     },
                     onError = { message ->
@@ -173,7 +173,7 @@ private fun FormularioRegistro(
 
         // Usuario
         CustomTextField(
-            value = state.usuario,
+            value = state.username,
             onValueChange = onUsuarioChange,
             label = "Usuario",
             modifier = Modifier.fillMaxWidth()

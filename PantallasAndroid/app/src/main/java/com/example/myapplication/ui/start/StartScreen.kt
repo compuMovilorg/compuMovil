@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,7 +40,8 @@ fun BodyStartScreen(
             texto = stringResource(R.string.iniciar_sesion),
             modifier = Modifier
                 .padding(vertical = 8.dp)
-                .fillMaxWidth(0.7f),
+                .fillMaxWidth(0.7f)
+                .testTag("btn_login"),
             onClick = onLoginClick,
             height = 60.dp, // más alto
             fontSize = 22.sp
@@ -49,7 +51,8 @@ fun BodyStartScreen(
             texto = stringResource(R.string.crear_cuenta),
             modifier = Modifier
                 .padding(vertical = 8.dp)
-                .fillMaxWidth(0.7f),
+                .fillMaxWidth(0.7f)
+                .testTag("btn_register"),
             onClick = onRegisterClick,
             height = 60.dp,
             fontSize = 22.sp

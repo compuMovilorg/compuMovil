@@ -44,7 +44,7 @@ class UserRepository @Inject constructor(
         return try {
             val user = userRemoteDataSource.getUserById(id, resolvedCurrentUserId)
             if (user == null) {
-                return Result.failure(Exception("User with id $id not found"))
+                return Result.failure(Exception("User not found"))
             }
             Log.d(TAG, "getUserById: usuario encontrado -> ${user.username ?: "sin username"} (${user.id})")
             Result.success(user.toUserInfo())

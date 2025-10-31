@@ -52,7 +52,7 @@ data class UserFirestoreDto(
             birthdate = birthdate,
             followersCount = followersCount,
             followingCount = followingCount,
-            profileImage = profileImage,
+            profileImage = profileImage ?: "No hay foto de perfil",
             followed = followed
         )
     }
@@ -81,7 +81,7 @@ data class UserRetrofitDto(
             birthdate = birthdate,
             followersCount = followersCount,
             followingCount = followingCount,
-            profileImage = profileImage,
+            profileImage = profileImage ?: "No hay foto de perfil",
             followed = followed
         )
     }

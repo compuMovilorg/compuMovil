@@ -11,50 +11,36 @@ class AuthRepository @Inject constructor(
     val currentUser: FirebaseUser?
         get() = authRemoteDataSource.currentUser
 
-    /** Inicia sesión. NO escribe perfil. */
     suspend fun login(email: String, password: String): Result<Unit> = runCatching {
-        withTimeout(15_000) {
-            authRemoteDataSource.login(email, password)
-        }
+        withTimeout(15_000) { authRemoteDataSource.login(email, password) }
         Unit
     }
 
-    /**
-     * Registra al usuario y devuelve el UID NUEVO.
-     * NO escribe perfil; el ViewModel decide cuándo/qué guardar en Firestore.
-     */
-    suspend fun register(email: String, password: String): Result<String> = runCatching {
-        withTimeout(15_000) {
-            authRemoteDataSource.register(email, password)
-        }
+    suspend fun register(email: String, password: String): Result<Unit> = runCatching {
+        withTimeout(15_000) { authRemoteDataSource.register(email, password) }
+        Unit
     }
 
     fun logout() = authRemoteDataSource.logout()
 
-    /**
-     * Actualiza la foto de perfil del usuario en FirebaseAuth.
-     */
+    /** Sign out con timeout y Result, alias de logout() */
+    suspend fun signOut(): Result<Unit> = runCatching {
+        withTimeout(5_000) { authRemoteDataSource.logout() }
+        Unit
+    }
+
     suspend fun updateProfileImage(url: String): Result<Unit> = runCatching {
-        withTimeout(10_000) {
-            authRemoteDataSource.updateProfileImage(url)
-        }
+        withTimeout(10_000) { authRemoteDataSource.updateProfileImage(url) }
+        Unit
     }
 
-    /**
-     * Actualiza el nombre visible del usuario en FirebaseAuth.
-     */
     suspend fun updateDisplayName(name: String): Result<Unit> = runCatching {
-        withTimeout(10_000) {
-            authRemoteDataSource.updateDisplayName(name)
-        }
+        withTimeout(10_000) { authRemoteDataSource.updateDisplayName(name) }
+        Unit
     }
 
-    /**
-     * Fuerza la recarga del usuario autenticado actual desde Firebase.
-     */
     suspend fun reloadCurrentUser(): Result<Unit> = runCatching {
-        withTimeout(10_000) {
-            authRemoteDataSource.reloadCurrentUser()
-        }
+        withTimeout(10_000) { authRemoteDataSource.reloadCurrentUser() }
+        Unit
     }
 }
