@@ -1,6 +1,7 @@
 package com.example.myapplication.data.datasource
 
 import android.net.Uri
+import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
@@ -49,4 +50,24 @@ class AuthRemoteDataSource @Inject constructor(
     suspend fun reloadCurrentUser() {
         auth.currentUser?.reload()?.await()
     }
+
+    suspend fun sendEmailVerification(acs: ActionCodeSettings? = null) {
+        val user = currentUser ?: error("No hay usuario autenticado para enviar verificación.")
+        auth.setLanguageCode("es") // opcional
+        if (acs != null) {
+            user.sendEmailVerification(acs).await()
+        } else {
+            user.sendEmailVerification().await()
+        }
+    }
+
+    /** Devuelve true si (tras recargar) el email está verificado. */
+    suspend fun reloadAndIsEmailVerified(): Boolean {
+        auth.currentUser?.reload()?.await()
+        return currentUser?.isEmailVerified == true
+    }
+
+    /** Estado inmediato (sin recargar). Útil para UI reactiva. */
+    val isEmailVerified: Boolean
+        get() = currentUser?.isEmailVerified == true
 }

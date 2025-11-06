@@ -21,8 +21,26 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "com.example.myapplication.HiltTestRunner"
+       testInstrumentationRunner = "com.example.myapplication.HiltTestRunner"
+        //testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+//    flavorDimensions += "env"
+//    productFlavors {
+//        create("dev") {
+//            dimension = "env"
+//            applicationIdSuffix = ".dev"
+//            versionNameSuffix = "-dev"
+//            // Dev usa emuladores y base URL local
+//            buildConfigField("Boolean", "USE_EMULATORS", "true")
+//            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000/\"")
+//        }
+//        create("prod") {
+//            dimension = "env"
+//            // Prod apunta a servicios reales
+//            buildConfigField("Boolean", "USE_EMULATORS", "false")
+//            buildConfigField("String", "BASE_URL", "\"https://api.tu-dominio.com/\"")
+//        }
+//    }
 
     buildTypes {
         debug {

@@ -28,6 +28,7 @@ class RegisterViewModelntegrationTest {
     private lateinit var authRepository: AuthRepository
     private lateinit var userRepository: UserRepository
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() = runTest {
         try {
@@ -41,12 +42,18 @@ class RegisterViewModelntegrationTest {
             AuthRemoteDataSource(Firebase.auth)
         )
 
-        // 💡 Evita tiempo virtual: usa Default.limitedParallelism(1) como Main
-        val realDispatcher = Dispatchers.Default.limitedParallelism(1)
-        Dispatchers.setMain(realDispatcher)
+        // Dispatcher "real" para evitar tiempo virtual en Auth/Firestore
+        val blocking = Dispatchers.Default.limitedParallelism(1)
+        Dispatchers.setMain(blocking) // opcional: para tests que leen Main
 
-        viewModel = RegisterViewModel(authRepository, userRepository, realDispatcher)
+        viewModel = RegisterViewModel(
+            authRepository = authRepository,
+            userRepository = userRepository,
+            ioDispatcher = Dispatchers.IO,   // puedes usar blocking si prefieres uno solo
+            blockingDispatcher = blocking    // <--- ESTE era el que faltaba
+        )
     }
+
 
     @Test
     @OptIn(ExperimentalCoroutinesApi::class)

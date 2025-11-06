@@ -43,4 +43,16 @@ class AuthRepository @Inject constructor(
         withTimeout(10_000) { authRemoteDataSource.reloadCurrentUser() }
         Unit
     }
+
+    suspend fun sendEmailVerification(): Result<Unit> = runCatching {
+        withTimeout(15_000) { authRemoteDataSource.sendEmailVerification() }
+        Unit
+    }
+
+    suspend fun reloadAndIsEmailVerified(): Result<Boolean> = runCatching {
+        withTimeout(10_000) { authRemoteDataSource.reloadAndIsEmailVerified() }
+    }
+
+    val isEmailVerified: Boolean
+        get() = authRemoteDataSource.isEmailVerified
 }

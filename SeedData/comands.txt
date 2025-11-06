@@ -1,0 +1,4 @@
+$env:FIRESTORE_EMULATOR_HOST = "localhost:8080" 
+
+firebase emulators:start --only firestore,auth --project nocta-95b8c
+
