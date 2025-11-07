@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.max
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
@@ -133,12 +134,21 @@ class UserViewModel @Inject constructor(
                 Log.d("UserVM", "Resultado del repo follow/unfollow: $result")
 
                 if (result.isSuccess) {
-                    _uiState.value = _uiState.value.copy(
-                        user = _uiState.value.user?.copy(
-                            followed = !(_uiState.value.user?.followed ?: false)
+                    val prev = _uiState.value.user
+                    val prevFollowed = prev?.followed ?: false
+                    val nowFollowed = !prevFollowed
+                    val prevCount = prev?.followersCount ?: 0
+                    val newCount = if (nowFollowed) prevCount + 1 else max(0, prevCount - 1)
+
+                    _uiState.update { st ->
+                        st.copy(
+                            user = st.user?.copy(
+                                followed = nowFollowed,
+                                followersCount = newCount
+                            )
                         )
-                    )
-                    Log.d("UserVM", "UIState actualizado correctamente")
+                    }
+                    Log.d("UserVM", "UIState actualizado correctamente (followed=$nowFollowed, followers=$newCount)")
                 } else {
                     Log.e("UserVM", "Error en follow/unfollow: ${result.exceptionOrNull()?.message}")
                 }

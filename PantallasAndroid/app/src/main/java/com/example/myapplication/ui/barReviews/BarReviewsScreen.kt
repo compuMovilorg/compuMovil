@@ -8,30 +8,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myapplication.utils.ReviewCard
 
 @Composable
 fun BarReviewsScreen(
+    viewModel: BarReviewsViewModel,
     gastroBarId: String,
     gastroBarName: String? = null,
     onReviewClick: (String) -> Unit,
     onUserClick: (String) -> Unit
 ) {
-    // Pasamos los parámetros al ViewModel usando hiltViewModel()
-    val viewModel: BarReviewsViewModel = hiltViewModel()
-
-    // Efecto para actualizar el estado si cambian los datos
+    // Cargar/re-cargar SOLO si cambia el id o el nombre
     LaunchedEffect(gastroBarId, gastroBarName) {
-        // Si el ViewModel aún no tiene ese gastroBar cargado, lo actualiza
         if (viewModel.uiState.value.gastroBarId != gastroBarId) {
-            viewModel.reload()
+            viewModel.load(gastroBarId, gastroBarName)
         }
     }
 
     BarReviewsBody(
         viewModel = viewModel,
+        gastroBarId = gastroBarId,
         onReviewClick = onReviewClick,
         onUserClick = onUserClick
     )
@@ -40,6 +38,7 @@ fun BarReviewsScreen(
 @Composable
 fun BarReviewsBody(
     viewModel: BarReviewsViewModel,
+    gastroBarId: String,
     onReviewClick: (String) -> Unit,
     onUserClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -52,6 +51,7 @@ fun BarReviewsBody(
             .fillMaxSize()
             .padding(horizontal = 24.dp)
             .padding(top = 100.dp)
+            .testTag("bar_reviews_screen_$gastroBarId")
     ) {
         when {
             state.isLoading -> {
@@ -75,18 +75,27 @@ fun BarReviewsBody(
             else -> {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag("bar_reviews_list")
                 ) {
                     items(reviews, key = { it.id }) { review ->
-                        ReviewCard(
-                            review = review,
-                            modifier = Modifier.fillMaxWidth(),
-                            onReviewClick = { onReviewClick(it) },
-                            onLikeClick = { reviewId, userId ->
-                                viewModel.sendOrDeleteReviewLike(reviewId, userId)
-                            },
-                            onUserClick = { onUserClick(review.userId) }
-                        )
+                        // Contenedor genérico para contar/esperar ítems
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("review_item")
+                        ) {
+                            ReviewCard(
+                                review = review,
+                                modifier = Modifier.fillMaxWidth(),
+                                onReviewClick = { onReviewClick(it) },
+                                onLikeClick = { reviewId, userId ->
+                                    viewModel.sendOrDeleteReviewLike(reviewId, userId)
+                                },
+                                onUserClick = { onUserClick(review.userId) }
+                            )
+                        }
                     }
                 }
             }

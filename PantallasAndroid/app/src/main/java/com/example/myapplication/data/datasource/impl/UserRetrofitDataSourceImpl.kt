@@ -59,5 +59,12 @@ class UserRetrofitDataSourceImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
+    override suspend fun getFollowingIds(
+        userId: String,
+        fromServer: Boolean
+    ): List<String> {
+        TODO("Not yet implemented")
+    }
+
 
 }

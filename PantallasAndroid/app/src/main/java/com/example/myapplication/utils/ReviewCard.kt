@@ -1,5 +1,6 @@
 package com.example.myapplication.utils
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -12,29 +13,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.myapplication.data.ReviewInfo
-import android.util.Log
 
 @Composable
 fun ReviewCard(
     review: ReviewInfo,
     onReviewClick: (String) -> Unit,
     onUserClick: (String) -> Unit,
-    onLikeClick: (String, String) -> Unit, // reviewId, userId
+    onLikeClick: (String, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val reviewId = review.id.ifBlank { "unknown" }
+    val userId = review.userId.ifBlank { "unknown_user" }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
+            // contenedor raíz de la card
+            .testTag("review_card_$reviewId")
+            // tag específico para click en el review (lo mantengo)
+            .testTag("review_item_$reviewId")
             .clickable {
-                if (review.id.isNotBlank()) {
-                    onReviewClick(review.id)
-                } else {
-                    Log.w("ReviewCard", "Review id vacío o nulo, click ignorado")
-                }
+                if (review.id.isNotBlank()) onReviewClick(review.id)
+                else android.util.Log.w("ReviewCard", "Review id vacío o nulo, click ignorado")
             },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -49,37 +54,42 @@ fun ReviewCard(
             ReviewCardHeader(
                 userImage = review.userImage,
                 userName = review.name,
+                // tag al contenedor clickeable del header (ya lo tenías)
+                modifier = Modifier.testTag("review_user_$userId"),
                 onUserClick = {
-                    if (review.userId.isNotBlank()) {
-                        onUserClick(review.userId)
-                    } else {
-                        Log.w("ReviewCard", "User id vacío o nulo, click ignorado")
-                    }
+                    if (review.userId.isNotBlank()) onUserClick(review.userId)
+                    else android.util.Log.w("ReviewCard", "User id vacío o nulo, click ignorado")
                 }
             )
 
             // Nombre del lugar
             Text(
                 text = review.placeName,
+                modifier = Modifier.testTag("review_place_name_$reviewId"),
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
             )
 
             // Imagen del lugar
-            AsyncImage(
+            coil.compose.AsyncImage(
                 model = review.placeImage ?: "",
                 contentDescription = "Imagen del lugar",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
+                    .testTag("review_image_$reviewId")
                     .fillMaxWidth()
                     .height(180.dp)
                     .clip(MaterialTheme.shapes.medium)
             )
 
             // Texto de la reseña
-            ReviewCardBody(review.reviewText)
+            ReviewCardBody(
+                reviewText = review.reviewText,
+                modifier = Modifier.testTag("review_text_$reviewId")
+            )
 
             // Footer
             ReviewCardFooter(
+                reviewId = reviewId,
                 likes = review.likes,
                 comments = review.comments,
                 onLikeClick = { onLikeClick(review.id, review.userId) },
@@ -94,11 +104,12 @@ fun ReviewCard(
 fun ReviewCardHeader(
     userImage: String?,
     userName: String?,
+    modifier: Modifier = Modifier,
     onUserClick: () -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onUserClick() }
             .padding(vertical = 4.dp)
@@ -110,21 +121,28 @@ fun ReviewCardHeader(
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = userName ?: "",
+            // nombre visible del usuario con tag propio
+            modifier = Modifier.testTag("review_user_name_${(userName ?: "").ifBlank { "unknown" }}"),
             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
         )
     }
 }
 
 @Composable
-fun ReviewCardBody(reviewText: String) {
+fun ReviewCardBody(
+    reviewText: String,
+    modifier: Modifier = Modifier
+) {
     Text(
         text = reviewText,
+        modifier = modifier,
         style = MaterialTheme.typography.bodyMedium
     )
 }
 
 @Composable
 fun ReviewCardFooter(
+    reviewId: String,
     likes: Int,
     comments: Int,
     onLikeClick: () -> Unit,
@@ -136,21 +154,33 @@ fun ReviewCardFooter(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onLikeClick) {
-                Icon(Icons.Default.Favorite, contentDescription = "Me gusta")
-            }
-            Text(text = "$likes")
+            IconButton(
+                onClick = onLikeClick,
+                modifier = Modifier.testTag("review_like_btn_$reviewId")
+            ) { Icon(Icons.Default.Favorite, contentDescription = "Me gusta") }
+
+            Text(
+                text = "$likes",
+                modifier = Modifier.testTag("review_like_count_$reviewId")
+            )
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onCommentClick) {
-                Icon(Icons.Default.Comment, contentDescription = "Comentar")
-            }
-            Text(text = "$comments")
+            IconButton(
+                onClick = onCommentClick,
+                modifier = Modifier.testTag("review_comment_btn_$reviewId")
+            ) { Icon(Icons.Default.Comment, contentDescription = "Comentar") }
+
+            Text(
+                text = "$comments",
+                modifier = Modifier.testTag("review_comment_count_$reviewId")
+            )
         }
 
-        IconButton(onClick = onShareClick) {
-            Icon(Icons.Default.Share, contentDescription = "Compartir")
-        }
+        IconButton(
+            onClick = onShareClick,
+            modifier = Modifier.testTag("review_share_btn_$reviewId")
+        ) { Icon(Icons.Default.Share, contentDescription = "Compartir") }
     }
 }
+

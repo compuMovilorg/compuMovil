@@ -12,7 +12,8 @@ object NavigationLogic {
         Screen.EditProfile.route,
         Screen.SettingsRoute.route,
         Screen.Notification.route,
-        Screen.Events.route
+        Screen.Events.route,
+        Screen.FollowingUsers.route
     )
 
     private val showBottomBarScreens = listOf(
@@ -27,7 +28,8 @@ object NavigationLogic {
         Screen.EditProfile.route,
         Screen.Notification.route,
         Screen.SettingsRoute.route,
-        Screen.User.route
+        Screen.User.route,
+        Screen.FollowingUsers.route
     )
 
     fun shouldShowBottomBar(route: String?) =showBottomBarScreens.contains(route)

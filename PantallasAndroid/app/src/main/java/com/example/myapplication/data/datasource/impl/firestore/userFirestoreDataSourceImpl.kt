@@ -267,4 +267,21 @@ class UserFirestoreDataSourceImpl @Inject constructor(
             null
         }
     }
+
+    override suspend fun getFollowingIds(
+        userId: String,
+        fromServer: Boolean
+    ): List<String> {
+        require(userId.isNotBlank()) { "userId vacío" }
+        val source = if (fromServer) Source.SERVER else Source.DEFAULT
+
+        val snap = users()
+            .document(userId)
+            .collection("followings")
+            .get(source)
+            .await()
+
+        return snap.documents.map { it.id }
+    }
+
 }

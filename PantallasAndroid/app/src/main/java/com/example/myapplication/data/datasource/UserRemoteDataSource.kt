@@ -7,11 +7,9 @@ interface UserRemoteDataSource {
 
     suspend fun getAllUsers(): List<UserDtoGeneric>
 
-    suspend fun getUserById(id: String,currentUserId: String): UserDtoGeneric?
+    suspend fun getUserById(id: String, currentUserId: String): UserDtoGeneric?
 
     suspend fun getUserByEmail(email: String): UserDtoGeneric
-
-//    suspend fun getUserByFirebaseUid(firebaseUid: String): UserDtoGeneric
 
     suspend fun createUser(user: UserDtoGeneric)
 
@@ -24,4 +22,6 @@ interface UserRemoteDataSource {
     suspend fun updateProfileImage(id: String, profileImageUrl: String)
 
     suspend fun followOrUnfollowUser(currentUserId: String, targetUserId: String): Result<Unit>
+
+    suspend fun getFollowingIds(userId: String, fromServer: Boolean = true): List<String>
 }

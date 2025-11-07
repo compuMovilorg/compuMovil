@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.mainuser
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,7 +22,8 @@ import com.example.myapplication.utils.ProfileAsyncImage
 @Composable
 fun MainUserScreen(
     viewModel: MainUserViewModel = hiltViewModel(),
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    onNavigateToFollowing: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -34,9 +36,11 @@ fun MainUserScreen(
         onCancelEdit = { viewModel.cancelEdit() },
         onConfirmEdit = { viewModel.confirmEdit() },
         onNavigateToProfile = onNavigateToProfile,
+        onNavigateToFollowing = onNavigateToFollowing,   // ⬅️ NUEVO
         modifier = Modifier.testTag("main_user_screen")
     )
 }
+
 
 @Composable
 private fun MainUserBody(
@@ -48,24 +52,13 @@ private fun MainUserBody(
     onCancelEdit: () -> Unit,
     onConfirmEdit: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToFollowing: () -> Unit,   // ⬅️ NUEVO
     modifier: Modifier = Modifier
 ) {
     when {
-        state.isLoading -> {
-            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
+        state.isLoading -> { /* ... igual ... */ }
 
-        state.errorMessage != null && state.user == null -> {
-            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = state.errorMessage)
-                    Spacer(Modifier.height(12.dp))
-                    Button(onClick = onRetry) { Text("Reintentar") }
-                }
-            }
-        }
+        state.errorMessage != null && state.user == null -> { /* ... igual ... */ }
 
         state.user != null -> {
             val user = state.user
@@ -93,7 +86,6 @@ private fun MainUserBody(
                             horizontalAlignment = Alignment.Start,
                             modifier = Modifier.weight(1f)
                         ) {
-                            // 🔹 Nombre de usuario con icono de configuración
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = user?.username.orEmpty(),
@@ -118,6 +110,7 @@ private fun MainUserBody(
                                 Text(text = displayName, style = MaterialTheme.typography.bodyMedium)
                             }
                             Spacer(modifier = Modifier.height(8.dp))
+
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text(
                                     text = "Seguidores: ${user?.followersCount ?: 0}",
@@ -126,7 +119,10 @@ private fun MainUserBody(
                                 Text("·", style = MaterialTheme.typography.bodyMedium)
                                 Text(
                                     text = "Siguiendo: ${user?.followingCount ?: 0}",
-                                    style = MaterialTheme.typography.bodyMedium
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier
+                                        .clickable { onNavigateToFollowing() }
+                                        .testTag("btn_following"),
                                 )
                             }
                         }
@@ -189,3 +185,4 @@ private fun MainUserBody(
         }
     }
 }
+

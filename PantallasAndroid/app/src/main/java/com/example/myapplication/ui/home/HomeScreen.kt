@@ -16,8 +16,8 @@ import com.example.myapplication.utils.ReviewCard
 
 @Composable
 fun HomeScreen(
-    onReviewClick: (String) -> Unit, // ahora String
-    onUserClick: (String) -> Unit,   // ahora String
+    onReviewClick: (String) -> Unit,
+    onUserClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel()
 ) {
@@ -37,36 +37,45 @@ fun HomeScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-
             state.errorMessage != null -> {
                 Text(
                     text = state.errorMessage ?: "Error desconocido",
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-
             reviews.isEmpty() -> {
                 Text(
                     text = "Aún no hay reseñas",
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-
             else -> {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag("review_list")
                 ) {
                     items(reviews, key = { it.id }) { review ->
-                        ReviewCard(
-                            review = review,
-                            modifier = Modifier.fillMaxWidth(),
-                            onReviewClick = { onReviewClick(review.id) },
-                            onUserClick = { onUserClick(review.userId) },
-                            onLikeClick = { reviewId, userId ->
-                                viewModel.sendOrDeleteReviewLike(reviewId, userId)
-                            }
-                        )
+                        // Contenedor con tag genérico para listar/contar ítems
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("review_item")
+                        ) {
+                            // Tag específico para el objetivo de click en el review
+                            ReviewCard(
+                                review = review,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("review_item_${review.id}"),
+                                onReviewClick = { onReviewClick(review.id) },
+                                onUserClick = { onUserClick(review.userId) },
+                                onLikeClick = { reviewId, userId ->
+                                    viewModel.sendOrDeleteReviewLike(reviewId, userId)
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -74,13 +83,12 @@ fun HomeScreen(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun ReviewScreenPreview() {
     HomeScreen(
         onReviewClick = {},
-        modifier = Modifier.fillMaxSize(),
-        onUserClick = {}
+        onUserClick = {},
+        modifier = Modifier.fillMaxSize()
     )
 }

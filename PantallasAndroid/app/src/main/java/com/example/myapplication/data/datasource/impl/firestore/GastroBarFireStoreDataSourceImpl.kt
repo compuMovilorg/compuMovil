@@ -1,5 +1,6 @@
 package com.example.myapplication.data.datasource.impl.firestore
 
+import android.util.Log
 import com.example.myapplication.data.datasource.GastroBarRemoteDataSource
 import com.example.myapplication.data.dtos.CreateGastroBarDto
 import com.example.myapplication.data.dtos.GastroBarDto
@@ -15,24 +16,29 @@ class GastroBarFireStoreDataSourceImpl @Inject constructor(
     private val collectionName = "gastroBars" // nombre de la colección en Firestore
 
     override suspend fun getAllGastroBares(): List<GastroBarDto> {
-        return db.collection(collectionName)
-            .get()
-            .await()
-            .toObjects(GastroBarDto::class.java)
+        val snap = db.collection(collectionName).get().await()
+
+        Log.d("GastroBarFS", "getAll size=${snap.size()}")
+        snap.documents.forEach { d ->
+            Log.v("GastroBarFS", "docId=${d.id} data=${d.data}")
+        }
+
+        return snap.documents.mapNotNull { doc ->
+            val dto = doc.toObject(GastroBarDto::class.java) ?: return@mapNotNull null
+            // IMPORTANTE: inyectar el document.id en el DTO
+            dto.copy(id = doc.id)
+        }
     }
 
     override suspend fun getGastroBarById(id: String): GastroBarDto {
-        val docSnapshot = db.collection(collectionName)
-            .document(id)
-            .get()
-            .await()
+        val doc = db.collection(collectionName).document(id).get().await()
+        if (!doc.exists()) throw NoSuchElementException("GastroBar con id $id no encontrado")
 
-        if (!docSnapshot.exists()) {
-            throw NoSuchElementException("GastroBar con id $id no encontrado")
-        }
-
-        return docSnapshot.toObject(GastroBarDto::class.java)
+        val dto = doc.toObject(GastroBarDto::class.java)
             ?: throw IllegalStateException("No se pudo convertir el documento a GastroBarDto")
+
+        // IMPORTANTE: retornar el DTO con id
+        return dto.copy(id = doc.id)
     }
 
     override suspend fun createGastroBar(gastrobar: CreateGastroBarDto) {

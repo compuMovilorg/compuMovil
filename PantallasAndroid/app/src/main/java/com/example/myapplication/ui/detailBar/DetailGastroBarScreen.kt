@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,7 +34,7 @@ import com.example.myapplication.utils.StarRating
 fun DetailGastroBarScreen(
     gastroBarId: String,
     viewModel: DetailGastroBarViewModel = hiltViewModel(),
-    onViewReviewsClick: (String, String?) -> Unit // ✅ Cambiado a String
+    onViewReviewsClick: (String, String?) -> Unit
 ) {
     DetailGastroBarBody(
         gastroBarId = gastroBarId,
@@ -56,7 +57,7 @@ fun DetailGastroBarBody(
 
     LaunchedEffect(gastroBarId) {
         Log.d("DetailScreen", "Entrando a DetailGastroBar con ID: $gastroBarId")
-        viewModel.buscarGastro(gastroBarId) // ✅ Función actualizada
+        viewModel.buscarGastro(gastroBarId)
     }
 
     state.gastroBar?.let { gastroBar ->
@@ -64,6 +65,7 @@ fun DetailGastroBarBody(
             modifier = modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .testTag("detail_screen")
         ) {
             HeaderImage(imageUrl = gastroBar.imagePlace)
             PlaceInfoSection(gastroBar = gastroBar)
@@ -84,10 +86,16 @@ fun DetailGastroBarBody(
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = {
-                        Log.d("DetailScreen", "Click en Ver Reseñas de ${gastroBar.name}")
-                        onViewReviewsClick(gastroBar.id, gastroBar.name) // ✅ ID como String
+                        Log.d(
+                            "DetailScreen",
+                            "Click Ver Reseñas idNav='$gastroBarId' idModel='${gastroBar.id}' name='${gastroBar.name}'"
+                        )
+                        // Usa SIEMPRE el id que vino por navegación
+                        onViewReviewsClick(gastroBarId, gastroBar.name)
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("btn_view_reviews_$gastroBarId")
                 ) {
                     Text(text = "Ver reseñas")
                 }
@@ -96,7 +104,9 @@ fun DetailGastroBarBody(
     } ?: run {
         Log.e("DetailScreen", "GastroBar con id '$gastroBarId' no encontrado")
         Box(
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier
+                .fillMaxSize()
+                .testTag("detail_screen"),
             contentAlignment = Alignment.Center
         ) {
             Text("GastroBar no encontrado")

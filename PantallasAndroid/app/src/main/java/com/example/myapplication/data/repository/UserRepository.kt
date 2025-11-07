@@ -233,6 +233,19 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun getFollowingIds(
+        userId: String? = null,
+        fromServer: Boolean = true
+    ): Result<List<String>> {
+        return try {
+            val resolvedUserId = userId ?: authRemoteDataSource.currentUser?.uid
+            require(!resolvedUserId.isNullOrBlank()) { "No hay usuario autenticado y no se proporcionó userId" }
 
-
+            val ids = userRemoteDataSource.getFollowingIds(resolvedUserId, fromServer)
+            Result.success(ids)
+        } catch (e: Exception) {
+            Log.e(TAG, "getFollowingIds error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
 }

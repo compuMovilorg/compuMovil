@@ -1,6 +1,7 @@
 package com.example.myapplication.navigation
 
 import android.util.Log
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -47,6 +48,9 @@ import com.example.myapplication.ui.settings.SettingsViewModel
 import com.example.myapplication.ui.start.StartScreen
 import com.example.myapplication.ui.user.UserScreen
 import com.example.myapplication.ui.user.UserViewModel
+import com.example.myapplication.ui.followingUsers.FollowingUsersScreen
+import com.example.myapplication.ui.followingUsers.FollowingUsersViewModel
+
 
 sealed class Screen(val route: String) {
     object StartRoute : Screen("start")
@@ -67,10 +71,12 @@ sealed class Screen(val route: String) {
     object EditProfile : Screen("editProfile")
     object SettingsRoute : Screen("settings")
     object Notification : Screen("notification")
-    // BarReviews already encoded to accept strings — keep it that way
+    object FollowingUsers : Screen("followingUsers")
     object BarReviews : Screen("barReviews/{gastroBarId}/{gastroBarName}") {
         fun createRoute(gastroBarId: String, gastroBarName: String? = ""): String {
-            return "barReviews/$gastroBarId/${gastroBarName ?: ""}"
+            val encodedId = Uri.encode(gastroBarId)
+            val encodedName = Uri.encode(gastroBarName ?: "")
+            return "barReviews/$encodedId/$encodedName"
         }
     }
 
@@ -182,14 +188,18 @@ fun AppNavigation(
         composable(Screen.Search.route) {
             val searchViewModel: SearchViewModel = hiltViewModel()
             SearchScreen(
-                gastroBars = LocalGastroBarProvider.gastroBars,
+                viewModel = searchViewModel,
                 onGastroBarClick = { gastroBarId ->
-                    // gastroBarId is string already
-                    navController.navigate("detail/$gastroBarId")
-                },
-                viewModel = searchViewModel
+                   Log.d("Nav", "navigate -> detail/$gastroBarId")
+                    if (gastroBarId.isBlank()) {
+                       Log.e("Nav", "Abort: gastroBarId en blanco")
+                    } else {
+                        navController.navigate("detail/$gastroBarId")
+                    }
+                }
             )
         }
+
 
         composable(Screen.Create.route) {
             val createViewModel: CreateViewModel = hiltViewModel()
@@ -219,11 +229,21 @@ fun AppNavigation(
                 viewModel = mainUserViewModel,
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
+                },
+                onNavigateToFollowing = {
+                    navController.navigate(Screen.FollowingUsers.route)
                 }
             )
         }
-
-
+        composable(route = Screen.FollowingUsers.route) {
+            val vm: FollowingUsersViewModel = hiltViewModel()
+            FollowingUsersScreen(
+                viewModel = vm,
+                onUserClick = { userId ->
+                    navController.navigate(Screen.User.createRoute(userId))
+                }
+            )
+        }
 
         composable(Screen.Profile.route) {
             val profileViewModel: ProfileViewModel = hiltViewModel()
@@ -296,32 +316,27 @@ fun AppNavigation(
         composable(
             route = Screen.BarReviews.route,
             arguments = listOf(
-                navArgument("gastroBarId") {
-                    type = NavType.StringType
-                    defaultValue = ""
-                },
-                navArgument("gastroBarName") {
-                    type = NavType.StringType
-                    defaultValue = ""
-                    nullable = true
-                }
+                navArgument("gastroBarId") { type = NavType.StringType; defaultValue = "" },
+                navArgument("gastroBarName") { type = NavType.StringType; defaultValue = ""; nullable = true }
             )
         ) { backStackEntry ->
             val barReviewsVM: BarReviewsViewModel = hiltViewModel(backStackEntry)
-            val gastroBarIdStr = backStackEntry.arguments?.getString("gastroBarId") ?: ""
-            val gastroBarName = backStackEntry.arguments?.getString("gastroBarName") ?: ""
+            val gastroBarIdStr = backStackEntry.arguments?.getString("gastroBarId")?.let(Uri::decode) ?: ""
+            val gastroBarName = backStackEntry.arguments?.getString("gastroBarName")?.let(Uri::decode) ?: ""
 
             Log.d("NavDebug", "BarReviews -> gastroBarId='$gastroBarIdStr', gastroBarName='$gastroBarName'")
 
             BarReviewsScreen(
+                viewModel = barReviewsVM,              // <-- pásalo
                 gastroBarId = gastroBarIdStr,
                 gastroBarName = gastroBarName,
-                onReviewClick = { /* no implementado aún */ },
+                onReviewClick = { /* ... */ },
                 onUserClick = { userIdStr ->
                     navController.navigate(Screen.User.createRoute(userIdStr))
                 }
             )
         }
+
 
 
         composable(
@@ -353,6 +368,6 @@ val bottomNavItems = listOf(
     BottomNavItem(Icons.Filled.Search, Icons.Outlined.Search, Screen.Search.route),
     BottomNavItem(Icons.Filled.AddCircle, Icons.Outlined.AddCircle, Screen.Create.route),
     BottomNavItem(Icons.Filled.Notifications, Icons.Outlined.Notifications, Screen.Events.route),
-   // BottomNavItem(Icons.Filled.Person, Icons.Outlined.Person, Screen.Profile.route)
+    // BottomNavItem(Icons.Filled.Person, Icons.Outlined.Person, Screen.Profile.route)
     BottomNavItem(Icons.Filled.Person, Icons.Outlined.Person, Screen.MainUser.route)
 )

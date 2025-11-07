@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -42,18 +43,30 @@ fun UserScreenBody(
 ) {
     when {
         state.isLoading -> {
-            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .testTag("profile_screen_loading"),
+                contentAlignment = Alignment.Center
+            ) {
                 CircularProgressIndicator()
             }
         }
 
         state.errorMessage != null -> {
-            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .testTag("profile_screen_error"),
+                contentAlignment = Alignment.Center
+            ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = state.errorMessage!!)
                     Spacer(Modifier.height(12.dp))
                     if (onRetry != null) {
-                        Button(onClick = onRetry) { Text("Reintentar") }
+                        Button(onClick = onRetry, modifier = Modifier.testTag("btn_profile_retry")) {
+                            Text("Reintentar")
+                        }
                     }
                 }
             }
@@ -67,6 +80,7 @@ fun UserScreenBody(
                 modifier = modifier
                     .fillMaxSize()
                     .padding(16.dp)
+                    .testTag("profile_screen")
             ) {
                 item {
                     Row(
@@ -74,11 +88,13 @@ fun UserScreenBody(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 100.dp)
+                            .testTag("profile_header")
                     ) {
                         ProfileAsyncImage(
                             profileImage = user.profileImage ?: "",
                             size = 90
                         )
+                        // Si quieres tag para el avatar: envuelve ProfileAsyncImage con .testTag("profile_avatar")
 
                         Spacer(modifier = Modifier.width(16.dp))
 
@@ -91,9 +107,11 @@ fun UserScreenBody(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Column {
+                                Column(modifier = Modifier.testTag("profile_identity")) {
+                                    // Username (lo muestras como username “crudo”, no con @)
                                     Text(
                                         text = user.username,
+                                        modifier = Modifier.testTag("profile_username"),
                                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                                     )
 
@@ -102,38 +120,50 @@ fun UserScreenBody(
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
                                             text = displayName,
+                                            modifier = Modifier.testTag("profile_name"),
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
                                 }
 
-                                // Botón "Seguir"
+                                // Botón Seguir / Siguiendo (reactivo al estado 'followed')
+                                val isFollowing = user.followed == true
                                 Button(
                                     onClick = {
-                                        Log.d("UserScreen", "CLICK detectado en boton Seguir para userId=${user.id}")
+                                        Log.d("UserScreen", "CLICK boton seguir/siguiendo para userId=${user.id}")
                                         if (!user.id.isNullOrBlank()) {
                                             viewModel.followOrUnfollowUser(user.id)
                                         } else {
-                                            Log.e("UserScreen", "user.id está vacío, no se puede seguir")
+                                            Log.e("UserScreen", "user.id vacío, no se puede seguir")
                                         }
                                     },
                                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                                    modifier = Modifier.height(36.dp)
+                                    modifier = Modifier
+                                        .height(36.dp)
+                                        .testTag("btn_follow")
                                 ) {
-                                    Text("Seguir", style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        text = if (isFollowing) "Siguiendo" else "Seguir",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
                                 }
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.testTag("profile_counters")
+                            ) {
                                 Text(
                                     text = "Seguidores: ${user.followersCount ?: 0}",
+                                    modifier = Modifier.testTag("followers_count"),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text("·", style = MaterialTheme.typography.bodyMedium)
                                 Text(
                                     text = "Siguiendo: ${user.followingCount ?: 0}",
+                                    modifier = Modifier.testTag("following_count"),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
@@ -150,7 +180,8 @@ fun UserScreenBody(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(20.dp),
+                                .padding(20.dp)
+                                .testTag("profile_reviews_empty"),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(text = "Este usuario no tiene publicaciones aún")
@@ -168,7 +199,12 @@ fun UserScreenBody(
         }
 
         else -> {
-            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .testTag("profile_screen_empty"),
+                contentAlignment = Alignment.Center
+            ) {
                 Text("No hay datos para mostrar")
             }
         }
@@ -181,6 +217,7 @@ fun ReviewItem(review: ReviewInfo) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .testTag("profile_review_item_${review.id}")
     ) {
         if (!review.placeImage.isNullOrEmpty()) {
             Image(
@@ -189,7 +226,8 @@ fun ReviewItem(review: ReviewInfo) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clip(MaterialTheme.shapes.medium),
+                    .clip(MaterialTheme.shapes.medium)
+                    .testTag("profile_review_image_${review.id}"),
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -197,6 +235,7 @@ fun ReviewItem(review: ReviewInfo) {
 
         Text(
             text = review.placeName,
+            modifier = Modifier.testTag("profile_review_place_${review.id}"),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
         )
 
@@ -204,6 +243,7 @@ fun ReviewItem(review: ReviewInfo) {
 
         Text(
             text = review.reviewText,
+            modifier = Modifier.testTag("profile_review_text_${review.id}"),
             style = MaterialTheme.typography.bodyMedium
         )
 

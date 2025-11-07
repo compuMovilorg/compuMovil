@@ -1,11 +1,11 @@
 package com.example.myapplication.ui.barReviews
 
 import android.util.Log
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.ReviewInfo
-import com.example.myapplication.data.repository.GastroBarRepository
 import com.example.myapplication.data.repository.ReviewRepository
 import com.example.myapplication.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +19,6 @@ import javax.inject.Inject
 class BarReviewsViewModel @Inject constructor(
     private val reviewRepository: ReviewRepository,
     private val userRepository: UserRepository,
-    private val gastroBarRepository: GastroBarRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -30,107 +29,98 @@ class BarReviewsViewModel @Inject constructor(
 
     init {
         val idRaw: String? = savedStateHandle["gastroBarId"]
-        val nameArg: String? = savedStateHandle["gastroBarName"]
-        val id = idRaw?.trim()
+        val nameRaw: String? = savedStateHandle["gastroBarName"]
+        val id = idRaw?.let(Uri::decode)?.trim()
+        val nameArg = nameRaw?.let(Uri::decode)
 
-        Log.d("BarReviewsVM", "init: savedStateHandle gastroBarId='$idRaw' -> trimmed='$id', name='$nameArg'")
+        Log.d(
+            "BarReviewsVM",
+            "init: savedStateHandle gastroBarId='$idRaw' -> trimmed='$id', name='$nameRaw' -> decoded='$nameArg'"
+        )
 
-        viewModelScope.launch {
-            if (!id.isNullOrBlank()) {
-                // Si ya tenemos un ID, lo usamos directamente
-                currentGastroBarId = id
-                _uiState.update { it.copy(gastroBarId = id, gastroBarName = nameArg) }
-                loadReviewsByBar(id)
-            } else if (!nameArg.isNullOrBlank()) {
-                // Si tenemos nombre pero no ID, buscamos el GastroBar
-                findGastroBarIdByName(nameArg)
-            } else {
-                Log.e("BarReviewsVM", "Ni gastroBarId ni gastroBarName especificados")
-                _uiState.update { it.copy(errorMessage = "GastroBar no especificado", isLoading = false) }
-            }
+        if (id.isNullOrBlank()) {
+            Log.e("BarReviewsVM", "Arg gastroBarId inválido o no especificado: '$idRaw'")
+            _uiState.update { it.copy(errorMessage = "GastroBar no especificado", isLoading = false) }
+        } else {
+            currentGastroBarId = id
+            _uiState.update { it.copy(gastroBarId = id, gastroBarName = nameArg) }
+            loadReviewsByBar(id)
         }
     }
 
-    /**
-     * Busca el ID del GastroBar por nombre usando el repositorio.
-     * Si lo encuentra, carga las reseñas asociadas.
-     */
-    private suspend fun findGastroBarIdByName(name: String) {
-        Log.d("BarReviewsVM", "Buscando gastrobar por nombre: '$name'")
-
-        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-        val result = gastroBarRepository.getGastroBares()
-        result.fold(
-            onSuccess = { gastrobares ->
-                val found = gastrobares.find { it.name.equals(name, ignoreCase = true) }
-                if (found != null) {
-                    Log.d("BarReviewsVM", "Gastrobar encontrado: id=${found.id}, name=${found.name}")
-                    currentGastroBarId = found.id
-                    _uiState.update {
-                        it.copy(gastroBarId = found.id, gastroBarName = found.name)
-                    }
-                    loadReviewsByBar(found.id)
-                } else {
-                    Log.w("BarReviewsVM", "No se encontró gastrobar con nombre='$name'")
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = "No se encontró el gastrobar '$name'"
-                        )
-                    }
-                }
-            },
-            onFailure = { throwable ->
-                Log.e("BarReviewsVM", "Error buscando gastrobares", throwable)
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = throwable.message ?: "Error al obtener gastrobares"
-                    )
-                }
-            }
-        )
+    fun setGastroBar(id: String, name: String? = null) {
+        val trimmed = id.trim()
+        currentGastroBarId = trimmed
+        _uiState.update { it.copy(gastroBarId = trimmed, gastroBarName = name ?: it.gastroBarName) }
     }
 
+    fun load(gastroBarId: String, gastroBarName: String? = null) {
+        if (gastroBarId.isBlank()) {
+            Log.e(
+                "BarReviewsVM",
+                "load() recibió un gastroBarId vacío. No se puede cargar la lista de reseñas"
+            )
+            _uiState.update {
+                it.copy(
+                    gastroBarId = null,
+                    gastroBarName = gastroBarName ?: it.gastroBarName,
+                    isLoading = false,
+                    errorMessage = "GastroBar no especificado"
+                )
+            }
+            return
+        }
+        setGastroBar(gastroBarId, gastroBarName)
+        loadReviewsByBar(gastroBarId)
+    }
+
+    /**
+     * Llamada directa y única a getReviewsByGastroBar(id).
+     * No hay fallback: si la query devuelve vacío o falla, el estado refleja ese resultado.
+     */
     private fun loadReviewsByBar(gastroBarId: String) {
         val id = gastroBarId.trim()
         currentGastroBarId = id
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            Log.d("BarReviewsVM", "Solicitando reseñas para gastrobar id='$id'")
+            Log.d("BarReviewsVM", "loadReviewsByBar -> solicitando reviews para id='$id'")
 
-            val result = reviewRepository.getReviewsByGastroBar(id)
-            result.fold(
-                onSuccess = { reviews ->
-                    if (reviews.isEmpty()) {
-                        Log.w("BarReviewsVM", "No se encontraron reseñas para id='$id'")
-                    } else {
-                        reviews.forEach { r ->
-                            Log.d("BarReviewsVM", "Review cargada: id=${r.id}, placeName=${r.placeName}, userId=${r.userId}")
+            try {
+                val result = reviewRepository.getReviewsByGastroBar(id)
+                result.fold(
+                    onSuccess = { reviews ->
+                        Log.d("BarReviewsVM", "getReviewsByGastroBar returned=${reviews.size} for id='$id'")
+                        // Mantenemos exactamente lo que venga de la repo (sin intentar filtrar o adivinar)
+                        _uiState.update {
+                            it.copy(
+                                reviews = reviews,
+                                isLoading = false,
+                                errorMessage = if (reviews.isEmpty()) "No se encontraron reseñas para este gastrobar" else null
+                            )
+                        }
+                    },
+                    onFailure = { throwable ->
+                        Log.e("BarReviewsVM", "getReviewsByGastroBar FAILURE for id='$id': ${throwable.message}", throwable)
+                        _uiState.update {
+                            it.copy(
+                                reviews = emptyList(),
+                                isLoading = false,
+                                errorMessage = throwable.message ?: "Error al cargar reseñas"
+                            )
                         }
                     }
-
-                    _uiState.update {
-                        it.copy(
-                            reviews = reviews,
-                            isLoading = false,
-                            errorMessage = if (reviews.isEmpty()) "No se encontraron reseñas para este gastrobar" else null
-                        )
-                    }
-                },
-                onFailure = { throwable ->
-                    Log.e("BarReviewsVM", "Error cargando reseñas para id='$id'", throwable)
-                    _uiState.update {
-                        it.copy(
-                            reviews = emptyList(),
-                            isLoading = false,
-                            errorMessage = throwable.message ?: "Error al cargar reseñas"
-                        )
-                    }
+                )
+            } catch (e: Exception) {
+                Log.e("BarReviewsVM", "Exception in loadReviewsByBar for id='$id': ${e.message}", e)
+                _uiState.update {
+                    it.copy(
+                        reviews = emptyList(),
+                        isLoading = false,
+                        errorMessage = e.message ?: "Error interno al cargar reseñas"
+                    )
                 }
-            )
+            }
         }
     }
 
@@ -152,34 +142,35 @@ class BarReviewsViewModel @Inject constructor(
                         review.reviewText.contains(q, ignoreCase = true)
             }
         }
-
     fun sendOrDeleteReviewLike(reviewId: String, userId: String) {
         viewModelScope.launch {
             val currentState = _uiState.value
             val review = currentState.reviews.find { it.id == reviewId }
 
             if (review == null) {
-                Log.w("BarReviewsVM", "sendOrDeleteReviewLike: No se encontró review con id='$reviewId'")
+                // No se encontró la review
                 return@launch
             }
 
             val result = reviewRepository.sendOrDeleteReviewLike(reviewId, userId)
             if (result.isSuccess) {
                 _uiState.update { state ->
-                    val updatedReviews = state.reviews.map { r ->
+                    state.reviews.map { r ->
                         if (r.id == reviewId) {
                             if (r.liked) {
+                                // Ya estaba like → quitar like
                                 r.copy(likes = r.likes - 1, liked = false)
                             } else {
+                                // No estaba like → poner like
                                 r.copy(likes = r.likes + 1, liked = true)
                             }
                         } else r
+                    }.let { updatedReviews ->
+                        state.copy(reviews = updatedReviews)
                     }
-                    state.copy(reviews = updatedReviews)
                 }
-            } else {
-                Log.e("BarReviewsVM", "Error al enviar/eliminar like: ${result.exceptionOrNull()?.message}")
             }
         }
     }
+
 }
