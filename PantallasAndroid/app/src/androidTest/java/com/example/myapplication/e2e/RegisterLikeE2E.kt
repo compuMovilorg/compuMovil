@@ -290,7 +290,7 @@ class RegisterLikeE2E {
             .performTextClearance()
 
         composeRule.onNodeWithTag("password_field")
-            .performTextInput("123456") // si tu mínimo es 8, usa "12345678"
+            .performTextInput("123456")
 
         composeRule.onNodeWithTag("btn_create_account")
             .performScrollTo()

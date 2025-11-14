@@ -21,6 +21,8 @@ import com.example.myapplication.data.local.LocalGastroBarProvider
 import com.example.myapplication.ui.Splash.SplashScreen
 import com.example.myapplication.ui.barReviews.BarReviewsScreen
 import com.example.myapplication.ui.barReviews.BarReviewsViewModel
+import com.example.myapplication.ui.chat.ChatScreen
+import com.example.myapplication.ui.chat.ChatViewModel
 import com.example.myapplication.ui.create.CreateScreen
 import com.example.myapplication.ui.create.CreateViewModel
 import com.example.myapplication.ui.detailBar.DetailGastroBarScreen
@@ -67,6 +69,11 @@ sealed class Screen(val route: String) {
     }
     object MainUser : Screen("mainUser")
 
+    // 👇 NUEVO: ruta de chat
+    object Chat : Screen("chat/{userId}") {
+        fun createRoute(userId: String) = "chat/$userId"
+    }
+
     object Profile : Screen("profile")
     object EditProfile : Screen("editProfile")
     object SettingsRoute : Screen("settings")
@@ -82,6 +89,7 @@ sealed class Screen(val route: String) {
 
     object Splash : Screen("splash")
 }
+
 
 @Composable
 fun AppNavigation(
@@ -222,7 +230,7 @@ fun AppNavigation(
             )
         }
 
-        // MAIN USER (pantalla del usuario autenticado)
+        // MAIN USER
         composable(route = Screen.MainUser.route) {
             val mainUserViewModel: com.example.myapplication.ui.mainuser.MainUserViewModel = hiltViewModel()
             com.example.myapplication.ui.mainuser.MainUserScreen(
@@ -340,7 +348,7 @@ fun AppNavigation(
 
 
         composable(
-            route = "user/{userId}",
+            route = Screen.User.route,
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId") ?: ""
@@ -352,7 +360,25 @@ fun AppNavigation(
                 }
             }
 
-            UserScreen(viewModel = userViewModel)
+            UserScreen(
+                viewModel = userViewModel,
+                onChatClick = { targetUserId ->
+                    Log.d("Nav", "Ir a chat con userId=$targetUserId")
+                    navController.navigate(Screen.Chat.createRoute(targetUserId))
+                }
+            )
+        }
+
+
+        composable(
+            route = Screen.Chat.route,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val chatViewModel: ChatViewModel = hiltViewModel(backStackEntry)
+
+            ChatScreen(
+                viewModel = chatViewModel
+            )
         }
     }
 }

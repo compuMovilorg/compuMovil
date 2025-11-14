@@ -5,6 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,7 +23,8 @@ import com.example.myapplication.utils.ProfileAsyncImage
 
 @Composable
 fun UserScreen(
-    viewModel: UserViewModel = hiltViewModel()
+    viewModel: UserViewModel = hiltViewModel(),
+    onChatClick: (String) -> Unit = {}
 ) {
     Log.d("UserScreen", "UserScreen Composable inicializado")
     val state by viewModel.uiState.collectAsState()
@@ -30,7 +33,8 @@ fun UserScreen(
         state = state,
         onRetry = { viewModel.reload() },
         modifier = Modifier,
-        viewModel = viewModel
+        viewModel = viewModel,
+        onChatClick = onChatClick
     )
 }
 
@@ -39,7 +43,8 @@ fun UserScreenBody(
     state: UserState,
     viewModel: UserViewModel,
     onRetry: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onChatClick: (String) -> Unit = {}
 ) {
     when {
         state.isLoading -> {
@@ -94,7 +99,6 @@ fun UserScreenBody(
                             profileImage = user.profileImage ?: "",
                             size = 90
                         )
-                        // Si quieres tag para el avatar: envuelve ProfileAsyncImage con .testTag("profile_avatar")
 
                         Spacer(modifier = Modifier.width(16.dp))
 
@@ -102,17 +106,22 @@ fun UserScreenBody(
                             verticalArrangement = Arrangement.Center,
                             modifier = Modifier.weight(1f)
                         ) {
+                            // 🔹 Fila con nombre + botón de chat
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Column(modifier = Modifier.testTag("profile_identity")) {
-                                    // Username (lo muestras como username “crudo”, no con @)
+                                Column(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .testTag("profile_identity")
+                                ) {
                                     Text(
                                         text = user.username,
                                         modifier = Modifier.testTag("profile_username"),
-                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     )
 
                                     val displayName = user.name ?: ""
@@ -126,31 +135,28 @@ fun UserScreenBody(
                                     }
                                 }
 
-                                // Botón Seguir / Siguiendo (reactivo al estado 'followed')
-                                val isFollowing = user.followed == true
-                                Button(
+                                // Botón de chat al lado del nombre
+                                IconButton(
                                     onClick = {
-                                        Log.d("UserScreen", "CLICK boton seguir/siguiendo para userId=${user.id}")
+                                        Log.d("UserScreen", "CLICK boton chat para userId=${user.id}")
                                         if (!user.id.isNullOrBlank()) {
-                                            viewModel.followOrUnfollowUser(user.id)
+                                            onChatClick(user.id)
                                         } else {
-                                            Log.e("UserScreen", "user.id vacío, no se puede seguir")
+                                            Log.e("UserScreen", "user.id vacío, no se puede abrir chat")
                                         }
                                     },
-                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                                    modifier = Modifier
-                                        .height(36.dp)
-                                        .testTag("btn_follow")
+                                    modifier = Modifier.testTag("btn_chat_user")
                                 ) {
-                                    Text(
-                                        text = if (isFollowing) "Siguiendo" else "Seguir",
-                                        style = MaterialTheme.typography.bodyMedium
+                                    Icon(
+                                        imageVector = Icons.Filled.Chat,
+                                        contentDescription = "Chatear",
                                     )
                                 }
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
 
+                            // Fila de seguidores / siguiendo
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 modifier = Modifier.testTag("profile_counters")
@@ -167,6 +173,28 @@ fun UserScreenBody(
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
+                        }
+
+                        // Botón Seguir / Siguiendo
+                        val isFollowing = user.followed == true
+                        Button(
+                            onClick = {
+                                Log.d("UserScreen", "CLICK boton seguir/siguiendo para userId=${user.id}")
+                                if (!user.id.isNullOrBlank()) {
+                                    viewModel.followOrUnfollowUser(user.id)
+                                } else {
+                                    Log.e("UserScreen", "user.id vacío, no se puede seguir")
+                                }
+                            },
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                            modifier = Modifier
+                                .height(36.dp)
+                                .testTag("btn_follow")
+                        ) {
+                            Text(
+                                text = if (isFollowing) "Siguiendo" else "Seguir",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
                     }
 
